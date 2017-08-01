@@ -1,0 +1,11 @@
+{%extends "base.html"%}
+{%block title%}Reading Task{%endblock%}
+{%block body%}
+  {% if task %}
+    <h2>Reading Comprehension Task</h2>
+    <hr>
+    <p></p>
+  {% else %}
+    <h2>You are not allowed to see this page at this moment. Please check back.</h2>
+  {% endif %}
+{%endblock%}
