@@ -4,7 +4,11 @@
   {% if task %}
     <h2>Reading Comprehension Task</h2>
     <hr>
-    <p></p>
+    {% if task.filepath %}
+      <p>{{task.filepath}}</p>
+    {% else %}
+      <h4>Reading Comprehension Task for today was not found on Server.</h4>
+    {% endif %}
   {% else %}
     <h2>You are not allowed to see this page at this moment. Please check back.</h2>
   {% endif %}
