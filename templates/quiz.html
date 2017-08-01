@@ -21,16 +21,16 @@
 		</div>
 	</header>
 	<div id="div" class="container">
-		<div class="row" style="padding-bottom:25px">
+		<div class="row">
 			<!-- Content box, where required data is parsed from JSON -->
 			<div id="QuestionView" class="col-md-6 col-lg-6 col-sm-6">
 				<div style="display: flex">
-						<h3 id="section-name"></h3>	
+						<h3 id="section-name"></h3>
 				</div>
 				<div id="question-instructions"></div>
 				<br><div id="content-box"></div>
 				<div id="back" class="col-md-6 col-lg-6 col-sm-6"></div>
-			</div>			
+			</div>
 			<div class="col-md-6 col-lg-6 col-sm-6">
 					<div class="row">
 						<div class="col-md-6" id="progress-box">
@@ -57,7 +57,7 @@
 					<!-- <button class="btn btn-success">Submit Answer</button> -->
 				</div>
 			</div>
-			
+
 		</div>
 	</div>
 	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -68,7 +68,7 @@
 			        <h4 class="modal-title">Examples</h4>
 			      </div>
 			      <div class="modal-body" id="examplecontent">
-			        
+
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-primary" data-dismiss="modal" id="close">Close</button>
@@ -88,7 +88,7 @@
 	<script type="text/javascript" src="javascripts/recorder.js"></script>
 	<script type="text/javascript">
 		$("#close").click(function(){
-					
+
 		});
 
 		$(document).ready(function() {
@@ -104,7 +104,7 @@
 		    var audio;
 	        audio = $("audioDemo");
 			addEventHandlers();
-	 
+
 	        function addEventHandlers(){
 	            $("a.start").click(startAudio);
 	            $("a.forward").click(forwardAudio);
@@ -112,39 +112,39 @@
 	            $("a.pause").click(pauseAudio);
 	            $("a.stop").click(stopAudio);
 	        }
-	 
+
 	        function loadAudio(){
 	            audio.bind("load",function(){
 	                $(".alert-success").html("Audio Loaded succesfully");
 	            });
 	            audio.trigger('load');
 	        }
-	 
+
 	        function startAudio(){
 	            audio.trigger('play');
 	        }
-	 
+
 	        function pauseAudio(){
 	            audio.trigger('pause');
 	        }
-	 
+
 	        function stopAudio(){
 	            pauseAudio();
 	            audio.prop("currentTime",0);
 	        }
-	 
+
 	        function forwardAudio(){
 	            pauseAudio();
 	            audio.prop("currentTime",audio.prop("currentTime")+5);
 	            startAudio();
 	        }
-	 
+
 	        function backAudio(){
 	            pauseAudio();
 	            audio.prop("currentTime",audio.prop("currentTime")-5);
 	            startAudio();
 	        }
-	 
+
 	        function volumeUp(){
 	            var volume = audio.prop("volume")+0.2;
 	            if(volume >1){
@@ -152,7 +152,7 @@
 	            }
 	            audio.prop("volume",volume);
 	        }
-	 
+
 	        function volumeDown(){
 	            var volume = audio.prop("volume")-0.2;
 	            if(volume <0){
@@ -160,7 +160,7 @@
 	            }
 	            audio.prop("volume",volume);
 	        }
-	 
+
 	        function toggleMuteAudio(){
 	            audio.prop("muted",!audio.prop("muted"));
 	        }

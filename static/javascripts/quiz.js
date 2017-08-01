@@ -239,9 +239,9 @@ var startView = {
 			this.questionPane = $("#content-box");
 			this.QuestionV=$('#QuestionView');
 
-			this.startMessage = "Click the Start Test button to begin.";
+			this.startMessage = "Complete the following Tasks before you begin to take the Test.";
 			this.resumeMessage = "You have started the test, click the button below to resume the test.";
-			this.resumeMessage += " Click the Resume Test button to resume.";
+			this.resumeMessage += "Click the Resume Test button to resume.";
 			this.errorMessage = "There is a problem with starting your test session. Refresh the page. ";
 			this.errorMessage += "If the problem persists then report Error 100 to your test administrator.";
 
@@ -298,7 +298,31 @@ var startView = {
 			this.titlePane.html(quizModel.title);
 			var quizStatus = quizModel.getQuizStatus();
 			if(quizStatus == "START") {
-				this.questionPane.html('<h3>' + this.startMessage + '</h3><br>');
+
+				// this.questionPane.html('<h3>' + this.startMessage + '</h3><br>');
+
+				/*
+				 * Get Listening and Reading Content.
+				 */
+
+				/*
+				 *listening_content = get_listening_section_data()
+				 *reading_content = get_reading_section_data()
+				 *
+				 *console.log(listening_content)
+				 *console.log(reading_content)
+				 */
+				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
+				 this.questionPane.append("<a href='/readingtask'>Click here to read the PDF.</a><br><br>")
+
+				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
+				 this.questionPane.append("<a href='/listeningtask'>Click here to watch the video.</a><br><br>")
+
+				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
+				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')
+				 this.startButton.removeClass("btn-lg");
+				 this.startButton.removeClass("btn-sm");
+
 			} else if (quizStatus == "INPROGRESS") {
 				this.questionPane.html(this.resumeMessage);
 				this.startButton.html("Resume Test");
