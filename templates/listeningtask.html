@@ -1,15 +1,17 @@
 {%extends "base.html"%}
 {%block title%}Listening Task{%endblock%}
 {%block body%}
+  <div class="container">
   {% if task %}
     <h2>Listening Comprehension Task</h2>
     <hr>
     {% if task.filepath %}
       <p>{{task.filepath}}</p>
     {% else %}
-      <h4>Reading Comprehension Task for today was not found on Server.</h4>
+      <h4>Listening Comprehension Task for today was not found on Server.</h4>
     {% endif %}
   {% else %}
     <h2>You are not allowed to see this page at this moment. Please check back.</h2>
   {% endif %}
+  </div>
 {%endblock%}
