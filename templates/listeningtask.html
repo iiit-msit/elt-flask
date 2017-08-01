@@ -6,7 +6,9 @@
     <h2>Listening Comprehension Task</h2>
     <hr>
     {% if task.filepath %}
-      <p>{{task.filepath}}</p>
+    <div style="text-align:center; border:1px solid black;">
+      <iframe allowfullscreen="" height="500" width="600" src="{{task.filepath}}" frameborder="0"></iframe>
+    </div>
     {% else %}
       <h4>Listening Comprehension Task for today was not found on Server.</h4>
     {% endif %}

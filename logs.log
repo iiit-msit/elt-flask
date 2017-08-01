@@ -39,3 +39,9 @@ START
 START
 START
 START
+Can't convert 'datetime.datetime' object to str implicitly
+Can't convert 'datetime.datetime' object to str implicitly
+Can't convert 'datetime.datetime' object to str implicitly
+strptime() takes exactly 2 arguments (1 given)
+strptime() takes exactly 2 arguments (1 given)
+strptime() takes exactly 2 arguments (1 given)
