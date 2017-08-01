@@ -3,7 +3,13 @@
 {%block body%}
   <div class="container">
   {% if task %}
-    <h2>Reading Comprehension Task</h2>
+    <div class="row">
+      <h2 class="col-md-6">Reading Comprehension Task</h2>
+      <span class="col-md-6 text-right">
+        <br>
+        <a class="btn btn-primary" href="/startquiz">Back to Home Screen</a>
+      </span>
+    </div>
     <hr>
     {% if task.filepath %}
       <div style="text-align:center; border:1px solid black;">

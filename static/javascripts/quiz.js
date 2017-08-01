@@ -678,6 +678,7 @@ var resultView = {
 			spklink ="";
 			count=0;
 			var table = document.createElement("TABLE");
+			table.className = "table";
 			this.questionPane.append(table);
 			var tr = document.createElement("TR");
 			var td = document.createElement("TH");
@@ -782,8 +783,8 @@ var resultView = {
 				count +=1;
 			});
 
-
-			this.questionNote.html('<p class="lead">Your total score is: ' + totalScore + '</p><a href="/" class="btn btn-sm btn-primary">Back to Dashboard</a>');
+			this.questionNote.append('<p class="lead">Your total score is: ' + totalScore + '</p>');
+			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
 			//this.questionPane.hide();
 			this.navBar.hide();
 			this.finalScore = totalScore;

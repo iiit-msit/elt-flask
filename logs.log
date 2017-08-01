@@ -51,3 +51,5 @@ Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblo
 Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
 Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
 Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+[]
+[[], <class 'list'>]

@@ -10,8 +10,14 @@
 {%block body%}
   <div class="container">
   {% if task %}
-    <h2>Listening Comprehension Task</h2>
-    <hr>
+  <div class="row">
+    <h2 class="col-md-6">Listening Comprehension Task</h2>
+    <span class="col-md-6 text-right">
+      <br>
+      <a class="btn btn-primary" href="/startquiz">Back to Home Screen</a>
+    </span>
+  </div>
+  <hr>
     {% if task.filepath %}
     <div style="text-align:center; border:1px solid black;">
       <video controls width="100%" src="{{task.filepath}}" preload="auto" autoplay>
