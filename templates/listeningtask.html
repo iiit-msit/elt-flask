@@ -1,5 +1,12 @@
 {%extends "base.html"%}
 {%block title%}Listening Task{%endblock%}
+{% block styles %}
+<style>
+  video {
+    object-fit: fill;
+  }
+</style>
+{% endblock %}
 {%block body%}
   <div class="container">
   {% if task %}
@@ -7,7 +14,9 @@
     <hr>
     {% if task.filepath %}
     <div style="text-align:center; border:1px solid black;">
-      <iframe allowfullscreen="" height="500" width="600" src="{{task.filepath}}" frameborder="0"></iframe>
+      <video controls width="100%" src="{{task.filepath}}" preload="auto" autoplay>
+        Your browser does not support the video tag.
+      </video>
     </div>
     {% else %}
       <h4>Listening Comprehension Task for today was not found on Server.</h4>

@@ -293,7 +293,18 @@ var startView = {
 				}
 			});
 		},
-
+		datetoday: function(){
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+			if(dd<10)
+			    dd = '0'+dd
+			if(mm<10)
+			    mm = '0'+mm
+			today = mm + '-' + dd + '-' + yyyy;
+			return today
+		},
 		render : function() {
 			this.titlePane.html(quizModel.title);
 			var quizStatus = quizModel.getQuizStatus();
@@ -312,6 +323,7 @@ var startView = {
 				 *console.log(listening_content)
 				 *console.log(reading_content)
 				 */
+				 this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
 				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
 				 this.questionPane.append("<a href='/readingtask'>Click here to read the PDF.</a><br><br>")
 

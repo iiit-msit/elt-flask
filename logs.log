@@ -45,3 +45,9 @@ Can't convert 'datetime.datetime' object to str implicitly
 strptime() takes exactly 2 arguments (1 given)
 strptime() takes exactly 2 arguments (1 given)
 strptime() takes exactly 2 arguments (1 given)
+Unexpected end of template. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+Unexpected end of template. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
+Encountered unknown tag 'end'. Jinja was looking for the following tags: 'endblock'. The innermost block that needs to be closed is 'block'.
