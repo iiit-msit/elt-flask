@@ -1,0 +1,201 @@
+{%extends "base.html"%}
+{%block title%}Add Students{%endblock%}
+{% block styles %}
+	<link href="/css/bootstrap-datetimepicker.css" rel="Stylesheet"></link>
+	<script src="/javascripts/moment.js"></script>
+	<script src="/js/bootstrap-datetimepicker.js"></script>
+	<style type="text/css">
+		  .ui-autocomplete {
+		    max-height: 120px;
+		    overflow-y: auto;
+		    overflow-x: hidden;
+		  }
+		  * html .ui-autocomplete {
+		    height: 100px;
+		  }
+	</style>
+{% endblock %}
+{%block body%}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-6 col-sm-12 panel" style="background: #eee; padding-left: 3%; padding-right: 3%">
+			<br><h3>Edit Test</h3>
+			<hr style="border-top: 1px solid black">
+			<h4>Test ID: {{testid}}</h4><br>
+			<!-- <h4>Hosting Date: {{session.hosting_date}}</h4> -->
+			<!-- <h4>Add Students</h4> -->
+			<form method="post" action="/edit/{{testid}}" enctype=multipart/form-data>
+			  <!-- <div class="form-group">
+			    <label for="datepicker">Test Hosting Date</label>
+			    <input type="text" class="form-control" id="datepicker" name="datepicker" placeholder="Pick a Valid Date">
+			  </div> -->
+		        <div class="form-group">
+		    		<label for="datetimepicker1">Test Start Date</label>    
+		            <div class='input-group date' id='datetimepicker1'>
+		                <input type='text' name='datetimepicker1' class="form-control" />
+		                <span class="input-group-addon">
+		                    <span class="glyphicon glyphicon-calendar"></span>
+		                </span>
+		            </div>
+		        </div>
+		        <div class="form-group">
+		    		<label for="datetimepicker1">Test End Date</label>    
+		            <div class='input-group date' id='datetimepicker2'>
+		                <input type='text' name='datetimepicker2' class="form-control" />
+		                <span class="input-group-addon">
+		                    <span class="glyphicon glyphicon-calendar"></span>
+		                </span>
+		            </div>
+		        </div>
+		      <div class="form-group">
+		      	<label>Existing Students : <span id="count"></span></label>
+		      	<div id="existingstudentslist"></div>
+		      </div>
+			  <div class="form-group">
+				<label for="studentslist">Add Students</label>
+			  	<textarea id="studentslist" class='form-control' name="studentslist" rows="1" placeholder='Start typing an email address and pick from suggestions..'></textarea>
+			  </div>
+			  <button type="submit" class="btn btn-primary">Save Changes</button>
+			</form>
+		</div>
+		<div class="col-md-6 col-sm-12" style="background: white">
+			{% if messages %}
+				<br><h3>Result</h3>
+				<hr style="border-top: 1px solid black">
+				{% if datevalid %}
+					<p class="panel panel-success">{{datevalid}}</p>
+				{% else %}
+					<p class="panel panel-danger">{{startdatevalid}}</p>
+					<p class="panel panel-danger">{{enddatevalid}}</p>
+				{% endif %}
+				<h4>Added Students:</h4>
+				{% for student in students %}
+					<p class="panel panel-success">{{student}}, {{students[student]}}</p>
+				{% endfor %}
+			{% endif %}
+		</div>
+	<!-- </div> -->
+</div>
+{%block script%}
+<script type="text/javascript">
+ 	
+ 	//initialize datepicker 
+ 	$(function () {
+ 	// 	start_date = "{{session['start_date']}}"
+ 	// end_date = "{{session['end_date']}}"
+ 	// $("#datetimepicker1").val(start_date) 
+ 	// $("#datetimepicker2").val(end_date)
+ 	// $("#studentslist").val("{{session['students']}}");
+ 	
+        $('#datetimepicker1').datetimepicker({
+        	format: 'DD-MM-YYYY HH:mm',
+        	stepping: 30,
+        	minDate: new Date()
+        });
+        $('#datetimepicker2').datetimepicker({
+        	format: 'DD-MM-YYYY HH:mm',
+        	stepping: 30,
+            useCurrent: false
+        });
+        $("#datetimepicker1").on("dp.change", function (e) {
+            $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+        });
+        $("#datetimepicker2").on("dp.change", function (e) {
+            $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+        });
+    });
+
+ 	//prefil form
+ 	$.get( "/prefiledit/{{testid}}", function( data ) {
+   		if (data)
+   			data = JSON.parse(data);
+   		else
+   			location.href="/admin"
+   		// $("#datetimepicker1").on("dp.change", function (e) {
+   		// 	$('#datetimepicker1').data("DateTimePicker").date(data['start_date']);
+     //        $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+     //    });
+     //    $("#datetimepicker2").on("dp.change", function (e) {
+   		// 	$('#datetimepicker2').data("DateTimePicker").date(data['end_date']);
+     //        $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+     //    });
+
+   		console.log(data['students']);
+   		$("#count").html(data['students'].length);
+   		$("#existingstudentslist").html('');
+   		$.each(data['students'], function(index,val){
+	   		var dom = `<div class="input-group">
+      <input type="text" class="form-control" value="`+val+`" disabled>
+      <span class="input-group-btn">
+        <a href="/uninvite/`+val+`/{{testid}}" class="btn btn-sm btn-danger" type="button">X</a>
+      </span>
+    </div>`
+	   		$("#existingstudentslist").append(dom);
+		});	
+		
+		// $("#studentslist").height( $("#studentslist")[0].scrollHeight );
+	});
+ 	// students = "{{session['students']}}"
+ 	// if(students != [])
+ 	// 	//Used Array to convert the psuedo-array into JS array
+ 	// 	students = Array.prototype.join.call(students, ",\n").substr(1,-2);
+
+ 	// //prefill form data
+ 	// $("#studentslist").val(students)
+
+ 	//resize textarea according to students list
+
+	// code for auto-suggesting student email id's
+	$( function() {
+	    function split( val ) {
+	      return val.split( /\n\s*/ );
+	    }
+
+	    function extractLast( term ) {
+	      return split( term ).pop();
+	    }
+	 	
+	    $( "#studentslist" )
+	      // .on( "keydown", function( event ) {
+	      //   if ( event.keyCode === $.ui.keyCode.TAB &&
+	      //       $( this ).autocomplete( "instance" ).menu.active ) {
+	      //     event.preventDefault();
+	      //   }
+	      // })
+	      .on("keydown", function( event ) {
+	        if ( event.keyCode === $.ui.keyCode.TAB &&
+	            $( this ).autocomplete( "instance" ).menu.active ) {
+	          		event.preventDefault();
+	        	}
+	      	})
+	      .on("paste", function(event) {
+	      	$("#studentslist").height( $("#studentslist")[0].scrollHeight );
+	      })
+	      .autocomplete({
+	        minLength: 0,
+	        source: function( request, response ) {
+	          $.getJSON("{{url_for('autocomplete')}}",{
+	            q: extractLast(request.term),
+	            testid: "{{testid}}",
+	          }, function(data) {
+	            response($.ui.autocomplete.filter(data.matching_results, extractLast( request.term )));
+	          });
+	        },
+	        focus: function() {
+	          return false;
+	        },
+	        select: function( event, ui ) {
+	          var terms = split( this.value );
+	          terms.pop();
+	          if ( terms.indexOf(ui.item.value) == -1)
+	          	terms.push( ui.item.value );
+	          	terms.push( "" );
+	          	this.value = terms.join( "\n" );
+	          	$("#studentslist").height( $("#studentslist")[0].scrollHeight );
+	          return false;
+	        }
+	      });
+	  });
+</script>
+{%endblock%}
+{%endblock%}
