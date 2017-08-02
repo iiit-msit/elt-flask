@@ -1,65 +1,81 @@
-studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email sirimala.sreenath@gmail.com
-Student Tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student sirimala.sreenath@gmail.com
-testid English Comprehension Test 3 in tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
-testid <class 'str'> in tests True
-All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3']
-English Comprehension Test
-tests for testid is English Comprehension Test
-tests None
+gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 1
 English Comprehension Test 2
 tests for testid is English Comprehension Test 2
-tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
-gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 2
 English Comprehension Test 3
 tests for testid is English Comprehension Test 3
-tests English Comprehension Test 3::02-08-2017 18:56::10-08-2017 18:57
-gettestdetails function output ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
-studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email sirimala.sreenath@gmail.com
-Student Tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student sirimala.sreenath@gmail.com
-testid English Comprehension Test 3 in tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
+tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+Student Tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student vy@fju.us
+testid English Comprehension Test 1 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
 testid <class 'str'> in tests True
-All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3']
-English Comprehension Test
-tests for testid is English Comprehension Test
-tests None
+All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
+English Comprehension Test 1
+tests for testid is English Comprehension Test 1
+tests English Comprehension Test 1::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 1
 English Comprehension Test 2
 tests for testid is English Comprehension Test 2
-tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
-gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 2
 English Comprehension Test 3
 tests for testid is English Comprehension Test 3
-tests English Comprehension Test 3::02-08-2017 18:56::10-08-2017 18:57
-gettestdetails function output ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
-studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email sirimala.sreenath@gmail.com
-Student Tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student sirimala.sreenath@gmail.com
-testid English Comprehension Test 3 in tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
+tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+Student Tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student vy@fju.us
+testid English Comprehension Test 2 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
 testid <class 'str'> in tests True
-All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3']
-English Comprehension Test
-tests for testid is English Comprehension Test
-tests None
+All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
+English Comprehension Test 1
+tests for testid is English Comprehension Test 1
+tests English Comprehension Test 1::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 1
 English Comprehension Test 2
 tests for testid is English Comprehension Test 2
-tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
-gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 2
 English Comprehension Test 3
 tests for testid is English Comprehension Test 3
-tests English Comprehension Test 3::02-08-2017 18:56::10-08-2017 18:57
-gettestdetails function output ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
-studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email sirimala.sreenath@gmail.com
-Student Tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student sirimala.sreenath@gmail.com
-testid English Comprehension Test 3 in tests ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
+tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+Student Tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student vy@fju.us
+testid English Comprehension Test 3 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
 testid <class 'str'> in tests True
-All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test', 'English Comprehension Test 2', 'English Comprehension Test 3']
-English Comprehension Test
-tests for testid is English Comprehension Test
-tests None
+All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
+English Comprehension Test 1
+tests for testid is English Comprehension Test 1
+tests English Comprehension Test 1::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 1
 English Comprehension Test 2
 tests for testid is English Comprehension Test 2
-tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
-gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 22:46::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 2
 English Comprehension Test 3
 tests for testid is English Comprehension Test 3
-tests English Comprehension Test 3::02-08-2017 18:56::10-08-2017 18:57
-gettestdetails function output ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
-studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 3', '02-08-2017 18:56', '10-08-2017 18:57', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email sirimala.sreenath@gmail.com
+tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+&lt;function test at 0x7f1fd2760488&gt;
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 1
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 1
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 2
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 3
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 1
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 1
+Entity '<class '__main__.TestDetails'>' has no property 'emailid'
+English Comprehension Test 1
