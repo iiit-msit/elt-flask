@@ -110,7 +110,7 @@ var quizModel = {
 
 var octopus = {
 		init : function() {
-			$.post("/getquizstatus")
+			$.post("/getquizstatus/{{test_name}}")
 				.done(function(data){
 					console.log("info: questions loaded from server" + data);
 					data = JSON.parse(data);
