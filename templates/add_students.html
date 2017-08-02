@@ -79,7 +79,7 @@
 						students=JSON.stringify({jsonData: students});
 						$.post("/uninvite/{{testid}}", students)
 						.done(function(data){
-							console.log(data);
+							// console.log(data);
 							location.href = '/edit/{{testid}}'
 						})
 						.fail(function(error){

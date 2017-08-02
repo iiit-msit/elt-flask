@@ -112,7 +112,7 @@ var octopus = {
 		init : function() {
 			$.post("/getquizstatus")
 				.done(function(data){
-					//console.log("info: questions loaded from server" + data);
+					console.log("info: questions loaded from server" + data);
 					data = JSON.parse(data);
 					quizModel.init(data)
 					startView.init();
@@ -146,7 +146,7 @@ var octopus = {
 
 			submittedQuestion.subsections = undefined;
 			data = JSON.stringify({jsonData: submittedQuestion});
-			//console.log("submittedquestion:" + data);
+			console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
 				.done(function(data){
 					//console.log("Success:" + data);
