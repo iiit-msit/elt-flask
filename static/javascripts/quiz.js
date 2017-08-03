@@ -189,7 +189,7 @@ var octopus = {
 		getResults : function() {
 			$.ajax({
 				type: 'get',
-				url: '/getResult',
+				url: '/getResult/'+octopus.test_name,
 				dataType:'json',
 				async: false,
 				success: function (data) {
@@ -460,7 +460,7 @@ var questionView = {
 			}
 			if (q.subsections.types == "record")
 			{
-				this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
+				this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder/'+octopus.test_name+'\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
 				this.questionPane.append('<div><label>Audio Link: </label><input type="text" id="audiolink" value="#" hidden> </input></div>');
 				this.questionPane.append('<br><label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip"> Skip Question</input></label>');
 
@@ -737,12 +737,12 @@ var resultView = {
 					var t6 = document.createElement("audio");
 					t6.setAttribute("controls", "controls")
 					$.ajax({
-				        url: "/get_audio",
+				        url: "/get_audio/"+octopus.test_name,
 				        type: 'GET',
 				        contentType: false,
 				        processData: false,
 				        success: function(data) {
-				        	console.log(["Audio fetch Success", data]);
+				        	console.log(["Audio fetch Success"]);
 				        	spklink = value.submittedans;
 							t6.setAttribute("src", 'data:audio/webm;base64,'+data);
 				        },
