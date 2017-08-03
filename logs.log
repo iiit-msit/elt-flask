@@ -1,17 +1,12 @@
-"English Comprehension Test 2"
-['vy@fju.us', None]
-"English Comprehension Test 2"
-['vy@fju.us', '"English Comprehension Test 2"']
-{'test_name': '"English Comprehension Test 2"', 'status': 'success', 'qid': 101, 'q_status': 'submitted', 'validresponse': 'true'}
-"English Comprehension Test 2"
-['vy@fju.us', '"English Comprehension Test 2"']
-{'test_name': '"English Comprehension Test 2"', 'status': 'success', 'qid': 102, 'q_status': 'submitted', 'validresponse': 'true'}
-"English Comprehension Test 2"
-['vy@fju.us', '"English Comprehension Test 2"']
-{'test_name': '"English Comprehension Test 2"', 'status': 'success', 'qid': 103, 'q_status': 'submitted', 'validresponse': 'true'}
-"English Comprehension Test 2"
-['vy@fju.us', '"English Comprehension Test 2"']
-{'test_name': '"English Comprehension Test 2"', 'status': 'success', 'qid': 104, 'q_status': 'submitted', 'validresponse': 'true'}
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 2
+English Comprehension Test 3
+tests for testid is English Comprehension Test 3
+tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
+gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+Student Tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student vy@fju.us
+testid English Comprehension Test 1 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
+testid <class 'str'> in tests True
 All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
 English Comprehension Test 1
 tests for testid is English Comprehension Test 1
@@ -27,7 +22,7 @@ tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
 gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
 studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
 Student Tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] for student vy@fju.us
-testid English Comprehension Test 1 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
+testid English Comprehension Test 2 in tests ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3'] <class 'list'> <class 'str'>
 testid <class 'str'> in tests True
 All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
 English Comprehension Test 1

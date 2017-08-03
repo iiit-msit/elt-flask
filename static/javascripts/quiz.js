@@ -179,7 +179,7 @@ var octopus = {
 			//console.log(q);
 			// call server side submit function
 			// creating json file for submit response
-			var data = {"currentQuestion": q.id, "draft":responseAnswer,"responsetime":q.responseTime}
+			var data = {"currentQuestion": q.id, "draft":responseAnswer,"responsetime":q.responseTime,"test_name":octopus.test_name}
 			data=JSON.stringify({jsonData: data});
 			$.post("/autosaveEssay", data)
 				.done(function(data){
