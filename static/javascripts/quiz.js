@@ -109,14 +109,14 @@ var quizModel = {
 };
 
 var octopus = {
-		init : function() {
+		init : function(test_name) {
+			this.test_name = test_name
 			$.ajax({
 					type: "post",
 					url:"/getquizstatus",
-					data: "{{test_name}}",
+					data: this.test_name,
 				})
 				.done(function(data){
-					console.log("info: questions loaded from server" + data);
 					data = JSON.parse(data);
 					quizModel.init(data)
 					startView.init();
@@ -149,6 +149,7 @@ var octopus = {
 				questionView.stopautosave();
 
 			submittedQuestion.subsections = undefined;
+			submittedQuestion.test_name = octopus.test_name;
 			data = JSON.stringify({jsonData: submittedQuestion});
 			console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
@@ -201,8 +202,11 @@ var octopus = {
 			});
 		},
 		pingServer : function() {
-			$.post("/testtime")
-
+			$.ajax({
+					type: "post",
+					url:"/testtime",
+					data: this.test_name,
+				})
 				.done(function(data){
 					//console.log("ping response " + data)
 					data = JSON.parse(data);

@@ -76,8 +76,8 @@
 		    </div><!-- /.modal-content -->
 	  </div><!-- /.modal-dialog -->
 	</div>
-	<script type="text/javascript" src="/javascripts/app.js"></script>
-	<script type="text/javascript" src="/javascripts/quiz.js"></script>
+	<!-- <script type="text/javascript" src="{{ url_for('static', filename='/javascripts/app.js') }}"></script> -->
+	<script type="text/javascript" src="{{ url_for('static', filename='/javascripts/quiz.js') }}"></script>
 	<script type="text/javascript" src="/javascripts/feedback.js"></script>
 	<!-- swfobject is a commonly used library to embed Flash content -->
 <!--
@@ -91,6 +91,7 @@
 
 		});
 		$(document).ready(function() {
+				octopus.init('"{{test_name}}"');
 		    function createAudioElement(blobURL) {
 		        const audioEl = document.createElement("audio");
 		        audioEl.controls = true;
