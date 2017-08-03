@@ -8,7 +8,7 @@
 	function showresult(email) {
 		$.ajax({
 		    type: 'POST',
-		    url: '/getResult',
+		    url: '/getResult/{{test_name}}',
 		    data: {"emailid": email},
 		    success: function (data) {
 		    	data=JSON.parse(data);

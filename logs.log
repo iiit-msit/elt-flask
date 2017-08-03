@@ -12,3 +12,34 @@ tests for testid is English Comprehension Test 1
 tests English Comprehension Test 1::03-08-2017 12:00::30-08-2017 12:00
 gettestdetails function output ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"] for test name English Comprehension Test 1
 studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"]]} for email sirimala.sreenath@gmail.com
+All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test 2', 'English Comprehension Test 1']
+English Comprehension Test 2
+tests for testid is English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+English Comprehension Test 1
+tests for testid is English Comprehension Test 1
+tests English Comprehension Test 1::03-08-2017 12:00::30-08-2017 12:00
+gettestdetails function output ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"] for test name English Comprehension Test 1
+studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"]]} for email sirimala.sreenath@gmail.com
+Student Tests ['English Comprehension Test 2', 'English Comprehension Test 1'] for student sirimala.sreenath@gmail.com
+testid English Comprehension Test 1 in tests ['English Comprehension Test 2', 'English Comprehension Test 1'] <class 'list'> <class 'str'>
+testid <class 'str'> in tests True
+Im in get result for English Comprehension Test 1
+Im in get result for English Comprehension Test 1
+Im in get result for English Comprehension Test 2
+Tried to login in as sirimala.sreenath@gmail.com from IP 127.0.0.1, but Invalid Credentials.
+All tests student with email sirimala.sreenath@gmail.com invited for ['English Comprehension Test 2', 'English Comprehension Test 1']
+English Comprehension Test 2
+tests for testid is English Comprehension Test 2
+tests English Comprehension Test 2::02-08-2017 18:13::09-08-2017 18:14
+gettestdetails function output ['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"] for test name English Comprehension Test 2
+English Comprehension Test 1
+tests for testid is English Comprehension Test 1
+tests English Comprehension Test 1::03-08-2017 12:00::30-08-2017 12:00
+gettestdetails function output ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"] for test name English Comprehension Test 1
+studenttests output {'data': [['English Comprehension Test 2', '02-08-2017 18:13', '09-08-2017 18:14', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-default'>View Result (score: 3)</a>"], ['English Comprehension Test 1', '03-08-2017 12:00', '30-08-2017 12:00', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 1)</a>"]]} for email sirimala.sreenath@gmail.com
+Im in get result for English Comprehension Test 3
+Im in get result for English Comprehension Test 3
+['number is ', 28]
+['number is ', 28]

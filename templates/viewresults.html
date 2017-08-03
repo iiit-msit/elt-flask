@@ -1,0 +1,39 @@
+{%extends "base.html"%}
+{%block title%}View Results{%endblock%}
+{%block script%}
+<script type="text/javascript">
+	
+</script>
+{%endblock%}
+{%block body%}
+	<div class="container">
+		<h3>Test Results</h3><br>
+		<div class="row">
+			<table class='table table-bordered'>
+			<thead>
+				<tr>
+					<th>S. No</th>
+					<th>Test Name</th>
+					<th>Start Date</th>
+					<th>End Date</th>
+					<th>File</th>
+					<th>File</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for test in tests%}
+					<tr>
+						<td>{{loop.index}}</td>
+						<td><a href="/testresult/{{test.name}}">{{test.name}}</a></td>
+						<td>{{test.start_date}}</td>
+						<td>{{test.end_date}}</td>
+						<td><a href="/downloadTestResults/{{test.name}}" class="btn btn-sm btn-primary">Download as CSV</a></td>
+						<td><a href="/downloadTestResultsSummary/{{test.name}}" class="btn btn-sm btn-primary">Download Summary as CSV</a></td>
+					</tr>
+				{%endfor%}
+			</tbody>
+			</table>
+		</div>
+		
+	</div>
+{%endblock%}
