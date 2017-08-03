@@ -333,10 +333,10 @@ var startView = {
 				 */
 				 this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
 				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
-				 this.questionPane.append("<a href='/readingtask'>Click here to read the PDF.</a><br><br>")
+				 this.questionPane.append("<a href='/readingtask/"+octopus.test_name+"'>Click here to read the PDF.</a><br><br>")
 
 				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
-				 this.questionPane.append("<a href='/listeningtask'>Click here to watch the video.</a><br><br>")
+				 this.questionPane.append("<a href='/listeningtask/"+octopus.test_name+"'>Click here to watch the video.</a><br><br>")
 
 				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
 				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')

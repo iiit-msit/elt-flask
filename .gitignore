@@ -1,3 +1,4 @@
 gct.py
 venv/
-*.log
+logs.log
+logs.log*
