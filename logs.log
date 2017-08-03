@@ -1,14 +1,8 @@
-English Comprehension Test 1
-['vy@fju.us', 'English Comprehension Test 1']
-{'validresponse': 'true', 'test_name': 'English Comprehension Test 1', 'q_status': 'submitted', 'status': 'success', 'qid': 103}
-English Comprehension Test 1
-['vy@fju.us', 'English Comprehension Test 1']
-{'validresponse': 'true', 'test_name': 'English Comprehension Test 1', 'q_status': 'submitted', 'status': 'success', 'qid': 104}
 All tests student with email vy@fju.us invited for ['English Comprehension Test 1', 'English Comprehension Test 2', 'English Comprehension Test 3']
 English Comprehension Test 1
 tests for testid is English Comprehension Test 1
 tests English Comprehension Test 1::02-08-2017 22:46::03-08-2017 22:47
-gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-warning'>Resume Test</a>"] for test name English Comprehension Test 1
+gettestdetails function output ['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 2)</a>"] for test name English Comprehension Test 1
 English Comprehension Test 2
 tests for testid is English Comprehension Test 2
 tests English Comprehension Test 2::02-08-2017 22:46::03-08-2017 22:47
@@ -17,4 +11,4 @@ English Comprehension Test 3
 tests for testid is English Comprehension Test 3
 tests English Comprehension Test 3::02-08-2017 22:47::03-08-2017 22:47
 gettestdetails function output ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"] for test name English Comprehension Test 3
-studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-warning'>Resume Test</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us
+studenttests output {'data': [['English Comprehension Test 1', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 1' class='btn btn-sm btn-default'>View Result (score: 2)</a>"], ['English Comprehension Test 2', '02-08-2017 22:46', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 2' class='btn btn-sm btn-primary'>Attempt Test</a>"], ['English Comprehension Test 3', '02-08-2017 22:47', '03-08-2017 22:47', "<a href='/quiz/English Comprehension Test 3' class='btn btn-sm btn-primary'>Attempt Test</a>"]]} for email vy@fju.us

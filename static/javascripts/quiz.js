@@ -225,7 +225,7 @@ var octopus = {
 			progressView.timeBox.html("");
 			resultView.init();
 			//console.log("score="+resultView.totalScore);
-			var data = {"testend":true, "finalScore": resultView.finalScore,"spklink": resultView.spklink};
+			var data = {"testend":true, "finalScore": resultView.finalScore,"spklink": resultView.spklink, "test_name":octopus.test_name};
 
 			data=JSON.stringify({jsonData: data});
 			//console.log("endtest" + data);
