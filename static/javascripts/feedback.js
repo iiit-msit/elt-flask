@@ -16,8 +16,8 @@ var feedbackView={
 				this.backdiv.replaceWith(btn);
 				this.backbtn = $("#backbtn");
 				this.backbtn.addClass("btn btn-primary");
-				this.backbtn.click(function(){	
-					resultView.render();
+				this.backbtn.click(function(){
+					resultView.init();
 					$('#backbtn').hide();
 					$('#progress-box').html("");
 					$("#examplecontent").html('');
@@ -28,9 +28,9 @@ var feedbackView={
 					if (value.id == qid){
 						console.log(value);
 						feedbackView.render(value);
-						return;	
+						return;
 					}
-					
+
 				});
 			},
 			render : function(data){
@@ -63,7 +63,7 @@ var feedbackView={
 					//startView.wami1.show();
 					questionView.displayRecording();
 				}
-					
+
 				if (q.subsections.types == "question")
 				{
 					feedbackView.displayOptions(data);
@@ -100,10 +100,10 @@ var feedbackView={
 					this.progressbox.append(btn);
 					this.examplePane.append(q.examples);
 					$("#ex").click(function(){
-		
+
 					});
 				}
-				
+
 				if (q.subsections.name=="T1-Reading"||q.subsections.name=="T2-Listening"||q.practicelinks.length==0){
 
 				}else{

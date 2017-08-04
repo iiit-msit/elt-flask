@@ -46,7 +46,8 @@ var quizModel = {
 												value.section = sections.name;
 												value.subsections = subsections;
 												value.options = Randomiser.shuffle(value.options);
-												value.options = (value.options).map(function(d) { return d.substring(1); });
+												if (quizModel.quizStatus != "END")
+													value.options = (value.options).map(function(d) { return d.substring(1); });
 												questionsArray.push(value);
 											});
 										}
@@ -791,7 +792,7 @@ var resultView = {
 				count +=1;
 			});
 
-			this.questionNote.append('<p class="lead">Your total score is: ' + totalScore + '</p>');
+			this.questionNote.html('<p class="lead">Your total score is: ' + totalScore + '</p>');
 			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
 			//this.questionPane.hide();
 			this.navBar.hide();
