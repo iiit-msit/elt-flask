@@ -1,0 +1,96 @@
+{
+    "name": "E2-Listening",
+    "types": "video",
+    "note": "",
+    "videoArray": [
+        {
+            "link": "",
+            "questions": [
+                {
+                    "question": "Who is the newly appointed chief of staff?",
+                    "options": [
+                        "~Reince Priebus",
+                        "~John Kennedy",
+                        "=John Kelly",
+                        "~Donald Trump"
+                    ],
+                    "id": "101",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Who did the speaker refer to as the scapegoat?",
+                    "options": [
+                        "~Hillary Clinton",
+                        "~John Kelly",
+                        "~David Wright",
+                        "=Reince Priebus"
+                    ],
+                    "id": "102",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "The retired four star general was a supporter to which of the president's plans?",
+                    "options": [
+                        "~To strengthen America's economy",
+                        "=To strengthen America's borders",
+                        "~To strengthen America's education system",
+                        "~All of the above"
+                    ],
+                    "id": "103",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Who did the speaker say will take over as the acting secretary?",
+                    "options": [
+                      "=Elaine Duke",
+                      "~Robert Duke",
+                      "~Duke Willington",
+                      "~Earl Duke"
+                    ],
+                    "id": "104",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Which department responded to Donald Trump's comments on police procedures?",
+                    "options": [
+                      "~New York Police Department",
+                      "=Suffolk County Police Department",
+                      "~Boston Police Department",
+                      "~Harlan County Police Department"
+                    ],
+                    "id": "105",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "What did Cookie Roberts say?",
+                    "options": [
+                      "~the problem is with chief of staff",
+                      "~the problem is with the people",
+                      "=the problem is with the President",
+                      "~the problem is with the judiciary system"
+                    ],
+                    "id": "106",
+                    "answer": "",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Who according to Cookie Roberts cannot be stopped from tweeting what ever he wants to tweet?",
+                    "options": [
+                      "~Bill Clinton",
+                      "~Obama",
+                      "~George Bush",
+                      "=Donald Trump"
+                    ],
+                    "id": "107",
+                    "answer": "",
+                    "practicelinks": []
+                }
+            ]
+        }
+    ]
+}
