@@ -1155,7 +1155,7 @@ def getResult(test_name):
         #app.logger.info(["post", email])
 
     if request.method == "GET":
-        email = session["user"]['email']
+        email = get_email_from_session()
         return getResultOfStudent(email, test_name)
 
 
@@ -1967,7 +1967,7 @@ def create(admin=None, test_name=None):
         admin = session["user"]['email']
 
     if request.method == "GET":
-        tests= [{"name":"English Comprehension Test 1","start_date":"03-08-2017 12:00","end_date":"30-08-2017 12:00"},{"name":"English Comprehension Test 2","start_date":"09-08-2017 12:00","end_date":"30-08-2017 12:00"},{"name":"English Comprehension Test 3","start_date":"20-08-2017 12:00","end_date":"30-08-2017 12:00"}]
+        tests= [{"name":"TOEFL Test","start_date":"03-08-2017 12:00","end_date":"30-08-2017 12:00", "test_mode":"TOEFL"}]
         tests.append({"name":"Daily English Practice","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
         for test in tests:
             # if not test_name:
