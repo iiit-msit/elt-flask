@@ -1,0 +1,17 @@
+{
+    "name": "E3: Speaking",
+    "questions": [
+        {
+            "question": "Listen To: <br><audio controls src=\"json/audio1.mp3\"> Your browser does not support the audio tag. </audio><br><br>What additional benefits of demonetization do you perceive? Give a detailed explanation of at least one. Do not include the benefits already discussed.<br><div id='recorder'></div>",
+            "options": [],
+            "id": "201"
+        },
+        {
+            "question": "Listen To: <br><audio controls src=\"json/audio2.mp3\"> Your browser does not support the audio tag. </audio><br><br>Based on the audio you’ve just listened to, how accurate do you think is the speaker? Give your opinion on one issue.<br><div id='recorder'></div>",
+            "options": [],
+            "id": "202"
+        }
+    ],
+    "note": "Speak for about one to two minutes into the recording tool provided on the desktop on the following subject. You might want to prepare notes for a minute and get started.",
+    "types": "record"
+}

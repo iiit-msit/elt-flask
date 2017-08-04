@@ -1,0 +1,197 @@
+{
+    "name": "E2-Listening",
+    "types": "video",
+    "note": "Listen to the video given and answer the following questions:",
+    "videoArray": [
+        {
+            "link": "<div><audio controls src=\"json/audio1.mp3\"> Your browser does not support the audio tag. </audio></div>",
+            "questions": [
+                {
+                    "question": "The bold decision of Demonetization affects",
+                    "options": [
+                        "~1.4 billion people",
+                        "=1.25 billion people",
+                        "~3.26 million people",
+                        "~2.63 million people"
+                    ],
+                    "id": "101",
+                    "answer": "0.18-0.25secs",
+                    "practicelinks": [
+                        "http://learnenglishteens.britishcouncil.org/skills/listening-skills-practice",
+                        "http://www.esl-lab.com"
+                    ]
+                },
+                {
+                    "question": "What are the areas which have been identified as strategic benefits of demonetization?",
+                    "options": [
+                        "~Terror funding",
+                        "~Maoist extremism",
+                        "~Unrest in Kashmir",
+                        "=All of the above"
+                    ],
+                    "id": "102",
+                    "answer": "1.15 -1.20secs",
+                    "practicelinks": [
+                        "http://englishinteractive.net/listening.html",
+                        "http://www.iei.illinois.edu/California/index.html"
+                    ]
+                },
+                {
+                    "question": "The announcement of the demonetization of five hundred rupee and one thousand rupee notes was made ",
+                    "options": [
+                        "~By the President of India in a scheduled, televised address to the nation",
+                        "~By the Prime Minister of India in a scheduled, televised address to the nation",
+                        "=By the Prime Minister of India in an unscheduled, real time, televised address to the nation",
+                        "~By the President of India in an unscheduled, real time, televised address to the nation"
+                    ],
+                    "id": "103",
+                    "answer": "4.35 -4.40 secs",
+                    "practicelinks": [
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/2014/09/140911_6min_underwater_living.shtml",
+                        "http://esl.about.com/library/listening/bllis_reservation.htm"
+                    ]
+                },
+                {
+                    "question": "Prime Minister Modi’s surgical strike on black money has dealt a body blow to Pakistan’s multi-crore fake Indian Currency network.",
+                    "options": [
+                        "=True",
+                        "~False",
+                        "~Partly true",
+                        "~Not sure"
+                    ],
+                    "id": "104",
+                    "answer": "2.08 -2.15 secs",
+                    "practicelinks": [
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/2014/09/140918_6min_london_skyline.shtml",
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/"
+                    ]
+                },
+                {
+                    "question": "Money collected from Bihar, Chhattisgarh and Jharkhand, from road contractors and big industrial houses carrying out mining activities is called",
+                    "options": [
+                        "~Penalty",
+                        "~Safety fee",
+                        "=Levy",
+                        "~None of these"
+                    ],
+                    "id": "105",
+                    "answer": "0.18-0.25secs",
+                    "practicelinks": [
+                        "http://learnenglishteens.britishcouncil.org/skills/listening-skills-practice",
+                        "http://www.esl-lab.com"
+                    ]
+                },
+                {
+                    "question": "Stone pelt-ers in Kashmir are part of the patriotic groups.",
+                    "options": [
+                        "~True",
+                        "=False",
+                        "~Partly true",
+                        "~Not sure"
+                    ],
+                    "id": "106",
+                    "answer": "1.15 -1.20secs",
+                    "practicelinks": [
+                        "http://englishinteractive.net/listening.html",
+                        "http://www.iei.illinois.edu/California/index.html"
+                    ]
+                }
+            ]
+        },
+        {
+            "link": "<div><audio controls src=\"json/audio2.mp3\"> Your browser does not support the audio tag. </audio></div>",
+            "questions": [
+                {
+                    "question": "Good, transparent governance needs",
+                    "options": [
+                        "~transportation",
+                        "=Facilitation",
+                        "~Amiability",
+                        "~Hostility"
+                    ],
+                    "id": "107",
+                    "answer": "1:08 – 1:15",
+                    "practicelinks": [
+                        "http://learnenglishteens.britishcouncil.org/skills/listening-skills-practice",
+                        "http://www.esl-lab.com"
+                    ]
+                },
+                {
+                    "question": "What is the magic, the tool which is mentioned as a weapon to clean up corruption?",
+                    "options": [
+                        "~Heavy Artillery",
+                        "~Ensuring a Police State",
+                        "=Use of Information Technology (IT)",
+                        "~None of these"
+                    ],
+                    "id": "108",
+                    "answer": "1:35 – 1:49",
+                    "practicelinks": [
+                        "http://englishinteractive.net/listening.html",
+                        "http://www.iei.illinois.edu/California/index.html"
+                    ]
+                },
+                {
+                    "question": "Corruption in the grand contracts can be done away with",
+                    "options": [
+                        "~Careful design of contracts",
+                        "~More competitive processes",
+                        "~Careful design of contracts, less competitive processes",
+                        "=Careful design of contracts, more competitive processes"
+                    ],
+                    "id": "109",
+                    "answer": "2:00 – 2:07",
+                    "practicelinks": [
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/2014/09/140911_6min_underwater_living.shtml",
+                        "http://esl.about.com/library/listening/bllis_reservation.htm"
+                    ]
+                },
+                {
+                    "question": "A big source of harassment for people today may be identified as",
+                    "options": [
+                        "~Bribery",
+                        "=Tax Refunds",
+                        "~False Contracts",
+                        "~Not sure"
+                    ],
+                    "id": "110",
+                    "answer": "2:36 – 2:42",
+                    "practicelinks": [
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/2014/09/140918_6min_london_skyline.shtml",
+                        "http://www.bbc.co.uk/worldservice/learningenglish/general/sixminute/"
+                    ]
+                },
+                {
+                    "question": "The biggest lessons to be learnt from countries like Singapore and Scandinavia in combating corruption is",
+                    "options": [
+                        "~Penalties",
+                        "~Levies",
+                        "=Transparency",
+                        "~None of these"
+                    ],
+                    "id": "111",
+                    "answer": "3:38 – 3:48",
+                    "practicelinks": [
+                        "http://learnenglishteens.britishcouncil.org/skills/listening-skills-practice",
+                        "http://www.esl-lab.com"
+                    ]
+                },
+                {
+                    "question": "The requirement is for a change in ___________________ to combat corruption.",
+                    "options": [
+                        "~Attitudes",
+                        "~Capabilities",
+                        "=Attitudes and Capabilities",
+                        "~None of these"
+                    ],
+                    "id": "112",
+                    "answer": "4:12 – 4:22",
+                    "practicelinks": [
+                        "http://englishinteractive.net/listening.html",
+                        "http://www.iei.illinois.edu/California/index.html"
+                    ]
+                }
+            ]
+        }
+    ]
+}
