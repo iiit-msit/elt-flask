@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 import json
 import os
-from settings import APP_STATIC_JSON
+from settings import APP_STATIC_JSON, APP_ROOT
 from random import shuffle
 import cgi
 from werkzeug.utils import secure_filename
@@ -49,7 +49,7 @@ app.logger.setLevel(logging.NOTSET)
 login_log = app.logger
 app.debug = False
 app.secret_key = "some_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:veda1997@localhost/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
 # app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
@@ -1631,11 +1631,27 @@ def setpassword():
 def audio():
     return render_template("audio.html")
 
+def get_today_ddmmyyyy():
+    fmt = '%d-%m-%Y'
+    today = datetime.now(IST)
+    todayf = today.strftime(fmt)
+    return todayf
+
 def today_ddmmyy():
     fmt = '%d-%m-%y'
     today = datetime.now(IST)
     todayf = today.strftime(fmt)
     return str(todayf)
+
+def is_safe_path(basedir, path, follow_symlinks=True):
+  # resolves symbolic links
+  if follow_symlinks:
+    return os.path.realpath(path).startswith(basedir)
+
+  return os.path.abspath(path).startswith(basedir)
+
+def convert_string_date(date):
+    return datetime.strptime(date, '%d-%m-%Y').date()
 
 @app.route('/content/<test_mode>/<datetoday>/<filename>')
 @login_required
@@ -1644,8 +1660,18 @@ def send_content(test_mode, datetoday,filename):
     email = get_email_from_session()
     # if setquizstatus(email) == "INPROGRESS":
     #     return redirect("/")
-    return send_from_directory('static/content/%s/%s/'%(test_mode, datetoday), filename)
-
+    date1 = convert_string_date(get_today_ddmmyyyy())
+    date2 = convert_string_date(datetoday)
+    app.logger.info("date %s and type %s result %s"%(date1, date2, date1 >= date2))
+    safe = is_safe_path(APP_ROOT, '/content/%s/%s/%s'%(test_mode, datetoday, filename))
+    app.logger.info("safe %s"%safe)
+    app.logger.info("app root %s"%APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday))
+    #the below link is tested by putting the folder outside of the root
+    # return send_from_directory(APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday), filename)
+    if date1 >= date2:
+        return send_from_directory('static/content/%s/%s/'%(test_mode, datetoday), filename)
+    else:
+        return redirect("/")
 #
 # Reading Task Handlers
 #
