@@ -1,0 +1,96 @@
+{
+    "name": "E1-Reading",
+    "types": "passage",
+    "passageArray": [
+        {
+            "note": "",
+            "passage": "",
+            "questions": [
+                {
+                    "question": "According to the author which process of Amazon is not reversible?",
+                    "options": [
+                      "~Deforestation",
+                      "=Afforestation",
+                      "~Reforestation",
+                      "~Cultivation"
+                    ],
+                    "id": "1",
+                    "answer": "Ban or cuts in the movie",
+                    "practicelinks": []
+                },
+                {
+                    "question": "According the author, which country takes governing seriously?",
+                    "options": [
+                      "~Russia",
+                      "~Japan",
+                      "=China",
+                      "~Germany"
+                    ],
+                    "id": "2",
+                    "answer": "Pahlaj Nihalani",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Who has pulled out of the Paris climate accord without any input from scientists?",
+                    "options": [
+                      "=Donald Trump",
+                      "~John Kelly",
+                      "~Mike Johnson",
+                      "~None of the Above"
+                    ],
+                    "id": "3",
+                    "answer": "Decreased",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Which is the third climate change that the author was speaking about other than environmental and globalization changes?",
+                    "options": [
+                      "~Climate of Polity",
+                      "=Climate of Technology",
+                      "~Climate of Economy",
+                      "~None of the above"
+                    ],
+                    "id": "4",
+                    "answer": "Constitutional principles",
+                    "practicelinks": []
+                },
+                {
+                    "question": "The author refers to the phrase “your rivals’ falling becomes more dangerous than your rivals’ rising” in which country’s context?",
+                    "options": [
+                      "~India's economy",
+                      "=Mexico's economy",
+                      "~Chinese economy",
+                      "~Japanese Economy"
+                    ],
+                    "id": "5",
+                    "answer": "censor authority",
+                    "practicelinks": []
+                },
+                {
+                    "question": "For how many years did the grand old party (GOP) had replacing Obamacare as its top policy?",
+                    "options": [
+                      "~8 years",
+                      "~9 years",
+                      "=7 years",
+                      "~10 years"
+                    ],
+                    "id": "6",
+                    "answer": "Film was too lady oriented",
+                    "practicelinks": []
+                },
+                {
+                    "question": "In conclusion, who should take the helm to work towards environmental problem?",
+                    "options": [
+                      "~Republicans",
+                      "~Democrats",
+                      "=Both Republicans and Democrats",
+                      "~Environmentalists"
+                    ],
+                    "id": "7",
+                    "answer": "both from systemic framework and outside",
+                    "practicelinks": []
+                }
+            ]
+        }
+    ]
+}

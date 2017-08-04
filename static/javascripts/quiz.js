@@ -792,7 +792,7 @@ var resultView = {
 			});
 
 			this.questionNote.append('<p class="lead">Your total score is: ' + totalScore + '</p>');
-			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
+			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
 			//this.questionPane.hide();
 			this.navBar.hide();
 			this.finalScore = totalScore;

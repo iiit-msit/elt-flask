@@ -1,0 +1,96 @@
+{
+    "name": "E2-Listening",
+    "types": "video",
+    "note": "",
+    "videoArray": [
+        {
+            "link": "",
+            "questions": [
+                {
+                    "question": "According to Mr Vyas, what was the objective of the raids?",
+                    "options": [
+                      "=Winning one more Rajya Sabha seat",
+                      "~Offending the BJP Political Leaders",
+                      "~A simple IT raid",
+                      "~Creating unrest and a lack of confidence"
+                    ],
+                    "id": "101",
+                    "answer": "1:50 – 2:07",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Jai Narayan Vyas questions that the entire process was a",
+                    "options": [
+                      "~Tragedy",
+                      "~Farce",
+                      "=Witch-hunt",
+                      "~None of the above"
+                    ],
+                    "id": "102",
+                    "answer": "2:40 – 2:50",
+                    "practicelinks": []
+                },
+                {
+                    "question": "JaiVeer Shergill states that the Congress is embroiled in a case of vendetta because",
+                    "options": [
+                      "~The objective of the IT raid was not the seize money",
+                      "~The intent was to seize and snatch Congress MLAs",
+                      "~The raid was not on an individual, but on democracy and fair and free elections",
+                      "=All of the above"
+                    ],
+                    "id": "103",
+                    "answer": "3:23 – 4:10",
+                    "practicelinks": []
+                },
+                {
+                    "question": "JaiVeer Shergill emphasises that the raids only highlight BJP’s",
+                    "options": [
+                      "~pattern laid out by the Panama papers",
+                      "=Political desperation to gain strength in Rajya Sabha",
+                      "~Hold over the para-military forces",
+                      "~None of the above"
+                    ],
+                    "id": "104",
+                    "answer": "4:30 – 5:05",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Mr Vyas states that the point of the raids is moot because",
+                    "options": [
+                      "~There is no case of the Congress MLAs being threatened or of being witch-hunted",
+                      "~The complaint to the Election Commission was wrong",
+                      "=The Finance Minister has amply clarified the position and purpose of the IT department",
+                      "~There is no tangible proof in the form of reports, of the wild charges being made"
+                    ],
+                    "id": "105",
+                    "answer": "6:10 – 7:00",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Mr Vyas alleges that all the charges being laid at the door of the BJP are",
+                    "options": [
+                      "~Trumped up",
+                      "~Unfair and unfounded",
+                      "~The result of a frustrated Congress",
+                      "=All of the above"
+                    ],
+                    "id": "106",
+                    "answer": "7:00 – 7:28",
+                    "practicelinks": []
+                },
+                {
+                    "question": "Mr Shergill accuses that",
+                    "options": [
+                      "~Congress MLAs are being hounded to gain strength in Rajya Sabha",
+                      "~Bribes are being offered to Congress MLAs to join BJP",
+                      "~Police forces are behaving like the muscle men of BJP",
+                      "=All of the above"
+                    ],
+                    "id": "107",
+                    "answer": "8:00 – 9:00",
+                    "practicelinks": []
+                }
+            ]
+        }
+    ]
+}

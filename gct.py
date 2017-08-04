@@ -49,7 +49,7 @@ app.logger.setLevel(logging.NOTSET)
 login_log = app.logger
 app.debug = False
 app.secret_key = "some_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:veda1997@localhost/postgres'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
 # app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
@@ -445,15 +445,14 @@ class EssayTypeResponse(db.Model):
         self.qattemptedtime = qattemptedtime
         self.test_name = test_name
 
-def getQuestionPaper(qid_list):
-    path = 'QP_template.json'
-    json_temp=json.loads(open(os.path.join(APP_STATIC_JSON,path)).read())
+def getQuestionPaper(qid_list,path):
+    json_temp=json.loads(open(os.path.join(path,'QP_template.json')).read())
     #print qid_list
     i=0;j=0;k=0;l=0;m=0;n=0;p=0;q=0;r=0;s=0;t=0
     for qid in qid_list:
         qid=int(qid)
         if qid in list(range(e1_start,e1_end)):
-              e1_readjson=json.loads(open(os.path.join(APP_STATIC_JSON,'E1-Reading.json'), encoding='utf-8').read())
+              e1_readjson=json.loads(open(os.path.join(path,'E1-Reading.json'), encoding='utf-8').read())
               for key in e1_readjson["passageArray"]:
                     for qn in key["questions"]:
                           pid=qn["id"]
@@ -463,7 +462,7 @@ def getQuestionPaper(qid_list):
                                 json_temp["section"][2]["subsection"][0]["questions"][m]["serialno"] = qid_list[qid]
                                 m +=1
         if qid in list(range(e2_start,e2_end)):
-              e2_lsnjson=json.loads(open(os.path.join(APP_STATIC_JSON,'E2-Listening.json'), encoding='utf-8').read())
+              e2_lsnjson=json.loads(open(os.path.join(path,'E2-Listening.json'), encoding='utf-8').read())
               for key in e2_lsnjson["videoArray"]:
                     for qn in key["questions"]:
                           pid=qn["id"]
@@ -473,14 +472,14 @@ def getQuestionPaper(qid_list):
                                 json_temp["section"][0]["subsection"][0]["questions"][n]["serialno"] = qid_list[qid]
                                 n +=1
         if qid in list(range(e3_start,e3_end)):
-              e3_spkjson=json.loads(open(os.path.join(APP_STATIC_JSON,'E3-Speaking.json'), encoding='utf-8').read())
+              e3_spkjson=json.loads(open(os.path.join(path,'E3-Speaking.json'), encoding='utf-8').read())
               for key in e3_spkjson["questions"]:
                     if int(key["id"]) == qid:
                           json_temp["section"][1]["subsection"][0]["questions"].append(key)
                           json_temp["section"][1]["subsection"][0]["questions"][p]["serialno"] = qid_list[qid]
                           p += 1
         if qid in list(range(e4_start,e4_end)):
-              e4_wrtjson=json.loads(open(os.path.join(APP_STATIC_JSON,'E4-Writing.json'), encoding='utf-8').read())
+              e4_wrtjson=json.loads(open(os.path.join(path,'E4-Writing.json'), encoding='utf-8').read())
               for key in e4_wrtjson["questions"]:
                     if int(key["id"]) == qid:
                           json_temp["section"][3]["subsection"][0]["questions"].append(key)
@@ -489,8 +488,7 @@ def getQuestionPaper(qid_list):
     return json_temp
 
 def generateQuestionPaper(path):
-    path = path+'QP_template.json'
-    json_temp=json.loads(open(path, encoding='utf-8').read())
+    json_temp=json.loads(open(os.path.join(path,'QP_template.json'), encoding='utf-8').read())
     for key in json_temp:
         if  key == "section":
             section=json_temp[key]
@@ -504,7 +502,7 @@ def generateQuestionPaper(path):
                             #print name
                             if name == "E2-Listening":
                                 #print name
-                                json_subs=json.loads(open(os.path.join(APP_STATIC_JSON,name+".json"), encoding='utf-8').read())
+                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 video_list=json_subs["videoArray"]
                                 serialno=list(range(0,len(video_list)))
                                 shuffle(serialno)
@@ -516,7 +514,7 @@ def generateQuestionPaper(path):
                                     i +=1
                             if types =="question" or types =="record":
                                 #print name
-                                json_subs=json.loads(open(os.path.join(APP_STATIC_JSON,name+".json"), encoding='utf-8').read())
+                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 qns_list=json_subs["questions"];
                                 serialno=list(range(0,len(qns_list)))
                                 shuffle(serialno)
@@ -525,7 +523,7 @@ def generateQuestionPaper(path):
                                     subs["questions"][no]["serialno"]=no+1
                             if types == "passage":
                                 #print name
-                                json_subs=json.loads(open(os.path.join(APP_STATIC_JSON,name+".json"), encoding='utf-8').read())
+                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 psglist=json_subs["passageArray"]
                                 serialno=list(range(0,len(psglist)))
                                 shuffle(serialno)
@@ -537,7 +535,7 @@ def generateQuestionPaper(path):
                                 subs["passage"]=psglist[serialno[0]]["passage"]
                             if types =="essay":
                                 #print name
-                                json_subs=json.loads(open(os.path.join(APP_STATIC_JSON,name+".json"), encoding='utf-8').read())
+                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 qns_list=json_subs["questions"];
                                 serialno=list(range(0,len(qns_list)))
                                 shuffle(serialno)
@@ -546,7 +544,7 @@ def generateQuestionPaper(path):
                                     subs["questions"][no]["serialno"]=no+1
                             if name == "T2-Listening":
                                 #print name
-                                json_subs=json.loads(open(os.path.join(APP_STATIC_JSON,name+".json"), encoding='utf-8').read())
+                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 video_list=json_subs["videoArray"]
                                 serialno=list(range(0,len(video_list)))
                                 shuffle(serialno)
@@ -559,11 +557,11 @@ def generateQuestionPaper(path):
     #ss=json.dumps(json_temp)
     return json_temp
 
-def getAnswer(qid):
+def getAnswer(qid,path):
     qid=int(qid)
 
     if qid in list(range(e1_start,e1_end)):
-        e1_readjson=json.loads(open(os.path.join(APP_STATIC_JSON, 'E1-Reading.json'), encoding='utf-8').read())
+        e1_readjson=json.loads(open(os.path.join(path, 'E1-Reading.json'), encoding='utf-8').read())
         for psg in e1_readjson["passageArray"]:
             for key in psg["questions"]:
                 if int(key["id"]) == qid:
@@ -571,7 +569,7 @@ def getAnswer(qid):
                         if op[0] == "=":
                             return op[1:len(op)]
     if qid in list(range(e2_start,e2_end)):
-        e2_lsnjson=json.loads(open(os.path.join(APP_STATIC_JSON, 'E2-Listening.json'), encoding='utf-8').read())
+        e2_lsnjson=json.loads(open(os.path.join(path, 'E2-Listening.json'), encoding='utf-8').read())
         for key in e2_lsnjson["videoArray"]:
             for qn in key["questions"]:
                 if int(qn["id"]) == qid:
@@ -953,7 +951,7 @@ def getquizstatus(email=None):
     if question_ids:
         isRandomized = True
         qid_dict = qidlisttodict(question_ids)
-        json_data=getQuestionPaper(qid_dict)
+        json_data=getQuestionPaper(qid_dict,path)
         #app.logger.info("User is Resuming Test")
     else:
         isRandomized = False
@@ -1077,7 +1075,9 @@ def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,re
             q_status="submitted"
             status="success"
             validresponse="true"
-            cans=getAnswer(currentQuestion)
+            test = Tests.query.filter_by(name=test_name).first()
+            path = "static/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
+            cans=getAnswer(currentQuestion,path)
             if cans == submittedans:
                 score = 1
 
