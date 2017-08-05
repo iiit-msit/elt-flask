@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 from flask import json as fJson
 import logging
 from logging.handlers import RotatingFileHandler
-# from config import BaseConfig, TestConfig
+from config import BaseConfig
 from config import EmailConfig
 import uuid
 import base64
@@ -49,7 +49,8 @@ app.logger.setLevel(logging.NOTSET)
 login_log = app.logger
 app.debug = False
 app.secret_key = "some_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:veda1997@localhost/postgres'
+app.config.from_object(BaseConfig)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
 # app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
@@ -410,7 +411,7 @@ class Response(db.Model):
     currentQuestion=db.Column(db.String(120))
     serialno=db.Column(db.Integer)
     q_section = db.Column(db.String(120))
-    ip = db.Column(db.String(20), default="0.0.0.0")
+    ip = db.Column(db.String(20), default="127.0.0.1")
 
     def __init__(self, **kwargs):
         super(Response, self).__init__(**kwargs)
@@ -1655,7 +1656,11 @@ def is_safe_path(basedir, path, follow_symlinks=True):
   return os.path.abspath(path).startswith(basedir)
 
 def convert_string_date(date):
-    return datetime.strptime(date, '%d-%m-%Y').date()
+    try:
+        return datetime.strptime(date, '%d-%m-%Y').date()
+    except Exception as e:
+        app.logger.info("Error while converting string_to_date funciton %s"%e)
+        return datetime.now().date()
 
 @app.route('/content/<test_mode>/<datetoday>/<filename>')
 @login_required
@@ -2421,7 +2426,7 @@ def render_csv_from_test_responses(data, test_name):
                 ]
         # app.logger.info(list(data)[0])
 
-        user = Randomize.query.first()
+        user = Randomize.query.filter_by(test_name=test_name).first()
         if user:
             Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).count()
             app.logger.info(["number is ", Questions_count])
