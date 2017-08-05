@@ -1,6 +1,6 @@
+static/content/
 venv/
 logs.log
 logs.log*
 env.py
 __pycache__/
-static/content/
