@@ -110,7 +110,8 @@ var quizModel = {
 };
 
 var octopus = {
-		init : function(test_name) {
+		init : function(test_name, mode) {
+			this.mode = mode
 			this.test_name = test_name
 			$.ajax({
 					type: "post",
@@ -319,7 +320,22 @@ var startView = {
 			var quizStatus = quizModel.getQuizStatus();
 			if(quizStatus == "START") {
 
-				// this.questionPane.html('<h3>' + this.startMessage + '</h3><br>');
+				if(octopus.mode=="TOEFL"){
+					this.questionPane.html('<h3>' + this.startMessage + '</h3><br>');
+				}
+				if(octopus.mode=="DEP") {
+					this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
+	 				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
+	 				 this.questionPane.append("<a href='/readingtask/"+octopus.test_name+"'>Click here to read the PDF.</a><br><br>")
+
+	 				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
+	 				 this.questionPane.append("<a href='/listeningtask/"+octopus.test_name+"'>Click here to watch the video.</a><br><br>")
+
+	 				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
+	 				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')
+	 				 this.startButton.removeClass("btn-lg");
+	 				 this.startButton.removeClass("btn-sm");
+				}
 
 				/*
 				 * Get Listening and Reading Content.
@@ -332,17 +348,6 @@ var startView = {
 				 *console.log(listening_content)
 				 *console.log(reading_content)
 				 */
-				 this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
-				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
-				 this.questionPane.append("<a href='/readingtask/"+octopus.test_name+"'>Click here to read the PDF.</a><br><br>")
-
-				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
-				 this.questionPane.append("<a href='/listeningtask/"+octopus.test_name+"'>Click here to watch the video.</a><br><br>")
-
-				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
-				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')
-				 this.startButton.removeClass("btn-lg");
-				 this.startButton.removeClass("btn-sm");
 
 			} else if (quizStatus == "INPROGRESS") {
 				this.questionPane.html(this.resumeMessage);

@@ -49,7 +49,7 @@ app.logger.setLevel(logging.NOTSET)
 login_log = app.logger
 app.debug = False
 app.secret_key = "some_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:veda1997@localhost/postgres'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
 # app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
@@ -1323,8 +1323,10 @@ def startquiz(test_name):
         email = session['user']['email']
         rollno = get_rollno(email)
         rollno = email if not rollno else rollno
+        test = Tests.query.filter_by(name=test_name).first()
+        mode = test.test_mode
 
-        return render_template('quiz.html', rollno=rollno, test_name=test_name)
+        return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode)
     return redirect("/")
 
 def generate_unique_code():
