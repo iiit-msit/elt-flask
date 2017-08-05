@@ -2758,6 +2758,7 @@ def upload_file():
                 file_list = zf.namelist()
                 if sublist(folder_structure[mode], file_list):
                     zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
+                    zf.close()
                     flash("Folder successfully put in test environment")
                 else:
                     flash("Uploaded zip file doesn't contain necessary files/folder structure")
