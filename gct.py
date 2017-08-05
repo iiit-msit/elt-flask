@@ -499,6 +499,7 @@ def generateQuestionPaper(path):
                     if key == "subsection":
                         for subs in s[key]:
                             cnt=int(subs["count"])
+                            app.logger.info(cnt)
                             name=subs["name"]
                             types=subs["types"]
                             #print name
@@ -537,6 +538,7 @@ def generateQuestionPaper(path):
                                 subs["passage"]=psglist[serialno[0]]["passage"]
                             if types =="essay":
                                 #print name
+                                app.logger.info("essay came")
                                 json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
                                 qns_list=json_subs["questions"];
                                 serialno=list(range(0,len(qns_list)))
@@ -1325,8 +1327,10 @@ def startquiz(test_name):
         email = session['user']['email']
         rollno = get_rollno(email)
         rollno = email if not rollno else rollno
+        test = Tests.query.filter_by(name=test_name).first()
+        mode = test.test_mode
 
-        return render_template('quiz.html', rollno=rollno, test_name=test_name)
+        return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode)
     return redirect("/")
 
 def generate_unique_code():
@@ -1677,7 +1681,7 @@ def send_content(test_mode, datetoday,filename):
     if date1 >= date2:
         return send_from_directory('static/content/%s/%s/'%(test_mode, datetoday), filename)
     else:
-        return redirect("/")
+        return "<h3>Error 404 in displaying the content you requested. Please contact Exam Admin.</h3>"
 #
 # Reading Task Handlers
 #
@@ -1973,8 +1977,12 @@ def create(admin=None, test_name=None):
         admin = session["user"]['email']
 
     if request.method == "GET":
-        tests= [{"name":"TOEFL Test","start_date":"03-08-2017 12:00","end_date":"30-08-2017 12:00", "test_mode":"TOEFL"}]
-        tests.append({"name":"Daily English Practice","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests= []
+        tests.append({"name":"Daily English Practice 1","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests.append({"name":"Daily English Practice 2","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests.append({"name":"Daily English Practice 3","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests.append({"name":"Daily English Practice 4","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests.append({"name":"Daily English Practice 5","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
         for test in tests:
             # if not test_name:
             test_name = test["name"]
