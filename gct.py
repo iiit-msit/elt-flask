@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 from flask import json as fJson
 import logging
 from logging.handlers import RotatingFileHandler
-# from config import BaseConfig, TestConfig
+from config import BaseConfig
 from config import EmailConfig
 import uuid
 import base64
@@ -49,7 +49,8 @@ app.logger.setLevel(logging.NOTSET)
 login_log = app.logger
 app.debug = False
 app.secret_key = "some_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
+app.config.from_object(BaseConfig)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
 # app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
