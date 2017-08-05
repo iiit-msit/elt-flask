@@ -33,6 +33,7 @@ import inspect
 import unittest
 import re
 import mimetypes
+import zipfile
 from sqlalchemy.ext.hybrid import hybrid_property
 app = Flask(__name__, static_url_path='')
 
@@ -2702,6 +2703,63 @@ def getrecorder():
 
     # if request.method == "POST":
 
+def sublist(child, parent):
+    return set(child) <= set(parent)
+
+
+@app.route('/upload_file', methods=['GET', 'POST'])
+@admin_login_required
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        mode = "DEP"
+        folder_structure = {"DEP":
+            ["E1-Reading.json",
+             "E3-Speaking.json",
+             "listening.mp4",
+             "reading.pdf",
+             "E2-Listening.json",
+             "E4-Writing.json", 
+             "QP_template.json"
+            ]
+            ,"TOEFL":
+            ["audio1.mp3",
+             "E1-Reading.json",
+             "E3-Speaking.json",
+             "QP_template.json",
+             "E2-Listening.json",
+             "E4-Writing.json"
+             ]
+            }
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join('static/tmp_upload', filename))
+            flash("%s file uplaoded successfully"%filename)
+            zip_exist = zipfile.is_zipfile('static/tmp_upload/'+filename)
+            if zip_exist:
+                zf = zipfile.ZipFile('static/tmp_upload/'+filename, 'r')
+                file_list = zf.namelist()
+                if sublist(folder_structure[mode], file_list):
+                    zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
+                    flash("Folder successfully put in test environment")
+                else:
+                    flash("Uploaded zip file doesn't contain necessary files/folder structure")
+            else:
+                flash("%s file is not a zip"%filename)
+            flash("%s is file a zip %s"%(filename, zip_exist))
+            return redirect(url_for('upload_file'))
+        else:
+            flash("file format is not allowed")
+    return render_template('upload_file.html')
 
 # ==================================================
                     # UNIT Tests
