@@ -464,12 +464,18 @@ var questionView = {
 				this.displayVideo();
 				this.displayOptions();
 			}
-			if (q.subsections.types == "record")
-			{
-				this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder/'+octopus.test_name+'\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
-				this.questionPane.append('<div><label>Audio Link: </label><input type="text" id="audiolink" value="#" hidden> </input></div>');
-				this.questionPane.append('<br><label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip"> Skip Question</input></label>');
 
+			/*
+			 * Show Recorder only for TOEFL
+			 */
+			if (octopus.mode == "TOEFL"){
+				if (q.subsections.types == "record")
+				{
+					this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder/'+octopus.test_name+'\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
+					this.questionPane.append('<div><label>Audio Link: </label><input type="text" id="audiolink" value="#" hidden> </input></div>');
+					this.questionPane.append('<br><label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip"> Skip Question</input></label>');
+
+				}
 			}
 
 			if (q.subsections.types == "question")
