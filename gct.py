@@ -1854,8 +1854,10 @@ def createDefaultTest(TestID, author, start_date,end_date, test_mode):
         test = Tests(TestID,author, start_date, end_date, test_mode)
         db.session.add(test)
         db.session.commit()
+        return True
     except Exception as e:
         app.logger.info(e)
+        return False
 
 def settestsession(TestID,start_date,end_date):
     try:
@@ -1970,6 +1972,36 @@ def updatetests(test_name=None,email=None,start_date=None,end_date=None):
         app.logger.info(e)
     return False
 
+def create_test(test_name, test_mode, start_date, end_date):
+    
+    if test_name and test_mode and start_date and end_date:
+        # if not test_name:
+        # test_name = test["name"]
+        # test_mode = test["test_mode"] if "test_mode" in test else "TOEFL"
+        #app.logger.info(test_name)
+        nameValid = validate_name(test_name)
+
+        # start_date = test["start_date"]
+        startdateValid = validate_date(start_date)
+
+        # end_date = test["end_date"]
+        enddateValid = validate_date(end_date)
+
+        
+        if nameValid and startdateValid and enddateValid:
+            #app.logger.info('%s created a Test - %s' %(admin,test_name))
+            is_created = createDefaultTest(test_name,admin, start_date, end_date, test_mode)
+            if is_created:
+                return True
+            # settestsession(test_name,start_date,end_date)
+        else:
+            flash('Failed to create Test - %s' %test_name)
+            app.logger.info('Failed to create Test - %s' %test_name)
+    else:
+        app.logger.info('Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date]))
+
+    return False
+
 @app.route('/create', methods=["GET","POST"])
 @admin_login_required
 def create(admin=None, test_name=None):
@@ -1984,26 +2016,9 @@ def create(admin=None, test_name=None):
         tests.append({"name":"Daily English Practice 4","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
         tests.append({"name":"Daily English Practice 5","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
         for test in tests:
-            # if not test_name:
-            test_name = test["name"]
-            test_mode = test["test_mode"] if "test_mode" in test else "TOEFL"
-            #app.logger.info(test_name)
-            nameValid = validate_name(test_name)
-
-            start_date = test["start_date"]
-            startdateValid = validate_date(start_date)
-
-            end_date = test["end_date"]
-            enddateValid = validate_date(end_date)
-
-            testValid = False
-            if nameValid and startdateValid and enddateValid:
-                testValid = True
-                #app.logger.info('%s created a Test - %s' %(admin,test_name))
-                createDefaultTest(test_name,admin, start_date, end_date, test_mode)
-                settestsession(test_name,start_date,end_date)
-            else:
-                app.logger.info('Failed to create Test - %s' %test_name)
+            # definition : create_test(test_name, test_mode, start_date, end_date)
+            testValid = create_test(test["name"], test["test_mode"], test["start_date"], test["end_date"])
+            app.logger.info("%s test is created %s"%(test["name"], testValid))
         return redirect(url_for("admin"))
 
 def loadTestSet():
