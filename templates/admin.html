@@ -31,13 +31,13 @@
 		        { width : '50px' },
 		        { width : '50px' },
 		        { width : '50px' },
-		        { width : '50px' },        
 		        { width : '50px' },
 		        { width : '50px' },
-		        { width : '50px' }        
-		    ] 
+		        { width : '50px' },
+		        { width : '50px' }
+		    ]
 	    });
-	    
+
 	});
 </script>
 
@@ -63,8 +63,9 @@
 	      	{% else %}
 	        	<li><a href="/create">Create Test</a></li>
 	        {% endif %} -->
+					<li><a href="/createexam">Create Test</a></li>
 	        <li><a href="/viewresults">View Results</a></li>
-	        <li class="dropdown">	
+	        <li class="dropdown">
 	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{session["user"]["email"]}} <span class="caret"></span></a>
 	          <ul class="dropdown-menu">
 	            <li role="separator" class="divider"></li>
@@ -113,18 +114,18 @@
             	<table class="table">
             		<thead>
             			<tr>
-            				<th>Email</th>		
+            				<th>Email</th>
 	   						<th>Status</th>
-	   						<th>Tracking ID</th>	
+	   						<th>Tracking ID</th>
             			</tr>
             		</thead>
             		<tbody>
             			<tr><td>Loading...</td></tr>
             		</tbody>
             	</table>
-                      
+
             </div>
-           
+
         </div>
     </div>
 </div>
@@ -186,7 +187,7 @@ $(document).ready(function() {
 			});
 		});
 	});
-});	
+});
 </script>
 
 </body>

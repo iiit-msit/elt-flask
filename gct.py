@@ -1679,6 +1679,9 @@ def send_content(test_mode, datetoday,filename):
     app.logger.info("app root %s"%APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday))
     #the below link is tested by putting the folder outside of the root
     # return send_from_directory(APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday), filename)
+    if role == "admin":
+        return send_from_directory('static/content/%s/%s/'%(test_mode, datetoday), filename)
+
     if date1 >= date2:
         return send_from_directory('static/content/%s/%s/'%(test_mode, datetoday), filename)
     else:
@@ -2772,7 +2775,23 @@ def createexam():
 
         try:
             test = create_test(test_name, mode, startdate, enddate)
-            flash("Success: Test Status is %s"%test)
+            if test != True:
+                flash("Error: %s"%test)
+                # return redirect(request.url)
+            else:
+                flash("Test Created Succesfully")
+        except Exception as e:
+            flash(e)
+            return redirect(request.url)
+
+        try:
+            registered = Users.query.all()
+            registered_emails = []
+            for i in registered:
+                registered_emails.append(i.emailid)
+            flash("Inviting %s"%str(registered_emails))
+            students_list = updateStudents(test_name,registered_emails)
+            flash("Success: %s"%str(students_list))
         except Exception as e:
             flash(e)
             return redirect(request.url)
