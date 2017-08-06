@@ -627,6 +627,11 @@ def before_request():
 def error(error):
     return render_template('error.html', error=error)
 
+@app.route('/createexam')
+def createexam():
+    return render_template('create_exam.html')
+
+
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     email="vy@fju.us"

@@ -20,10 +20,10 @@
 {% endblock %}
 {%block script%}
 <script type="text/javascript">
- 	
- 	//initialize datepicker 
+
+ 	//initialize datepicker
  	$(function(){
- 		
+
  		var table = $('#StudentsTable').DataTable({
 			dom: 'Bfrtip',
 			// "pageLength": 1,
@@ -95,22 +95,22 @@
 
 	    student_count = table.rows().length;
    		$("#count").html(student_count);
-   		
+
 	   	$('a#invitedstudents').on("click", function (e) {
 	   		if(student_count <= 0){
 	       		e.preventDefault();
 	        }
 	    });
-	 	
+
  	});
  	$(function () {
- 		
+
  	// 	start_date = "{{session['start_date']}}"
  	// end_date = "{{session['end_date']}}"
- 	// $("#datetimepicker1").val(start_date) 
+ 	// $("#datetimepicker1").val(start_date)
  	// $("#datetimepicker2").val(end_date)
  	// $("#studentslist").val("{{session['students']}}");
- 	
+
         $('#datetimepicker1').datetimepicker({
         	format: 'DD-MM-YYYY HH:mm',
         	// stepping: 30,
@@ -147,13 +147,13 @@
  //   		// console.log(data['students']);
  //   		student_count = data['students'].length;
  //   		$("#count").html(student_count);
-   		
+
 	//    	$('a#invitedstudents').on("click", function (e) {
 	//    		if(student_count <= 0){
 	//        		e.preventDefault();
 	//         }
 	//     });
-		
+
  //   		$("#existingstudentslist").html('');
  //   		$.each(data['students'], function(index,val){
 	//    		var dom = `<div class="input-group">
@@ -163,8 +163,8 @@
  //      </span>
  //    </div>`
 	//    		$("#existingstudentslist").append(dom);
-	// 	});	
-		
+	// 	});
+
 	// 	// $("#studentslist").height( $("#studentslist")[0].scrollHeight );
 	// });
  	// students = "{{session['students']}}"
@@ -186,7 +186,7 @@
 	    function extractLast( term ) {
 	      return split( term ).pop();
 	    }
-	 	
+
 	    $( "#studentslist" )
 	      // .on( "keydown", function( event ) {
 	      //   if ( event.keyCode === $.ui.keyCode.TAB &&
@@ -240,7 +240,7 @@
 			<div class="row" style="background-color: #eee;">
 				<form method="post" action="/edit/{{testid}}/set_exam_time">
 					<div class="form-group">
-			    		<label for="datetimepicker1">Test Start Date</label>    
+			    		<label for="datetimepicker1">Test Start Date</label>
 			            <div class='input-group date' id='datetimepicker1'>
 			                <input type='text' name='datetimepicker1' class="form-control" />
 			                <span class="input-group-addon">
@@ -249,7 +249,7 @@
 			            </div>
 			        </div>
 			        <div class="form-group">
-			    		<label for="datetimepicker1">Test End Date</label>    
+			    		<label for="datetimepicker1">Test End Date</label>
 			            <div class='input-group date' id='datetimepicker2'>
 			                <input type='text' name='datetimepicker2' class="form-control" />
 			                <span class="input-group-addon">
@@ -261,7 +261,7 @@
 			    </form>
 			</div>
 			<div class="row" style="background-color: #eee;">
-				<div style="background-color: #eee;"">
+				<div style="background-color: #eee;">
 
 					{% if messages %}
 						{% if datevalid %}
@@ -279,14 +279,14 @@
 		</div>
 		<div class="col-md-6 col-sm-12 panel" style="background-color: #eee; padding: 2%; padding-top:0px;">
 			<div class="row" style="background-color: #eee;">
-				
+
 			      <div class="form-group">
 			      	<!-- <label>Existing Students : <span id="count"></span></label> -->
 			      	<a id="invitedstudents" href="/downloadInvitedStudents/{{testid}}">
 				        <i class="fa fa-cog" aria-hidden="true"></i> Download Enrolled Student list as CSV
 				    </a>
 			      	<div id="existingstudentslist"></div>
-			      	
+
 			      		{%if allstudents%}
 			      			<!-- {{allstudents}} -->
 			      			<table id="StudentsTable" class="display" cellspacing="0" width="100%">
@@ -310,7 +310,7 @@
 			      				</tbody>
 			      			</table>
 			      		{%endif%}
-			      	
+
 			      	</div>
 			      </div>
 
@@ -327,7 +327,7 @@
 
 			</div>
 		</div>
-		
+
 	<!-- </div> -->
 	</div>
 
