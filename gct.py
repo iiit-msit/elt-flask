@@ -1668,6 +1668,7 @@ def convert_string_date(date):
 def send_content(test_mode, datetoday,filename):
     app.logger.info("Im in send_content with %s/%s"%(test_mode, datetoday))
     email = get_email_from_session()
+    role = get_role_from_session()
     # if setquizstatus(email) == "INPROGRESS":
     #     return redirect("/")
     date1 = convert_string_date(get_today_ddmmyyyy())
@@ -1990,17 +1991,18 @@ def create_test(test_name, test_mode, start_date, end_date):
 
         if nameValid and startdateValid and enddateValid:
             #app.logger.info('%s created a Test - %s' %(admin,test_name))
-            is_created = createDefaultTest(test_name,admin, start_date, end_date, test_mode)
+            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode)
             if is_created:
                 return True
             # settestsession(test_name,start_date,end_date)
         else:
-            flash('Failed to create Test - %s' %test_name)
-            app.logger.info('Failed to create Test - %s' %test_name)
+            message = 'Failed to create Test - %s: %s, start_date: %s, end_date: %s' %(test_name,nameValid,startdateValid,enddateValid)
+            app.logger.info('Failed to create Test - %s: %s, start_date: %s, end_date: %s' %(test_name,nameValid,startdateValid,enddateValid))
     else:
+        message = 'Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date])
         app.logger.info('Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date]))
 
-    return False
+    return message
 
 @app.route('/create', methods=["GET","POST"])
 @admin_login_required
@@ -2741,23 +2743,38 @@ def createexam():
         mode = request.form['mode']
         flash("Selected mode is %s"%mode)
 
-        if mode=="DEP":
-            test_name = request.form['dep_testname']
-            flash("Test Name is %s"%test_name)
-            date = request.form['datepicker']
-            flash("Start Date is %s"%date)
-
-        elif mode=="TOEFL":
-            test_name = request.form['dep_testname']
+        if mode=="TOEFL":
+            test_name = request.form['toefl_testname']
             flash("Test Name is %s"%test_name)
             startdate = request.form['datetimepicker1']
             flash("Start Date is %s"%startdate)
             enddate = request.form['datetimepicker2']
             flash("End Date is %s"%enddate)
+        else:
+            test_name = request.form['dep_testname']
+            flash("Test Name is %s"%test_name)
+            date = request.form['datepicker']
+            flash("Exam Date is %s"%date)
+            startdate = date+" 09:00"
+            enddate = date+" 23:59"
 
+        if not test_name or not mode or not date:
+            flash('Error: One or more fields of form are Invalid. [test_name:%s,startdate:%s,enddate:%s]'%(test_name,startdate,enddate))
+            return redirect(request.url)
+
+        if test_name=="" or mode=="" or date=="":
+            flash('Error: One or more fields of form are missing. [test_name:%s,startdate:%s,enddate:%s]'%(test_name,startdate,enddate))
+            return redirect(request.url)
 
         if 'file' not in request.files:
             flash('Error: No File selected. Please upload a .zip file.')
+            return redirect(request.url)
+
+        try:
+            test = create_test(test_name, mode, startdate, enddate)
+            flash("Success: Test Status is %s"%test)
+        except Exception as e:
+            flash(e)
             return redirect(request.url)
 
         folder_structure = {"DEP":
@@ -2789,13 +2806,16 @@ def createexam():
             flash('Uploading content from %s'%file.filename)
             filename = secure_filename(file.filename)
             file.save(os.path.join('static/tmp_upload', filename))
-            flash("Success: %s is a valid. \nExtracting contents..."%filename)
+            flash("Success: %s is valid. \nExtracting contents..."%filename)
             zip_exist = zipfile.is_zipfile('static/tmp_upload/'+filename)
             if zip_exist:
                 zf = zipfile.ZipFile('static/tmp_upload/'+filename, 'r')
                 file_list = zf.namelist()
                 if sublist(folder_structure[mode], file_list):
-                    zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
+                    if mode=="DEP":
+                        zf.extractall("static/content/"+mode+"/"+date)
+                    else:
+                        zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
                     zf.close()
                     flash("Success in extracting: Folder uploaded in test environment")
                 else:
@@ -2805,7 +2825,8 @@ def createexam():
             return redirect(url_for('createexam'))
         else:
             flash("Error: file format is not allowed")
-
+        return redirect("createexam")
+            # flash("Test Created: %s"%test)
 # ==================================================
                     # UNIT Tests
 # ==================================================
