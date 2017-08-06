@@ -12,3 +12,4 @@ Flask-Mail
 requests
 flask_csv
 pytz
+zipfile
