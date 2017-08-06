@@ -1999,7 +1999,10 @@ def create_test(test_name, test_mode, start_date, end_date):
                 return True
             # settestsession(test_name,start_date,end_date)
         else:
-            message = 'Failed to create Test - %s: %s, start_date: %s, end_date: %s' %(test_name,nameValid,startdateValid,enddateValid)
+            nameValid = "Already Exists."
+            startdateValid = "Invalid Date Format or Date is passed."
+            enddateValid = "Invalid Date Format."
+            message = 'Failed to create Test - [%s: %s, start_date: %s, end_date: %s]' %(test_name,nameValid,startdateValid,enddateValid)
             app.logger.info('Failed to create Test - %s: %s, start_date: %s, end_date: %s' %(test_name,nameValid,startdateValid,enddateValid))
     else:
         message = 'Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date])
@@ -2762,11 +2765,7 @@ def createexam():
             enddate = date+" 23:59"
 
         if not test_name or not mode or not date:
-            flash('Error: One or more fields of form are Invalid. [test_name:%s,startdate:%s,enddate:%s]'%(test_name,startdate,enddate))
-            return redirect(request.url)
-
-        if test_name=="" or mode=="" or date=="":
-            flash('Error: One or more fields of form are missing. [test_name:%s,startdate:%s,enddate:%s]'%(test_name,startdate,enddate))
+            flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
             return redirect(request.url)
 
         if 'file' not in request.files:
@@ -2777,7 +2776,7 @@ def createexam():
             test = create_test(test_name, mode, startdate, enddate)
             if test != True:
                 flash("Error: %s"%test)
-                # return redirect(request.url)
+                return redirect(request.url)
             else:
                 flash("Test Created Succesfully")
         except Exception as e:
