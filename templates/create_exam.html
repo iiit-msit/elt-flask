@@ -29,10 +29,10 @@
       <div class="panel-body">
         <h3>Enter Exam Metadata</h3>
         <hr>
-        <form action="#" id="js-upload-form" enctype="multipart/form-data">
+        <form action="/createexam" method="post" id="js-upload-form" enctype="multipart/form-data">
           <div class="form-group">
             <label for="mode">Select Mode:</label>
-            <select class="form-control" id="mode">
+            <select class="form-control" id="mode" name="mode">
               <option value="DEP">Daily English Practise</option>
               <option value="TOEFL">TOEFL Exam</option>
             </select>
@@ -68,7 +68,7 @@
             <label for="mode">Upload Content (.zip):</label>
             <div class="form-inline">
               <div class="form-group">
-                <input type="file" style="btn btn-default" name="content" id="js-upload-files" accept=".zip">
+                <input type="file" style="btn btn-default" name="file" id="js-upload-files" accept=".zip">
               </div>
             </div>
           </div>
@@ -80,6 +80,21 @@
       <div class="panel-body">
         <h3>Result</h3>
         <hr>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes" style="padding-left:0px">
+            {% for message in messages %}
+              {% if 'Success' in message %}
+                <li class="list-group-item list-group-item-success"><span class="badge alert-success pull-right  glyphicon glyphicon-ok"></span><b>{{ message }}</b></li>
+              {% elif 'Error' in message %}
+                <li class="list-group-item list-group-item-danger"><span class="badge alert-success pull-right"></span><b>{{ message }}</b></li>
+              {% else %}
+                <li class="list-group-item list-group-item-info"><span class="badge alert-success pull-right  glyphicon glyphicon-ok"></span><b>{{ message }}</b></li>
+              {% endif %}
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
       </div>
     </div>
   </div>

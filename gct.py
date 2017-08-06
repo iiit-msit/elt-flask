@@ -628,11 +628,6 @@ def before_request():
 def error(error):
     return render_template('error.html', error=error)
 
-@app.route('/createexam')
-def createexam():
-    return render_template('create_exam.html')
-
-
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     email="vy@fju.us"
@@ -1978,7 +1973,7 @@ def updatetests(test_name=None,email=None,start_date=None,end_date=None):
     return False
 
 def create_test(test_name, test_mode, start_date, end_date):
-    
+
     if test_name and test_mode and start_date and end_date:
         # if not test_name:
         # test_name = test["name"]
@@ -1992,7 +1987,7 @@ def create_test(test_name, test_mode, start_date, end_date):
         # end_date = test["end_date"]
         enddateValid = validate_date(end_date)
 
-        
+
         if nameValid and startdateValid and enddateValid:
             #app.logger.info('%s created a Test - %s' %(admin,test_name))
             is_created = createDefaultTest(test_name,admin, start_date, end_date, test_mode)
@@ -2734,20 +2729,44 @@ def getrecorder():
 def sublist(child, parent):
     return set(child) <= set(parent)
 
-
-@app.route('/upload_file', methods=['GET', 'POST'])
+@app.route('/createexam', methods=['GET', 'POST'])
 @admin_login_required
-def upload_file():
+def createexam():
+    if request.method == 'GET':
+        return render_template('create_exam.html')
+
     if request.method == 'POST':
+
         # check if the post request has the file part
-        mode = "DEP"
+        mode = request.form['mode']
+        flash("Selected mode is %s"%mode)
+
+        if mode=="DEP":
+            test_name = request.form['dep_testname']
+            flash("Test Name is %s"%test_name)
+            date = request.form['datepicker']
+            flash("Start Date is %s"%date)
+
+        elif mode=="TOEFL":
+            test_name = request.form['dep_testname']
+            flash("Test Name is %s"%test_name)
+            startdate = request.form['datetimepicker1']
+            flash("Start Date is %s"%startdate)
+            enddate = request.form['datetimepicker2']
+            flash("End Date is %s"%enddate)
+
+
+        if 'file' not in request.files:
+            flash('Error: No File selected. Please upload a .zip file.')
+            return redirect(request.url)
+
         folder_structure = {"DEP":
             ["E1-Reading.json",
              "E3-Speaking.json",
              "listening.mp4",
              "reading.pdf",
              "E2-Listening.json",
-             "E4-Writing.json", 
+             "E4-Writing.json",
              "QP_template.json"
             ]
             ,"TOEFL":
@@ -2759,19 +2778,18 @@ def upload_file():
              "E4-Writing.json"
              ]
             }
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+
         file = request.files['file']
         # if user does not select file, browser also
         # submit a empty part without filename
         if file.filename == '':
-            flash('No selected file')
+            flash('Error: File not selected. Please upload a .zip file.')
             return redirect(request.url)
         if file:
+            flash('Uploading content from %s'%file.filename)
             filename = secure_filename(file.filename)
             file.save(os.path.join('static/tmp_upload', filename))
-            flash("%s file uplaoded successfully"%filename)
+            flash("Success: %s is a valid. \nExtracting contents..."%filename)
             zip_exist = zipfile.is_zipfile('static/tmp_upload/'+filename)
             if zip_exist:
                 zf = zipfile.ZipFile('static/tmp_upload/'+filename, 'r')
@@ -2779,16 +2797,14 @@ def upload_file():
                 if sublist(folder_structure[mode], file_list):
                     zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
                     zf.close()
-                    flash("Folder successfully put in test environment")
+                    flash("Success in extracting: Folder uploaded in test environment")
                 else:
-                    flash("Uploaded zip file doesn't contain necessary files/folder structure")
+                    flash("Error in extracting: Uploaded zip file doesn't contain necessary files/folder structure.")
             else:
-                flash("%s file is not a zip"%filename)
-            flash("%s is file a zip %s"%(filename, zip_exist))
-            return redirect(url_for('upload_file'))
+                flash("Error: %s file is not a zip file"%filename)
+            return redirect(url_for('createexam'))
         else:
-            flash("file format is not allowed")
-    return render_template('upload_file.html')
+            flash("Error: file format is not allowed")
 
 # ==================================================
                     # UNIT Tests
