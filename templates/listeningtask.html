@@ -23,6 +23,10 @@
       <video controls type="video/mp4" width="100%" src="/play{{task.filepath}}" preload="auto" autoplay>
         Your browser does not support the video tag.
       </video>
+      <div class="text-left">
+      	<a href="/like/{{test_name}}/listening" class="btn btn-default"><span style="font-size:22px; color:#337ab7" class="glyphicon glyphicon-thumbs-up text-center"></span></a>
+      	<a href="/dislike/{{test_name}}/listening" class="btn btn-default"><span style="font-size:22px; color:#a94442" class="glyphicon glyphicon-thumbs-down text-center"></span></a>
+      </div>
     </div>
     {% else %}
       <h4>Listening Comprehension Task for today was not found on Server.</h4>

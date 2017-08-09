@@ -464,7 +464,7 @@ class Content(db.Model):
     ip = db.Column(db.String(20), default="127.0.0.1")
 
     def __init__(self, **kwargs):
-        super(ContentActivity, self).__init__(**kwargs)
+        super(Content, self).__init__(**kwargs)
         
 class ContentActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -1870,7 +1870,40 @@ def listeningtask(test_name):
         app.logger.info(e)
         return render_template('error.html', error="LTExec: Exception while presenting Listening Task")
 
+@app.route("/like/<test_name>/<section>", methods=["POST"])
+@login_required
+def like(test_name,section):
+    try:
+        email = get_email_from_session()
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        row = Content.query.filter_by(email=email,test_name=test_name,section=section).first()
+        if row:
+            row.liked = True
+        else:
+            row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
+            db.session.add(row)
+        db.session.commit()
+    except Exception as e:
+        app.logger.info(e)
+        return render_template('error.html', error=str(e))
 
+@app.route("/dislike/<test_name>/<section>", methods=["POST"])
+@login_required
+def dislike(test_name,section):
+    try:
+        email = get_email_from_session()
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        row = Content.query.filter_by(email=email,test_name=test_name,section=section).first()
+        if row:
+            row.liked = False
+        else:
+            row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
+            db.session.add(row)
+        db.session.commit()
+    except Exception as e:
+        app.logger.info(e)
+        return render_template('error.html', error="DislikeExec: Exception while disliking the content resource.")
+        
 #==================================================== ADMIN PAGE =====================================================
 # def valid_admin_login(email, password):
 #     result = AdminDetails.query.filter_by(email=email).first()
