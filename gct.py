@@ -1870,7 +1870,7 @@ def listeningtask(test_name):
         app.logger.info(e)
         return render_template('error.html', error="LTExec: Exception while presenting Listening Task")
 
-@app.route("/like/<test_name>/<section>", methods=["POST"])
+@app.route("/like/<test_name>/<section>", methods=["GET"])
 @login_required
 def like(test_name,section):
     try:
@@ -1883,11 +1883,12 @@ def like(test_name,section):
             row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
             db.session.add(row)
         db.session.commit()
+        return redirect(request.referrer)
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error=str(e))
 
-@app.route("/dislike/<test_name>/<section>", methods=["POST"])
+@app.route("/dislike/<test_name>/<section>", methods=["GET"])
 @login_required
 def dislike(test_name,section):
     try:
@@ -1900,6 +1901,7 @@ def dislike(test_name,section):
             row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
             db.session.add(row)
         db.session.commit()
+        return redirect(request.referrer)
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error="DislikeExec: Exception while disliking the content resource.")
