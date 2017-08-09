@@ -18,6 +18,7 @@
 					<th>End Date</th>
 					<th>File</th>
 					<th>File</th>
+					<th>Publish Results</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -29,6 +30,7 @@
 						<td>{{test.end_date}}</td>
 						<td><a href="/downloadTestResults/{{test.name}}" class="btn btn-sm btn-primary">Download as CSV</a></td>
 						<td><a href="/downloadTestResultsSummary/{{test.name}}" class="btn btn-sm btn-primary">Download Summary as CSV</a></td>
+						<td><a href="/releaseResults/{{test.name}}" class="btn btn-sm btn-primary">Publish Results</a></td>
 					</tr>
 				{%endfor%}
 			</tbody>
