@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+<head>
+	<title>English Literacy Test</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="stylesheets/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css">
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="javascripts/jquery.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+	<style type="text/css">
+		table.dataTable tbody td {
+		    word-break: break-all;
+		    vertical-align: top;
+		}
+	</style>
+<script type="text/javascript">
+   	$(document).ready(function() {
+	    $.fn.dataTable.ext.errMode = 'throw';
+	    $('#usertable').DataTable( {
+	        "ajax": "{{ url_for('loadtests') }}",
+	        "errMode": 'throw',
+	        autoWidth: false,
+		    columns : [
+		        { width : '50px' },
+		        { width : '50px' },
+		        { width : '50px' },
+		        { width : '50px' },
+		        { width : '50px' },
+		        { width : '50px' },
+		        { width : '50px' }
+		    ]
+	    });
+
+	});
+</script>
+
+</head>
+<body style='padding: 0px; background: #eee' class="container-fluid">
+	<nav class="navbar navbar-inverse" style="margin-bottom: 0px">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+	        <span class="sr-only">Toggle navigation</span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	        <span class="icon-bar"></span>
+	      </button>
+	      <a class="navbar-brand" href="#">Admin Dashboard</a>
+	    </div>
+		{%if session["user"]["email"]%}
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav navbar-right">
+
+	      	<!-- {% if session["TestID"] %}
+	        	<li><a href="/addstudents">Add Students</a></li>
+	      	{% else %}
+	        	<li><a href="/create">Create Test</a></li>
+	        {% endif %} -->
+					<li><a href="/createexam">Create Test</a></li>
+	        <li><a href="/viewresults">View Results</a></li>
+	        <li class="dropdown">
+	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{session["user"]["email"]}} <span class="caret"></span></a>
+	          <ul class="dropdown-menu">
+	            <li role="separator" class="divider"></li>
+	            <li><a href="/logout">Logout</a></li>
+	          </ul>
+	        </li>
+	      </ul>
+	    </div>
+	    {%endif%}
+	  </div>
+	</nav>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-12" style="background: white">
+				<br><h2 class="text-center">Tests Inventory</h2>
+				<hr>
+				<div id="container" style="padding-left: 5% ; padding-right: 5%">
+					<div class="row">
+						<table id="usertable" class="display text-left" >
+							  <thead>
+							  	<tr>
+							    	<th>Name of Test</th>
+							    	<th>Start Date</th>
+							    	<th>End Date</th>
+							    	<th>Students List</th>
+							    	<th>Edit</th>
+							    	<th>Preview</th>
+							    	<th>Notify</th>
+							  	</tr>
+							  </thead>
+						</table>
+					</div>
+				</div><br>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="NotifyMailResponses" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                 <h4 class="modal-title" id="myModalLabel">Notification Emails Status</h4>
+
+            </div>
+            <div class="modal-body">
+            	<table class="table">
+            		<thead>
+            			<tr>
+            				<th>Email</th>
+	   						<th>Status</th>
+	   						<th>Tracking ID</th>
+            			</tr>
+            		</thead>
+            		<tbody>
+            			<tr><td>Loading...</td></tr>
+            		</tbody>
+            	</table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	String.prototype.format = function () {
+        var args = [].slice.call(arguments);
+        return this.replace(/(\{\d+\})/g, function (a){
+            return args[+(a.substr(1,a.length-2))||0];
+        });
+	};
+	$('#usertable tbody').on( 'click', 'tr td a[id^="notify"]', function (){
+	   url = $(this).attr("name");
+	   students = $(this).parent().siblings().get(3).innerHTML;
+	   start_date = $(this).parent().siblings().get(1).innerHTML;
+	   end_date = $(this).parent().siblings().get(2).innerHTML;
+	   // console.log(students);
+	   students = students.split(",");
+	   // console.log(students);
+       $(".modal-body table tbody").html("");
+       $.each(students, function(index, emailid){
+       		// console.log(emailid);
+		   var request = $.get( url+"/"+emailid+"/"+start_date+"/"+end_date, function( data ) {
+		   		data = JSON.parse(data);
+		   		$.each(data, function(index,jsonObject){
+		   			status_code = jsonObject['status_code'];
+		   			// console.log(jsonObject);
+		   			// console.log(jsonObject['mail']);
+		   			// console.log(status_code);
+		   			message = ""
+		   			id = ""
+		   			if (status_code == "Error"){
+		   				message = jsonObject['status_message']['message']
+		   				id = jsonObject['status_message']['id']
+		   			}
+		   			else{
+		   				message = jQuery.parseJSON(jsonObject['status_message']).message
+		   				id = jQuery.parseJSON(jsonObject['status_message']).id
+		   			}
+		   			// console.log(jQuery.parseJSON(jsonObject['status_message']));
+		   			// console.log(jQuery.parseJSON(jsonObject['status_message']));
+		   			console.log([message, id]);
+		   			tr = "<tr>";
+		   			tr += "<td>"+jsonObject['mail']+"</td>";
+		   			tr += "<td>"+message+"</td>";
+		   			tr += "<td>"+id+"</td>";
+		   			tr += "</tr>";
+		   			// console.log(tr);
+			 		$(".modal-body table tbody").prepend(tr);
+				    // console.log(jsonObject['status_message']);
+				});
+			});
+		   request.error(function(jqXHR, textStatus, errorThrown) {
+			  if (textStatus == 'timeout')
+		   		$(".modal-body table tbody").html("The server is not responding. Please check your Internet Connection.");
+			  if (textStatus == 'error')
+		   		$(".modal-body table tbody").html("Something went wrong. Please check your Internet Connection.");
+		   		console.log(errorThrown);
+			});
+		});
+	});
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+{%extends "base.html"%}
+{%block title%}Login Page{%endblock%}
+{% block styles %}
+  <style>
+  .upload-drop-zone {
+    height: 200px;
+    border-width: 2px;
+    margin-bottom: 20px;
+    }
+
+    .upload-drop-zone {
+    color: #ccc;
+    border-style: dashed;
+    border-color: #ccc;
+    line-height: 200px;
+    text-align: center
+    }
+    .upload-drop-zone.drop {
+    color: #222;
+    border-color: #222;
+    }
+  </style>
+{% endblock %}
+{%block body%}
+  <div class="container">
+    <h2>Create an Exam</h2>
+    <hr style="border-color:black">
+    <div class="panel panel-default col-md-6">
+      <div class="panel-body">
+        <h3>Enter Exam Metadata</h3>
+        <hr>
+        <form action="/createexam" method="post" id="js-upload-form" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="mode">Select Mode:</label>
+            <select class="form-control" id="mode" name="mode">
+              <option value="DEP">Daily English Practise</option>
+              <option value="TOEFL">TOEFL Exam</option>
+            </select>
+          </div>
+
+          <div id="dep">
+            <div class="form-group">
+              <label for="dep_testname">Name of the Exam:</label>
+              <input id="dep_testname" name="dep_testname" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+  			    		<label for="datepicker">Start Date</label>
+                <input type='text' id='datepicker' name='datepicker' class="form-control" />
+		        </div>
+          </div>
+
+          <div id="toefl">
+            <div class="form-group">
+              <label for="toefl_testname">Name of the Exam:</label>
+              <input id="toefl_testname" name="toefl_testname" type="text" class="form-control">
+            </div>
+            <div class="form-group">
+  			    		<label for="datetimepicker1">Start Date</label>
+                <input type='text' id='datetimepicker1' name='datetimepicker1' class="form-control" />
+		        </div>
+            <div class="form-group">
+  			    		<label for="datetimepicker2">End Date</label>
+                <input type='text' id='datetimepicker2' name='datetimepicker2' class="form-control" />
+		        </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mode">Upload Content (.zip):</label>
+            <div class="form-inline">
+              <div class="form-group">
+                <input type="file" style="btn btn-default" name="file" id="js-upload-files" accept=".zip">
+              </div>
+            </div>
+          </div>
+          <input type="submit" class="btn btn-primary" id="js-upload-submit"></input>
+        </form>
+      </div>
+    </div>
+    <div class="panel panel-default col-md-6">
+      <div class="panel-body">
+        <h3>Result</h3>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes" style="padding-left:0px">
+            {% for message in messages %}
+              {% if 'Success' in message %}
+                <li class="list-group-item list-group-item-success"><span class="badge alert-success pull-right  glyphicon glyphicon-ok"></span><b>{{ message }}</b></li>
+              {% elif 'Error' in message %}
+                <li class="list-group-item list-group-item-danger"><span class="badge alert-success pull-right"></span><b>{{ message }}</b></li>
+              {% else %}
+                <li class="list-group-item list-group-item-info"><span class="badge alert-success pull-right  glyphicon glyphicon-ok"></span><b>{{ message }}</b></li>
+              {% endif %}
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+  <script>
+$(function() {
+  /*
+   * Exam Metadata Functionality
+   */
+    $("#toefl").hide()
+
+    // onchange for mode
+    $('#mode').on('change',function(){
+      var selection = $(this).val();
+      switch(selection){
+        case "TOEFL":
+          $("#dep").hide()
+          $("#toefl").show()
+          break;
+        case "DEP":
+          $("#toefl").hide()
+          $("#dep").show()
+          break;
+        default:
+          $("#toefl").hide()
+          $("#dep").hide()
+        }
+    });
+
+    //render datepicker
+    $('#datepicker').datepicker({
+      dateFormat: 'dd-mm-yy',
+      minDate: new Date()
+    });
+
+    // render datetimepicker1 & datetimepicker2
+    $('#datetimepicker1').datetimepicker({
+      format: 'DD-MM-YYYY HH:mm',
+      // stepping: 30,
+      minDate: new Date()
+    });
+    $('#datetimepicker2').datetimepicker({
+      format: 'DD-MM-YYYY HH:mm',
+      // stepping: 30,
+        useCurrent: false
+    });
+    $("#datetimepicker1").on("dp.change", function (e) {
+        $('#datetimepicker2').data("DateTimePicker").minDate(e.date);
+    });
+    $("#datetimepicker2").on("dp.change", function (e) {
+        $('#datetimepicker1').data("DateTimePicker").maxDate(e.date);
+    });
+});
+  </script>
+{% endblock %}

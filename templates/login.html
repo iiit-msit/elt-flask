@@ -1,0 +1,46 @@
+{%extends "base.html"%}
+{%block title%}Login Page{%endblock%}
+{%block script%}
+<script type="text/javascript" src="javascripts/notify.min.js"></script>
+{%endblock%}
+{%block body%}
+<div class="container-fluid">
+	<br><div class="row">
+		<div class="col-md-4"></div>
+		<div class="col-md-4 panel panel-default">
+			<h1 class="text-center">Login</h1><hr>
+			{% if error %}
+			<div class="alert alert-warning">
+			  <strong>{{error}}</strong>
+			</div>
+			{% endif %}
+			{% if success %}
+			<div class="alert alert-success">
+			  <strong>{{success}}</strong>
+			</div>
+			{% endif %}
+			<form method="post" action="/login">
+			  <div class="form-group">
+			    <label for="email">Email address</label>
+			    <input name="email" type="email" class="validate form-control" required="" aria-required="true" id="email" placeholder="Email">
+			  </div>
+			  <div class="form-group">
+			    <label for="password">Password</label>
+			    <input name="password" type="password" class="validate form-control" required="" aria-required="true" id="password" placeholder="Password">
+			  </div>
+			  <div class="form-group">
+				  <a href="/registration">Register</a>
+			  </div>
+			  <button type="submit" class="btn btn-primary text-center">Submit</button>
+
+			</form><br>
+			<!-- <form method="post">
+				<label>Username: </label><input id="email" name="email" type="email" class="validate" required="" aria-required="true"><br><br>
+				<label>Password: </label><input id="password" name="password" type="password" class="validate" required="" aria-required="true"><br><br>
+				<input type="submit">
+			</form> -->	
+		</div>
+		<div class="col-md-4"></div>
+	</div>
+</div>
+{%endblock%}

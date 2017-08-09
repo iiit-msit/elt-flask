@@ -1,0 +1,39 @@
+{%extends "base.html"%}
+{%block title%}Student Dashboard Page{%endblock%}
+{%block script%}
+<script type="text/javascript" src="javascripts/notify.min.js"></script>
+{%endblock%}
+
+{%block body%}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-12" style="background: white">
+				<br><h2 class="text-center">Tests Dashboard</h2>
+				<hr>
+				<div id="container" style="padding-left: 5% ; padding-right: 5%">
+					<div class="row">
+						<table id="usertable" class="table display text-left" >
+							  <thead>
+							  	<tr>
+							    	<th>Name of Test</th>
+							    	<th>Opening Date</th>
+							    	<th>Closing Date</th>
+							    	<th>Test Status</th>
+							  	</tr>
+							  </thead>
+						</table>
+					</div>
+				</div><br>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	   	$(document).ready(function() {
+		    $.fn.dataTable.ext.errMode = 'throw';
+		    $('#usertable').DataTable( {
+		        "ajax": "{{ url_for('studenttests') }}",
+		        "errMode": 'throw'
+		    });
+		});
+	</script>
+{%endblock%}

@@ -1,0 +1,25 @@
+{%extends "base.html"%}
+{%block title%}Reading Task{%endblock%}
+{%block body%}
+  <div class="container">
+  {% if task %}
+    <div class="row">
+      <h2 class="col-md-6">Reading Comprehension Task</h2>
+      <span class="col-md-6 text-right">
+        <br>
+        <a class="btn btn-primary" href="/startquiz/{{test_name}}">Back to Home Screen</a>
+      </span>
+    </div>
+    <hr>
+    {% if task.filepath %}
+      <div style="text-align:center; border:1px solid black;">
+        <iframe allowfullscreen="" height="500" width="100%" src="{{task.filepath}}" frameborder="0"></iframe>
+      </div>
+    {% else %}
+      <h4>Reading Comprehension Task for today was not found on Server.</h4>
+    {% endif %}
+  {% else %}
+    <h2>You are not allowed to see this page at this moment. Please check back.</h2>
+  {% endif %}
+  </div>
+{%endblock%}
