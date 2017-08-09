@@ -1201,6 +1201,12 @@ def getstudentscore(test_name, email):
 def testresult(test_name):
     return render_template("testresult.html", test_name=test_name)
 
+@app.route('/releaseResults/<test_name>', methods=["GET"])
+@admin_login_required
+def releaseResults(test_name):
+    app.logger.info("IN IM")
+    return ""
+    
 @app.route('/viewresults', methods=["GET"])
 @admin_login_required
 def viewresults():
@@ -1383,7 +1389,7 @@ def makestatusbutton(email,hosted, testid):
         td = TestDetails.query.filter(TestDetails.email==email, TestDetails.test_name==testid).first()
         if td:
             if td.testend:
-                button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-default'>View Result (score: "+str(td.score)+")</a>"
+                button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-default'>View Result</a>"
             else:
                 button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-warning'>Resume Test</a>"
         else:
