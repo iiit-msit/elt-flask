@@ -455,6 +455,29 @@ class EssayTypeResponse(db.Model):
         self.qattemptedtime = qattemptedtime
         self.test_name = test_name
 
+class Content(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(180))
+    test_name = db.Column(db.String(180))
+    section = db.Column(db.String(180))
+    liked = db.Column(db.Boolean())
+    ip = db.Column(db.String(20), default="127.0.0.1")
+
+    def __init__(self, **kwargs):
+        super(ContentActivity, self).__init__(**kwargs)
+        
+class ContentActivity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(180))
+    test_name = db.Column(db.String(180))
+    section = db.Column(db.String(180))
+    starttime = db.Column(db.String(180))
+    endtime = db.Column(db.String(180))
+    ip = db.Column(db.String(20), default="127.0.0.1")
+
+    def __init__(self, **kwargs):
+        super(ContentActivity, self).__init__(**kwargs)
+        
 def getQuestionPaper(qid_list,path):
     json_temp=json.loads(open(os.path.join(path,'QP_template.json')).read())
     #app.logger.info("E2-template.json %s %s"%(json_temp, path))
@@ -1846,6 +1869,7 @@ def listeningtask(test_name):
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error="LTExec: Exception while presenting Listening Task")
+
 
 #==================================================== ADMIN PAGE =====================================================
 # def valid_admin_login(email, password):
