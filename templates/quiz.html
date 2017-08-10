@@ -91,7 +91,12 @@
 
 		});
 		$(document).ready(function() {
-				octopus.init("{{test_name}}","{{mode}}");
+
+			 /*
+				*  Initialize Octopus to start rendering quiz page.
+				*/
+
+				octopus.init("{{test_name}}","{{mode}}","{{show_result}}");
 		    function createAudioElement(blobURL) {
 		        const audioEl = document.createElement("audio");
 		        audioEl.controls = true;
