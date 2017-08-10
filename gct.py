@@ -1751,21 +1751,6 @@ def send_content(test_mode, datetoday,filename):
         return send_from_directory(root+'/content/%s/%s/'%(test_mode, datetoday), filename)
     else:
         return "<h3>Error 404 in displaying the content you requested. Please contact Exam Admin.</h3>"
-#
-# Reading Task Handlers
-#
-
-def build_reading_task():
-    task = {}
-    today = today_ddmmyy()
-    filepath = "/content/"+today+"/reading.pdf"
-    task["filepath"] = filepath
-    return task
-
-def str_date_filepath(date):
-    if date:
-        date = date.split()[0]
-    return date
 
 @app.route("/addviewrecord", methods=["POST"])
 @login_required
@@ -1783,17 +1768,32 @@ def addviewrecord():
             test_name=params['test_name'],
             section=params['section'],
             starttime=params['starttime'],
-            endtime=params['endtime'],
+            endtime=datetime.now(IST),
             ip=request.headers.get('X-Forwarded-For', request.remote_addr)
         )
         db.session.add(ca)
         db.session.commit()
         # app.logger.info(ca)
         # app.logger.info(ContentActivity)
-        return "Storage Success"
+        return "Storage Success. starttime: "+str(params['starttime'])+", endtime: "+str(datetime.now(IST))
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error=e)
+
+#
+# Reading Task Handlers
+#
+def build_reading_task():
+    task = {}
+    today = today_ddmmyy()
+    filepath = "/content/"+today+"/reading.pdf"
+    task["filepath"] = filepath
+    return task
+
+def str_date_filepath(date):
+    if date:
+        date = date.split()[0]
+    return date
 
 @app.route("/readingtask/<test_name>", methods=["GET"])
 @login_required
@@ -1921,10 +1921,10 @@ def like(test_name,section):
             row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
             db.session.add(row)
         db.session.commit()
-        return redirect(request.referrer)
+        return "Liked "+section+" Content."
     except Exception as e:
         app.logger.info(e)
-        return render_template('error.html', error=str(e))
+        return "Error in liking the "+section+" Content."
 
 @app.route("/dislike/<test_name>/<section>", methods=["GET"])
 @login_required
@@ -1939,10 +1939,10 @@ def dislike(test_name,section):
             row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
             db.session.add(row)
         db.session.commit()
-        return redirect(request.referrer)
+        return "Disliked "+section+" Content."
     except Exception as e:
         app.logger.info(e)
-        return render_template('error.html', error="DislikeExec: Exception while disliking the content resource.")
+        return "Error in disliking the "+section+" Content."
 
 #==================================================== ADMIN PAGE =====================================================
 # def valid_admin_login(email, password):

@@ -11,7 +11,8 @@ $(function(){
     //   addviewrecord();
     //   return "leaving the page";
     // });
-    window.onbeforeunload = function(){
+    window.onbeforeunload = function(e){
+      e.preventDefault();
       addviewrecord(view);
       return 'Are you sure you want to leave?';
     };
@@ -47,8 +48,8 @@ $(function(){
       <div style="text-align:center; border:1px solid black;">
         <iframe allowfullscreen="" height="500" width="100%" src="{{task.filepath}}" frameborder="0"></iframe>
       	<div class="text-center">
-      	<a href="/like/{{test_name}}/reading" class="btn btn-default"><span style="font-size:22px; color:#337ab7" class="glyphicon glyphicon-thumbs-up text-center"></span></a>
-      	<a href="/dislike/{{test_name}}/reading" class="btn btn-default"><span style="font-size:22px; color:#a94442" class="glyphicon glyphicon-thumbs-down text-center"></span></a>
+      	<button id="like" class="btn btn-default"><span style="font-size:22px; color:#337ab7" class="glyphicon glyphicon-thumbs-up text-center"></span></button>
+      	<button id="dislike" class="btn btn-default"><span style="font-size:22px; color:#a94442" class="glyphicon glyphicon-thumbs-down text-center"></span></button>
       </div>
       </div>
     {% else %}
@@ -58,5 +59,32 @@ $(function(){
     <h2>You are not allowed to see this page at this moment. Please check back.</h2>
   {% endif %}
   </div>
+  <script>
+    $("#like").click(function(){
+      console.log("clicked")
+      $.ajax({
+        type: "GET",
+        url: "/like/{{test_name}}/reading",
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+      });
+    });
 
+    $("#dislike").click(function(){
+      $.ajax({
+        type: "GET",
+        url: "/dislike/{{test_name}}/reading",
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+            console.log(error);
+        }
+      });
+    });
+  </script>
 {%endblock%}
