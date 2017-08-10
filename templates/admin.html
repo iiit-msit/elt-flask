@@ -34,6 +34,7 @@
 		        { width : '50px' },
 		        { width : '50px' },
 		        { width : '50px' },
+						{ width : '50px' },
 		        { width : '50px' }
 		    ]
 	    });
@@ -94,6 +95,7 @@
 							    	<th>Edit</th>
 							    	<th>Preview</th>
 							    	<th>Notify</th>
+										<th>Release</th>
 							  	</tr>
 							  </thead>
 						</table>
@@ -137,12 +139,21 @@ $(document).ready(function() {
             return args[+(a.substr(1,a.length-2))||0];
         });
 	};
-	$('#usertable tbody').on( 'click', 'tr td a[id^="notify"]', function (){
+	$('#usertable tbody').on( 'click', 'tr td a[id^="notify"], a[id^="release"]', function (){
 	   url = $(this).attr("name");
+		 id = $(this).attr("id");
+		//  if (id.match("^notify")) {
+		// 	 console.log("Notify");
+		// 	 url = "/notify";
+		// 	}
+		// 	else if (id.match("^release")) {
+		// 		console.log("Release");
+		// 		url = "/release";
+		// 	}
 	   students = $(this).parent().siblings().get(3).innerHTML;
 	   start_date = $(this).parent().siblings().get(1).innerHTML;
 	   end_date = $(this).parent().siblings().get(2).innerHTML;
-	   // console.log(students);
+	  //  console.log(students);
 	   students = students.split(",");
 	   // console.log(students);
        $(".modal-body table tbody").html("");
@@ -152,7 +163,7 @@ $(document).ready(function() {
 		   		data = JSON.parse(data);
 		   		$.each(data, function(index,jsonObject){
 		   			status_code = jsonObject['status_code'];
-		   			// console.log(jsonObject);
+						// 		console.log(jsonObject);
 		   			// console.log(jsonObject['mail']);
 		   			// console.log(status_code);
 		   			message = ""
@@ -180,9 +191,9 @@ $(document).ready(function() {
 			});
 		   request.error(function(jqXHR, textStatus, errorThrown) {
 			  if (textStatus == 'timeout')
-		   		$(".modal-body table tbody").html("The server is not responding. Please check your Internet Connection.");
+		   		$(".modal-body table tbody").html(textStatus + " " +errorThrown);
 			  if (textStatus == 'error')
-		   		$(".modal-body table tbody").html("Something went wrong. Please check your Internet Connection.");
+		   		$(".modal-body table tbody").html(textStatus + " " +errorThrown);
 		   		console.log(errorThrown);
 			});
 		});

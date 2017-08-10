@@ -336,6 +336,7 @@ class StudentTests(db.Model):
     emailid = db.Column(db.String(180))
     test_name = db.Column(db.String(180))
     invitation_email_sent = db.Column(db.Boolean(), default=False)
+    result_email_sent = db.Column(db.Boolean(), default=False)
 
     def __init__(self, emailid, test_name):
         self.emailid = emailid
@@ -465,7 +466,7 @@ class Content(db.Model):
 
     def __init__(self, **kwargs):
         super(Content, self).__init__(**kwargs)
-        
+
 class ContentActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(180))
@@ -477,7 +478,7 @@ class ContentActivity(db.Model):
 
     def __init__(self, **kwargs):
         super(ContentActivity, self).__init__(**kwargs)
-        
+
 def getQuestionPaper(qid_list,path):
     json_temp=json.loads(open(os.path.join(path,'QP_template.json')).read())
     #app.logger.info("E2-template.json %s %s"%(json_temp, path))
@@ -497,7 +498,7 @@ def getQuestionPaper(qid_list,path):
                                 m +=1
         if qid in list(range(e2_start,e2_end)):
               e2_lsnjson=json.loads(open(os.path.join(path,'E2-Listening.json'), encoding='utf-8').read())
-              app.logger.info("E2-listening.json %s"%e2_lsnjson)
+            #   app.logger.info("E2-listening.json %s"%e2_lsnjson)
               for key in e2_lsnjson["videoArray"]:
                     for qn in key["questions"]:
                           pid=qn["id"]
@@ -520,7 +521,7 @@ def getQuestionPaper(qid_list,path):
                           json_temp["section"][3]["subsection"][0]["questions"].append(key)
                           json_temp["section"][3]["subsection"][0]["questions"][q]["serialno"] = qid_list[qid]
                           q += 1
-    app.logger.info("json template %s %s"%(json_temp, path))
+    # app.logger.info("json template %s %s"%(json_temp, path))
     return json_temp
 
 def generateQuestionPaper(path):
@@ -671,8 +672,8 @@ def error(error):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    email="vy@fju.us"
-    password="veda1997"
+    email="ss@fju.us"
+    password="ss"
     password = hashlib.md5(password.encode('utf-8')).hexdigest()
     verified=True
     user_type="student"
@@ -820,7 +821,7 @@ def quiz(test_name, email=None):
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
 @app.route('/javascripts/<path:path>')
-@cache.cached(timeout=50)
+# @cache.cached(timeout=50)
 def send_javascripts(path):
     app.logger.info("seeking for %s from %s at %s"%(path, request.headers.get('X-Forwarded-For', request.remote_addr), datetime.now()))
     return send_from_directory(root+"/javascripts", path)
@@ -1227,9 +1228,10 @@ def testresult(test_name):
 @app.route('/releaseResults/<test_name>', methods=["GET"])
 @admin_login_required
 def releaseResults(test_name):
-    app.logger.info("IN IM")
+    app.logger.info("In releaseResults for test %s"%test_name)
+
     return ""
-    
+
 @app.route('/viewresults', methods=["GET"])
 @admin_login_required
 def viewresults():
@@ -1321,9 +1323,10 @@ def getendtestdata(request_data):
     try:
         val = request_data['jsonData']
         testend = val['testend']
-        score = val['finalScore']
-        spklink = val['spklink']
+        score = val['finalScore'] if 'finalScore' in val else None
+        spklink = val['spklink'] if 'spklink' in val else None
         test_name = val['test_name']
+        app.logger.info([val, testend, score, spklink, test_name])
     except Exception as e:
         app.logger.info(e)
         return False
@@ -1361,6 +1364,7 @@ def endtest(email=None):
     email = email if email else get_email_from_session()
 
     data = json.loads(cgi.escape(str(request.get_data(), 'utf-8')))
+    app.logger.info(data)
     end_test_data, testend, score, spkling, test_name = getendtestdata(data)
 
     data1 = TestDetails.query.filter_by(email = email, test_name=test_name).first()
@@ -1386,8 +1390,12 @@ def startquiz(test_name):
         rollno = email if not rollno else rollno
         test = Tests.query.filter_by(name=test_name).first()
         mode = test.test_mode
-        app.logger.info("startquiz for %s with mode %s"%(test_name, mode))
-        return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode)
+        show_result = False
+        studentTest = StudentTests.query.filter(StudentTests.emailid==email and StudentTests.test_name==testid and StudentTests.result_email_sent.is_(True)).first()
+        if studentTest:
+            show_result = studentTest.result_email_sent
+        app.logger.info("startquiz for %s with mode %s and show result %s"%(test_name, mode, show_result))
+        return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode, show_result=show_result)
     return redirect("/")
 
 def generate_unique_code():
@@ -1759,6 +1767,34 @@ def str_date_filepath(date):
         date = date.split()[0]
     return date
 
+@app.route("/addviewrecord", methods=["POST"])
+@login_required
+def addviewrecord():
+    try:
+        app.logger.info("Im in addviewrecord method")
+        params =  eval(request.get_data())
+        email = get_email_from_session()
+        endtime = datetime.now(IST)
+        params['endtime'] = endtime
+        app.logger.info("params %s"%params)
+
+        # ca = ContentActivity(params)
+        ca = ContentActivity(email=email,
+            test_name=params['test_name'],
+            section=params['section'],
+            starttime=params['starttime'],
+            endtime=params['endtime'],
+            ip=request.headers.get('X-Forwarded-For', request.remote_addr)
+        )
+        db.session.add(ca)
+        db.session.commit()
+        # app.logger.info(ca)
+        # app.logger.info(ContentActivity)
+        return "Storage Success"
+    except Exception as e:
+        app.logger.info(e)
+        return render_template('error.html', error=e)
+
 @app.route("/readingtask/<test_name>", methods=["GET"])
 @login_required
 def readingtask(test_name):
@@ -1775,7 +1811,8 @@ def readingtask(test_name):
             reading_task = build_reading_task()
             if path != "":
                 reading_task = {"filepath":path}
-            return render_template('readingtask.html', task=reading_task, test_name=test_name)
+            time = datetime.now(IST)
+            return render_template('readingtask.html', task=reading_task, test_name=test_name, starttime=time)
         else:
             return redirect("/")
     except Exception as e:
@@ -1863,7 +1900,8 @@ def listeningtask(test_name):
             listening_task = build_listening_task()
             if path != "":
                 listening_task = {"filepath":path}
-            return render_template('listeningtask.html', task=listening_task, test_name=test_name)
+            time = datetime.now(IST)
+            return render_template('listeningtask.html', task=listening_task, test_name=test_name, starttime=time)
         else:
             return redirect("/")
     except Exception as e:
@@ -1905,7 +1943,7 @@ def dislike(test_name,section):
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error="DislikeExec: Exception while disliking the content resource.")
-        
+
 #==================================================== ADMIN PAGE =====================================================
 # def valid_admin_login(email, password):
 #     result = AdminDetails.query.filter_by(email=email).first()
@@ -2047,7 +2085,7 @@ def uninvite(email, testid):
             app.logger.info(students_list)
             # students = updateStudents(testid, students_list)
             for email in students_list:
-                result = StudentTests.query.filter_by(emailid=email).delete()
+                result = StudentTests.query.filter_by(emailid=email, test_name=testid).delete()
             db.session.commit()
 
         except Exception as e:
@@ -2329,29 +2367,30 @@ def prefiledit(name):
         return json.dumps({"start_date":start_date, "end_date":end_date, "students":students})
     return False
 
-def sendNotifyMail(email='rguktemailtest@gmail.com', testid=None, start_date=None, end_date=None):
+def sendNotifyMail(body="None", email='rguktemailtest@gmail.com', test_name=None, column=None):
     try:
         #app.logger.debug("send notify mail function")
-        body = """Dear Student,<br> This email message is sent by the online quiz portal.
-        The test starts at %s and ends by %s
-        Click on the link below and follow the instructions to take the test.
-        <a href=%s/quiz/%s>Test Link</a> """ % (start_date, end_date, request.host, testid)
-        # app.logger.info(body)
+        if not column:
+            app.logger.info("To send mail and mark column as mail sent a column name must be provided.")
+            return False
+        if not test_name:
+            app.logger.info("To send mail and mark column as mail sent a test_name must be provided.")
+            return False
         response = requests.post(
             "https://api.mailgun.net/v3/"+app.config['NUZVID_MAIL_GUN_DOMAIN']+"/messages",
             auth=("api", app.config['NUZVID_MAIL_GUN_KEY']),
             data={"from": "RGUKT QUIZ <news@"+app.config['NUZVID_MAIL_GUN_DOMAIN']+">",
                   "to": [email],
-                  "subject": 'RGUKT QUIZ LINK',
+                  "subject": 'RGUKT QUIZ LINK' if column == "invitation_email_sent" else "RGUKT QUIZ RESULT LINK",
                   "text": '',
                   "html": body})
         #app.logger.info([email, response.status_code, response.text])
-        student = StudentTests.query.filter_by(emailid=email).first()
+        student = StudentTests.query.filter_by(emailid=email, test_name=test_name).first()
         if student:
-            student.invitation_email_sent = True
+            setattr(student, column, True)
             db.session.commit()
         else:
-            app.logger.info(["Unknow email received quiz link", email])
+            app.logger.info(["Unknown email address received quiz link", email])
         return response
     except Exception as e:
         app.logger.info(["Error in sendnotifymail module ", e])
@@ -2386,6 +2425,15 @@ def sendNotifyMail(email='rguktemailtest@gmail.com', testid=None, start_date=Non
 #     #app.logger.info(mail_responses)
 #     return json.dumps(mail_responses)
 
+# @app.route('/notify/<testid>/<emailid>/<start_date>/<end_date>')
+# @app.route('/relase/<testid>/<emailid>/<start_date>/<end_date>')
+# @admin_login_required
+# def helotest(testid, emailid, start_date, end_date):
+#     return json.dumps([{
+#             "testid":testid, "emailid":emailid, "start_date":start_date, "end_date":end_date
+#         }])
+
+@app.route('/release/<testid>/<emailid>/<start_date>/<end_date>', methods=["GET", "POST"])
 @app.route('/notify/<testid>/<emailid>/<start_date>/<end_date>', methods=["GET", "POST"])
 @admin_login_required
 def notify(testid, emailid, start_date, end_date):
@@ -2396,11 +2444,30 @@ def notify(testid, emailid, start_date, end_date):
                 "status_message":"TestID not received"
             }])
 
-    app.logger.info(testid)
-    invitation_email_sent = StudentTests.query.filter(StudentTests.emailid==emailid and StudentTests.invitation_email_sent.is_(True)).first()
-    app.logger.info(invitation_email_sent.invitation_email_sent)
-    if not invitation_email_sent.invitation_email_sent:
-        response = sendNotifyMail(testid=testid, email=emailid, start_date=start_date, end_date=end_date)
+    app.logger.info("In notify/release method for test %s"%testid)
+    rule = request.url_rule
+    if 'notify' in rule.rule:
+        email_sent = StudentTests.query.filter(StudentTests.emailid==emailid and StudentTests.test_name==testid and StudentTests.invitation_email_sent.is_(True)).first()
+        email_sent = email_sent.invitation_email_sent
+        body = """Dear Student,<br> This email message is sent by the online quiz portal.
+        The test starts at %s and ends by %s
+        Click on the link below and follow the instructions to take the test.
+        <a href=%s/quiz/%s>Test Link</a> """ % (start_date, end_date, request.host, testid)
+        column = "invitation_email_sent"
+        # app.logger.info(body)
+    elif 'release' in rule.rule:
+        email_sent = StudentTests.query.filter(StudentTests.emailid==emailid and StudentTests.test_name==testid and StudentTests.result_email_sent.is_(True)).first()
+        email_sent = email_sent.result_email_sent
+        body = """Dear Student,<br> This email message is sent by the online quiz portal.
+        The results for test held in between %s and %s
+        Click on the link below to check your results.
+        <a href=%s/quiz/%s>Result Link</a> """ % (start_date, end_date, request.host, testid)
+        column = "result_email_sent"
+        # app.logger.info(body)
+
+    app.logger.info(email_sent)
+    if not email_sent:
+        response = sendNotifyMail(email=emailid, test_name=testid, column=column, body=body)
         if response:
             return json.dumps([{
                 "mail":emailid,
@@ -2419,7 +2486,7 @@ def notify(testid, emailid, start_date, end_date):
                 "status_code":"Error",
                 "status_message":{"id":"Error","message":"Mail already sent"}
             }])
-    #app.logger.info(mail_responses)
+    # app.logger.info(mail_responses)
 
 
 def get_all_test_created_by(creator=None):
@@ -2441,6 +2508,8 @@ def get_all_test_created_by(creator=None):
         test.append(button)
         button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='notify"+str(count)+"' name='/notify/"+test[0]+"' class='btn btn-sm btn-warning'>Notify</a>"
         test.append(button)
+        button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='release"+str(count)+"' name='/release/"+test[0]+"' class='btn btn-sm btn-warning'>Release Result</a>"
+        test.append(button)
         final["data"].append(test)
 
     return final
@@ -2452,7 +2521,7 @@ def loadtests(creator=None):
         creator = get_email_from_session()
     #app.logger.info("Getting all tests created by " + creator)
     final = get_all_test_created_by(creator)
-    #app.logger.info(str(json.dumps(final)))
+    # app.logger.info(str(json.dumps(final)))
     return json.dumps(final)
 
 

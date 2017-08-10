@@ -4,7 +4,7 @@ var quizModel = {
 		init : function(data) {
 			// create questions array from the JSON data
 			this.createQuizModel(data);
-			// console.log(data)
+			console.log(data)
 		},
 
 		// parse JSON data and create an array of questions
@@ -70,7 +70,7 @@ var quizModel = {
 				q = index-1;
 			});
 			this.questionIndex = q;
-			console.log("question index is:" + this.questionIndex)
+			// console.log("question index is:" + this.questionIndex)
 		},
 		getQuizStatus : function() {
 			// get the status of the quiz by looking into the questions array
@@ -110,9 +110,10 @@ var quizModel = {
 };
 
 var octopus = {
-		init : function(test_name, mode) {
-			this.mode = mode
-			this.test_name = test_name
+		init : function(test_name, mode, show_result) {
+			this.mode = mode;
+			this.test_name = test_name;
+			this.show_result = show_result;
 			$.ajax({
 					type: "post",
 					url:"/getquizstatus",
@@ -123,6 +124,7 @@ var octopus = {
 					quizModel.init(data)
 					startView.init();
 					var status = quizModel.getQuizStatus();
+					// console.log("quiz result" + data);
 					console.log("quiz status" + status);
 					if (status == "END")
 						resultView.init();
@@ -686,8 +688,8 @@ var resultView = {
 			/*
 			 *  Toggle this variable to switch between showing/hiding results page
 			 */
-			show_result = false;
-
+			show_result = octopus.show_result;
+			console.log("show_result "+show_result);
 			this.render(show_result);
 
 		},
