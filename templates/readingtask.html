@@ -12,9 +12,7 @@ $(function(){
     //   return "leaving the page";
     // });
     window.onbeforeunload = function(e){
-      e.preventDefault();
       addviewrecord(view);
-      return 'Are you sure you want to leave?';
     };
     function addviewrecord(view){
       // view.endtime = datetime.now(IST);

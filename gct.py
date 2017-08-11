@@ -672,6 +672,9 @@ def error(error):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
+    app.logger.info(root+"/content/DEP/08-08-2017/")
+    # return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
+    return get_view_details("Daily English Practise 1")
     email="ss@fju.us"
     password="ss"
     password = hashlib.md5(password.encode('utf-8')).hexdigest()
@@ -1759,7 +1762,7 @@ def addviewrecord():
         app.logger.info("Im in addviewrecord method")
         params =  eval(request.get_data())
         email = get_email_from_session()
-        endtime = datetime.now(IST)
+        endtime = str(datetime.now(IST))
         params['endtime'] = endtime
         app.logger.info("params %s"%params)
 
@@ -1768,14 +1771,14 @@ def addviewrecord():
             test_name=params['test_name'],
             section=params['section'],
             starttime=params['starttime'],
-            endtime=datetime.now(IST),
+            endtime=endtime,
             ip=request.headers.get('X-Forwarded-For', request.remote_addr)
         )
         db.session.add(ca)
         db.session.commit()
         # app.logger.info(ca)
         # app.logger.info(ContentActivity)
-        return "Storage Success. starttime: "+str(params['starttime'])+", endtime: "+str(datetime.now(IST))
+        return "Storage Success. starttime: "+str(params['starttime'])+", endtime: "+endtime
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error=e)
@@ -2551,6 +2554,44 @@ def get_all_student_details(test_name):
             student_table[student.email] = {"name": student.name, "rollno":student.rollno}
     # app.logger.info(json.dumps(student_table))
     return json.dumps(student_table)
+
+def format_seconds_mmss(seconds):
+    minutes, secs = divmod(seconds, 60)
+    view_time='%02d:%02d' %(minutes,secs)
+    return view_time
+
+def get_view_details_of_task(email,test_name,section):
+    content_activity = ContentActivity.query.filter_by(email=email, test_name=test_name, section=section).all()
+    view_count = len(content_activity)
+    view_time = 0
+    views = []
+    for row in content_activity:
+        view = {}
+        starttime = datetime.strptime(row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
+        endtime = datetime.strptime(row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
+        responsetime=endtime-starttime
+        view["starttime"] = str(starttime)
+        view["endtime"] = str(endtime)
+        view["responsetime"] = str(format_seconds_mmss(responsetime.seconds))
+        view["ip"] = row.ip
+        views.append(view)
+        view_time+=(responsetime.seconds)
+    view_time = format_seconds_mmss(view_time)
+    return {"Total View Time": str(view_time)+" seconds","No. of times viewed": view_count, "Views": views}
+
+def get_view_details_of_user(email,test_name):
+    view_details = {}
+    view_details["reading_task_responses"] = get_view_details_of_task(email,test_name,"reading")
+    view_details["listening_task_responses"] = get_view_details_of_task(email,test_name,"listening")
+    return view_details
+
+def get_view_details(test_name):
+    content_activity = ContentActivity.query.filter_by(test_name=test_name).all()
+    view_details = {}
+    for row in content_activity:
+        if row.email not in list(view_details):
+            view_details[row.email] = get_view_details_of_user(row.email,test_name)
+    return json.dumps(view_details)
 
 def get_student_details(student):
     return userDetails.query.filter(userDetails.email == student).first()
