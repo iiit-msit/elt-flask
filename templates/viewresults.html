@@ -2,7 +2,7 @@
 {%block title%}View Results{%endblock%}
 {%block script%}
 <script type="text/javascript">
-	
+
 </script>
 {%endblock%}
 {%block body%}
@@ -30,12 +30,14 @@
 						<td>{{test.end_date}}</td>
 						<td><a href="/downloadTestResults/{{test.name}}" class="btn btn-sm btn-primary">Download as CSV</a></td>
 						<td><a href="/downloadTestResultsSummary/{{test.name}}" class="btn btn-sm btn-primary">Download Summary as CSV</a></td>
+						<td><a href="/contentAnalytics/{{test.name}}" class="btn btn-sm btn-primary">Content Analytics</a></td>
+						<td><a href="/contentAnalyticsSummary/{{test.name}}" class="btn btn-sm btn-primary">Content Analytics Summary</a></td>
 						<td><a href="/releaseResults/{{test.name}}" class="btn btn-sm btn-primary">Publish Results</a></td>
 					</tr>
 				{%endfor%}
 			</tbody>
 			</table>
 		</div>
-		
+
 	</div>
 {%endblock%}

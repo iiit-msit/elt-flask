@@ -674,7 +674,7 @@ def error(error):
 def test():
     app.logger.info(root+"/content/DEP/08-08-2017/")
     # return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
-    return get_view_details("Daily English Practise 1")
+    # return get_view_details_complete("Daily English Practise 1")
     email="ss@fju.us"
     password="ss"
     password = hashlib.md5(password.encode('utf-8')).hexdigest()
@@ -2577,6 +2577,8 @@ def get_view_details_of_task(email,test_name,section):
         views.append(view)
         view_time+=(responsetime.seconds)
     view_time = format_seconds_mmss(view_time)
+    view_count = str(view_count)
+    view_count += " time" if view_count=="1" else " times"
     return {"Total View Time": str(view_time)+" seconds","No. of times viewed": view_count, "Views": views}
 
 def get_view_details_of_user(email,test_name):
@@ -2585,13 +2587,98 @@ def get_view_details_of_user(email,test_name):
     view_details["listening_task_responses"] = get_view_details_of_task(email,test_name,"listening")
     return view_details
 
-def get_view_details(test_name):
+def get_view_details_summary(test_name):
     content_activity = ContentActivity.query.filter_by(test_name=test_name).all()
     view_details = {}
     for row in content_activity:
         if row.email not in list(view_details):
             view_details[row.email] = get_view_details_of_user(row.email,test_name)
     return json.dumps(view_details)
+    return render_summary_csv_from_content_views(view_details)
+
+def get_view_details_complete(test_name):
+    content_activity = ContentActivity.query.filter_by(test_name=test_name).all()
+    view_details = []
+    for row in content_activity:
+        view = {}
+        view["email"] = row.email
+        view["section"] = row.section
+        starttime = datetime.strptime(row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
+        endtime = datetime.strptime(row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
+        responsetime=endtime-starttime
+        view["starttime"] = starttime
+        view["endtime"] = endtime
+        view["responsetime"] = str(format_seconds_mmss(responsetime.seconds))
+        view["ip"] = row.ip
+        view_details.append(view)
+    return render_complete_csv_from_content_views(view_details)
+
+def render_summary_csv_from_content_views(data):
+    csvList = []
+    header = [
+                "Email",
+                "Reading Task View Count",
+                "Reading Task View Time",
+                "Listening Task View Count",
+                "Listening Task View Time",
+            ]
+
+    csvList.append(header)
+    for csv_line in data:
+        csv_line_value = data[csv_line]
+        row = [csv_line,
+        csv_line_value["reading_task_responses"]["No. of times viewed"],
+                csv_line_value["reading_task_responses"]["Total View Time"],
+                csv_line_value["listening_task_responses"]["No. of times viewed"],
+                csv_line_value["listening_task_responses"]["Total View Time"],
+            ]
+        csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Content_Views_Summary.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+def render_complete_csv_from_content_views(data):
+    csvList = []
+    header = [
+                "Email",
+                "Section",
+                "Start Time",
+                "End Time",
+                "Viewed Time",
+                "IP Address"
+            ]
+
+    csvList.append(header)
+    for view in data:
+        row = [view["email"],
+                view["section"],
+                view["starttime"],
+                view["endtime"],
+                view["responsetime"],
+                view["ip"]
+            ]
+        csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Content_Views_Complete.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+@app.route('/contentAnalyticsSummary/<test_name>', methods=['GET'])
+@admin_login_required
+def contentAnalytics(test_name):
+    return render_summary_csv_from_content_views(test_name)
+
+@app.route('/contentAnalytics/<test_name>', methods=['GET'])
+@admin_login_required
+def contentAnalytics(test_name):
+    return render_complete_csv_from_content_views(test_name)
 
 def get_student_details(student):
     return userDetails.query.filter(userDetails.email == student).first()

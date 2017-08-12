@@ -338,20 +338,8 @@ var startView = {
 	 				 this.startButton.removeClass("btn-lg");
 	 				 this.startButton.removeClass("btn-sm");
 				}
-
-				/*
-				 * Get Listening and Reading Content.
-				 */
-
-				/*
-				 *listening_content = get_listening_section_data()
-				 *reading_content = get_reading_section_data()
-				 *
-				 *console.log(listening_content)
-				 *console.log(reading_content)
-				 */
-
-			} else if (quizStatus == "INPROGRESS") {
+			}
+			else if (quizStatus == "INPROGRESS") {
 				this.questionPane.html(this.resumeMessage);
 				this.startButton.html("Resume Test");
 				this.startButton.addClass("btn btn-info");
