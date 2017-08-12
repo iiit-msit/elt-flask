@@ -311,14 +311,16 @@ class Tests(db.Model):
     test_mode = db.Column(db.String(80), default="TOEFL")
     # json = db.Column(db.String(1000))
     creator = db.Column(db.String(180))
+    contentinside = db.Column(db.Boolean, default=False)
     time = db.Column(db.DateTime(), default=pytz.utc.localize(datetime.utcnow()), onupdate=pytz.utc.localize(datetime.utcnow()))
 
-    def __init__(self, name, creator, start_date, end_date, test_mode):
+    def __init__(self, name, creator, start_date, end_date, test_mode, contentinside):
         self.name = name
         self.creator = creator
         self.start_date = start_date
         self.end_date = end_date
         self.test_mode = test_mode
+        self.contentinside = contentinside
         self.time = pytz.utc.localize(datetime.utcnow())
         # self.json = json
     def isHosted(self):
@@ -1994,9 +1996,9 @@ def dislike(test_name,section):
 #     session.pop('adminemail', None)
 #     return redirect(url_for('adminlogin'))
 
-def createDefaultTest(TestID, author, start_date,end_date, test_mode):
+def createDefaultTest(TestID, author, start_date,end_date, test_mode,contentinside):
     try:
-        test = Tests(TestID,author, start_date, end_date, test_mode)
+        test = Tests(TestID,author, start_date, end_date, test_mode,contentinside)
         db.session.add(test)
         db.session.commit()
         return True
@@ -2119,7 +2121,7 @@ def updatetests(test_name=None,email=None,start_date=None,end_date=None):
         app.logger.info(e)
     return False
 
-def create_test(test_name, test_mode, start_date, end_date):
+def create_test(test_name, test_mode, start_date, end_date, contentinside):
 
     if test_name and test_mode and start_date and end_date:
         # if not test_name:
@@ -2137,7 +2139,7 @@ def create_test(test_name, test_mode, start_date, end_date):
 
         if nameValid and startdateValid and enddateValid:
             #app.logger.info('%s created a Test - %s' %(admin,test_name))
-            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode)
+            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode, contentinside)
             if is_created:
                 return True
             # settestsession(test_name,start_date,end_date)
@@ -2265,6 +2267,11 @@ def invitation_mail_sent():
         return False
     return dict(invitation_mail_sent=_invitation_mail_sent)
 
+def updateContentInside(test_name,boolean):
+    test = Tests.query.filter_by(name=test_name).first()
+    test.contentinside = boolean
+    db.session.commit()
+
 @app.route("/edit/<testid>/", defaults={'option': None})
 @app.route("/edit/<testid>/<option>", methods=["GET", "POST"])
 @admin_login_required
@@ -2280,8 +2287,9 @@ def edit(option, testid):
         # db.session.add(Users("ss@fju.us", "password", "student", True))
         # db.session.commit()
         all_registered_students = get_all_students()
+        contentinside = Tests.query.filter_by(name=testid).first().contentinside
         app.logger.info("All registered students %s"% all_registered_students)
-        return render_template("add_students.html", testid=testid, messages=False, invitedstudents=invitedstudents, allstudents=all_registered_students)
+        return render_template("add_students.html", testid=testid, contentinside=contentinside, messages=False, invitedstudents=invitedstudents, allstudents=all_registered_students)
 
     if request.method == "POST":
         invitedstudents = False
@@ -2290,10 +2298,16 @@ def edit(option, testid):
 
             startdatevalid = ""
             enddatevalid = ""
+            contentinside = False
             error = False
             try:
-                start_date = request.form["datetimepicker1"]
-                end_date = request.form["datetimepicker2"]
+                start_date = request.form.get("datetimepicker1")
+                end_date = request.form.get("datetimepicker2")
+                contentinside = request.form.get("contentinside")
+                # app.logger.info(request.form)
+                if contentinside == None:
+                    contentinside = False
+                updateContentInside(testid,contentinside)
                 if start_date != "" and end_date != "":
                     validate_start_date = validate_date(start_date)
                     validate_end_date = validate_date(end_date)
@@ -2312,7 +2326,7 @@ def edit(option, testid):
                     else:
                         startdatevalid = "Start Date %s is not Valid." %str(start_date)
                 else:
-                    startdatevalid = "Both Start Date and End Date are required"
+                    startdatevalid = "Updated Exam. Content Kept Inside Quiz: "+str(contentinside)
 
             except Exception as e:
                 app.logger.info(e)
@@ -2320,7 +2334,7 @@ def edit(option, testid):
                 error = e
 
             app.logger.info('%s %s %s' %(error, startdatevalid, enddatevalid))
-            return render_template("add_students.html", invitedstudents=invitedstudents,testid=testid, error=error, messages=True, startdatevalid=startdatevalid, enddatevalid=enddatevalid)
+            return render_template("add_students.html", invitedstudents=invitedstudents, contentinside=contentinside, testid=testid, error=error, messages=True, startdatevalid=startdatevalid, enddatevalid=enddatevalid)
         elif option == "invite_students":
             # app.logger.info("im in invite students functionality")
             students = {}
@@ -2593,7 +2607,6 @@ def get_view_details_summary(test_name):
     for row in content_activity:
         if row.email not in list(view_details):
             view_details[row.email] = get_view_details_of_user(row.email,test_name)
-    return json.dumps(view_details)
     return render_summary_csv_from_content_views(view_details)
 
 def get_view_details_complete(test_name):
@@ -2672,13 +2685,13 @@ def render_complete_csv_from_content_views(data):
 
 @app.route('/contentAnalyticsSummary/<test_name>', methods=['GET'])
 @admin_login_required
-def contentAnalytics(test_name):
-    return render_summary_csv_from_content_views(test_name)
+def contentAnalyticsSummary(test_name):
+    return get_view_details_complete(test_name)
 
 @app.route('/contentAnalytics/<test_name>', methods=['GET'])
 @admin_login_required
 def contentAnalytics(test_name):
-    return render_complete_csv_from_content_views(test_name)
+    return get_view_details_summary(test_name)
 
 def get_student_details(student):
     return userDetails.query.filter(userDetails.email == student).first()
@@ -3056,6 +3069,7 @@ def createexam():
             flash("Start Date is %s"%startdate)
             enddate = request.form['datetimepicker2']
             flash("End Date is %s"%enddate)
+            contentinsidequiz = request.form['insidequiz']
         else:
             test_name = request.form['dep_testname']
             flash("Test Name is %s"%test_name)
@@ -3063,6 +3077,10 @@ def createexam():
             flash("Exam Date is %s"%date)
             startdate = date+" 09:00"
             enddate = date+" 23:59"
+            contentinsidequiz = request.form['insidequiz']
+
+        if contentinsidequiz:
+            flash("You have Choosed to keep the news article and video inside the quiz.")
 
         if not test_name or not mode or not date:
             flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
@@ -3073,7 +3091,7 @@ def createexam():
             return redirect(request.url)
 
         try:
-            test = create_test(test_name, mode, startdate, enddate)
+            test = create_test(test_name, mode, startdate, enddate,contentinsidequiz)
             if test != True:
                 flash("Error: %s"%test)
                 return redirect(request.url)
