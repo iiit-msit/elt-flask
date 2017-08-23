@@ -21,10 +21,10 @@ $(function(){
           data: JSON.stringify(view),
           type: 'POST',
           success: function(response) {
-              console.log(response);
+              //console.log(response);
           },
           error: function(error) {
-              console.log(error);
+              //console.log(error);
           }
       });
     }
@@ -59,15 +59,15 @@ $(function(){
   </div>
   <script>
     $("#like").click(function(){
-      console.log("clicked")
+      //console.log("clicked")
       $.ajax({
         type: "GET",
         url: "/like/{{test_name}}/reading",
         success: function(response) {
-            console.log(response);
+            //console.log(response);
         },
         error: function(error) {
-            console.log(error);
+            //console.log(error);
         }
       });
     });
@@ -77,10 +77,10 @@ $(function(){
         type: "GET",
         url: "/dislike/{{test_name}}/reading",
         success: function(response) {
-            console.log(response);
+            //console.log(response);
         },
         error: function(error) {
-            console.log(error);
+            //console.log(error);
         }
       });
     });

@@ -28,10 +28,10 @@ $(function(){
           data: JSON.stringify(view),
           type: 'POST',
           success: function(response) {
-              console.log(response);
+              //console.log(response);
           },
           error: function(error) {
-              console.log(error);
+              //console.log(error);
           }
       });
     }
@@ -45,13 +45,13 @@ $(function(){
     <h2 class="col-md-6">Listening Comprehension Task</h2>
     <span class="col-md-6 text-right">
       <br>
-      <a class="btn btn-primary" href="/startquiz/{{test_name}}">Back to Home Screen</a>
+      <a id="backHome" class="btn btn-primary" href="/startquiz/{{test_name}}">Back to Home Screen</a>
     </span>
   </div>
   <hr>
     {% if task.filepath %}
     <div style="text-align:center; border:1px solid black;">
-      <video controls type="video/mp4" width="100%" src="/play{{task.filepath}}" preload="auto" autoplay>
+      <video id="video" controls type="video/mp4" width="100%" src="/play{{task.filepath}}" preload="auto" autoplay>
         Your browser does not support the video tag.
       </video>
       <div class="text-center">
@@ -67,16 +67,21 @@ $(function(){
   {% endif %}
   </div>
   <script>
+  $(function(){
+    $("#backHome").click(function(){
+      video = $("#video");
+      video.currentTime = video.duration;
+    });
     $("#like").click(function(){
       console.log("clicked")
       $.ajax({
         type: "GET",
         url: "/like/{{test_name}}/reading",
         success: function(response) {
-            console.log(response);
+            //console.log(response);
         },
         error: function(error) {
-            console.log(error);
+            //console.log(error);
         }
       });
     });
@@ -86,12 +91,13 @@ $(function(){
         type: "GET",
         url: "/dislike/{{test_name}}/reading",
         success: function(response) {
-            console.log(response);
+            //console.log(response);
         },
         error: function(error) {
-            console.log(error);
+            //console.log(error);
         }
       });
     });
+  });
   </script>
 {%endblock%}

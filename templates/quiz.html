@@ -79,6 +79,7 @@
 	<!-- <script type="text/javascript" src="{{ url_for('static', filename='/javascripts/app.js') }}"></script> -->
 	<script type="text/javascript" src="{{ url_for('static', filename='/javascripts/quiz.js') }}"></script>
 	<script type="text/javascript" src="/javascripts/feedback.js"></script>
+	<script type="text/javascript" src="/javascripts/keystroke_analytics.js"></script>
 	<!-- swfobject is a commonly used library to embed Flash content -->
 <!--
 	<script type="text/javascript"	src="/https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
@@ -91,7 +92,12 @@
 
 		});
 		$(document).ready(function() {
-
+				video = $("video").attr("id");
+				//console.log(["video exists and id is ", video]);
+				if(video != ""){
+					video = $("#"+video);
+					video.currentTime = video.duration;
+				}
 			 /*
 				*  Initialize Octopus to start rendering quiz page.
 				*/
@@ -197,7 +203,7 @@
 		            recorder.stop();
 		        });
 		        $("#save").click(function() {
-		            console.log(blobkey);
+		            //console.log(blobkey);
 		        });
 		        setTimeout(() => {
 		            recorder.stop();

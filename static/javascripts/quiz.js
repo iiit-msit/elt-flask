@@ -4,7 +4,7 @@ var quizModel = {
 		init : function(data) {
 			// create questions array from the JSON data
 			this.createQuizModel(data);
-			console.log(data)
+			//console.log(data)
 		},
 
 		// parse JSON data and create an array of questions
@@ -70,7 +70,7 @@ var quizModel = {
 				q = index-1;
 			});
 			this.questionIndex = q;
-			// console.log("question index is:" + this.questionIndex)
+			// //console.log("question index is:" + this.questionIndex)
 		},
 		getQuizStatus : function() {
 			// get the status of the quiz by looking into the questions array
@@ -83,7 +83,7 @@ var quizModel = {
 		nextQuestion : function() {
 			// returns the next questions and updates the pointer
 			var quizStatus = this.getQuizStatus();
-			//console.log(quizStatus);
+			////console.log(quizStatus);
 			if (quizStatus == "START")
 				this.questionIndex = -1;
 			if (quizStatus == "END"){
@@ -124,8 +124,8 @@ var octopus = {
 					quizModel.init(data)
 					startView.init();
 					var status = quizModel.getQuizStatus();
-					// console.log("quiz result" + data);
-					console.log("quiz status" + status);
+					// //console.log("quiz result" + data);
+					//console.log("quiz status" + status);
 					if (status == "END")
 						resultView.init();
 					else
@@ -155,10 +155,10 @@ var octopus = {
 			submittedQuestion.subsections = undefined;
 			submittedQuestion.test_name = octopus.test_name;
 			data = JSON.stringify({jsonData: submittedQuestion});
-			console.log("submittedquestion:" + data);
+			//console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
 				.done(function(data){
-					//console.log("Success:" + data);
+					////console.log("Success:" + data);
 					data = JSON.parse(data)
 					if(data.testEnd) {
 						quizModel.testEnd = true;
@@ -172,7 +172,7 @@ var octopus = {
 					}
 				});
 		},
-		autosaveContent : function(responseAnswer, responseTS) {
+		autosaveContent : function(responseAnswer, responseTS, analytics) {
 			// grab the current question object from model
 			var q = quizModel.question;
 
@@ -180,14 +180,16 @@ var octopus = {
 			// with response answer and response time
 			q.responseAnswer = responseAnswer;
 			q.responseTime = responseTS;
-			//console.log(q);
+			////console.log(q);
 			// call server side submit function
 			// creating json file for submit response
-			var data = {"currentQuestion": q.id, "draft":responseAnswer,"responsetime":q.responseTime,"test_name":octopus.test_name}
+			var data = {"currentQuestion": q.id, "draft":responseAnswer,"responsetime":q.responseTime,"test_name":octopus.test_name, "analytics":analytics}
+			//console.log(data);
 			data=JSON.stringify({jsonData: data});
+			//console.log(data);
 			$.post("/autosaveEssay", data)
 				.done(function(data){
-					//console.log("Success:" + data);
+					////console.log("Success:" + data);
 				});
 		},
 		getResults : function() {
@@ -212,7 +214,7 @@ var octopus = {
 					data: this.test_name,
 				})
 				.done(function(data){
-					//console.log("ping response " + data)
+					////console.log("ping response " + data)
 					data = JSON.parse(data);
 					quizModel.setQuizStatus(data.quizStatus);
 					if(!data.timeRemaining) {
@@ -221,24 +223,24 @@ var octopus = {
 					progressView.renderTime(data.timeRemaining);
 				})
 				.fail(function(){
-					//console.log("PING Failed");
+					////console.log("PING Failed");
 				});
 		},
 		endTest : function() {
 			progressView.progressBox.html("");
 			progressView.timeBox.html("");
 			resultView.init();
-			//console.log("score="+resultView.totalScore);
+			////console.log("score="+resultView.totalScore);
 			var data = {"testend":true, "finalScore": resultView.finalScore,"spklink": resultView.spklink, "test_name":octopus.test_name};
 
 			data=JSON.stringify({jsonData: data});
-			//console.log("endtest" + data);
+			////console.log("endtest" + data);
 			$.post("/endtest", data)
 				.done(function(data){
-					//console.log("Success:" + data);
+					////console.log("Success:" + data);
 				})
 				.fail(function(data){
-					//console.log("testend Failed");
+					////console.log("testend Failed");
 				});
 			octopus.stopPing();
 		}
@@ -251,7 +253,7 @@ var startView = {
 			this.questionPane = $("#content-box");
 			this.QuestionV=$('#QuestionView');
 
-			this.startMessage = "Complete the following Tasks before you begin to take the Test.";
+			this.startMessage = "Click on start Test button to begin the Test.";
 			this.resumeMessage = "You have started the test, click the button below to resume the test.";
 			this.resumeMessage += "Click the Resume Test button to resume.";
 			this.errorMessage = "There is a problem with starting your test session. Refresh the page. ";
@@ -326,17 +328,17 @@ var startView = {
 					this.questionPane.html('<h3>' + this.startMessage + '</h3><br>');
 				}
 				if(octopus.mode=="DEP") {
-					this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
-	 				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
-	 				 this.questionPane.append("<a href='/readingtask/"+octopus.test_name+"'>Click here to read the PDF.</a><br><br>")
+						 this.questionPane.append('<h2>Today: '+this.datetoday()+'</h2>')
+		 				 this.questionPane.append('<h3>1 - Reading Comprehension Task</h3>');
+		 				 this.questionPane.append("<a href='/readingtask/"+octopus.test_name+"'>Click here to read the PDF.</a><br><br>")
 
-	 				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
-	 				 this.questionPane.append("<a href='/listeningtask/"+octopus.test_name+"'>Click here to watch the video.</a><br><br>")
+		 				 this.questionPane.append('<h3>2 - Listening Comprehension Task</h3>');
+		 				 this.questionPane.append("<a href='/listeningtask/"+octopus.test_name+"'>Click here to watch the video.</a><br><br>")
 
-	 				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
-	 				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')
-	 				 this.startButton.removeClass("btn-lg");
-	 				 this.startButton.removeClass("btn-sm");
+		 				 this.questionPane.append('<h3>3 - Start the Test.</h3>');
+		 				 this.questionPane.append('<span>Once you start the test, you will not be able to view the above Reading and Listening sections.</span>')
+		 				 this.startButton.removeClass("btn-lg");
+		 				 this.startButton.removeClass("btn-sm");
 				}
 			}
 			else if (quizStatus == "INPROGRESS") {
@@ -406,7 +408,7 @@ var questionView = {
 					q.responseTime = questionView.getResponseTime();
 					octopus.submitAnswer();
 				} else {
-					console.log(selectedAnswer);
+					//console.log(selectedAnswer);
 
 					alert("Select a choice to submit answer.");
 				        document.getElementById("sanswer").disabled = false;
@@ -433,7 +435,8 @@ var questionView = {
 			this.sectionName.append(q.section);
 			// this.sectionName.append(q.subsections.name);
 			this.sectionName.append("</h4>");
-			this.questionNote.html('<p class="lead">' + q.subsections.note + '</p>');
+			if (q.subsections.types!="video")
+				this.questionNote.html('<p class="lead">' + q.subsections.note + '</p>');
 			this.questionPane.html('<p class="lead">' + q.question + '</p>');
 
 			if (q.subsections.types == "passage"){
@@ -446,11 +449,14 @@ var questionView = {
 				this.displayEssay();
 				this.myvar = setInterval(function() {
 					var text = $('textarea').val();
-					octopus.autosaveContent(text,Date.now()/(1000*60));
+					analytics = KeystrokeAnalaytics.render();
+					octopus.autosaveContent(text,Date.now()/(1000*60),analytics);
 				},30000);
 
 			}
+
 			if (q.subsections.types == "video"){
+				this.questionNote.html('<p class="lead">' + quizModel.question.subsections.note + '</p>');
 				this.displayVideo();
 				this.displayOptions();
 			}
@@ -480,7 +486,10 @@ var questionView = {
 
 		displayPassage : function() {
 			var q = quizModel.question;
-			this.questionNote.append('<div>' + q.subsections.passage +'</div>');
+			if (octopus.mode != "DEP")
+				this.questionNote.append('<div>' + q.subsections.passage +'</div>');
+			else
+				this.questionNote.html("<p class='lead'>Answer the following questions based on what you read in the Reading Comprehension Task</p>");
 		},
 
 		displayEssay : function() {
@@ -489,26 +498,30 @@ var questionView = {
 			var essayText = "";
 			if(quizModel.question.responseAnswer)
 				essayText = quizModel.question.responseAnswer;
-			console.log(essayText);
+			//console.log(essayText);
 			// create text area
 			var words = document.createElement("div");
 			words.setAttribute("id", "words");
 			this.questionPane.append(words);
 
-			this.questionPane.append('<div><textarea style="width: 500px; height: 200px">' +
+			this.questionPane.append('<div><textarea id="essayinput" style="width: 500px; height: 200px">' +
 			essayText + '</textarea>');
 			$('textarea').keyup(function () {
 				var value = $(this).val();
 				var regex = /\s+/gi;
 				var wordCount = value.trim().replace(regex, ' ').split(' ').length;
-				//console.log("word count" + wordCount);
+				////console.log("word count" + wordCount);
 				$("#words").html("Word Count: " + wordCount);
 			});
+			KeystrokeAnalaytics.init();
 		},
 
 		displayVideo : function() {
 			var q = quizModel.question;
-			this.questionNote.append(q.subsections.link);
+			if (octopus.mode != "DEP")
+				this.questionNote.append(q.subsections.link);
+			else
+				this.questionNote.html("<p class='lead'>Answer the following questions based on what you listened in the Listening Comprehension Task</p>");
 		},
 
 		displayRecording : function() {
@@ -616,10 +629,11 @@ var progressView = {
 
 				progressView.progressBox.append(btn);
 				$("#"+index).addClass("btn btn-xs " + buttonColor);
-				if(!question.status)
+				if(!question.status){
 					$("#"+index).attr('disabled','disabled');
+				}
 				$("#"+index).click(function(){
-					//console.log("progress:" + this.id);
+					////console.log("progress:" + this.id);
 					quizModel.setQuestion(this.id);
 					questionView.showQuestion();
 				});
@@ -677,7 +691,7 @@ var resultView = {
 			 *  Toggle this variable to switch between showing/hiding results page
 			 */
 			show_result = octopus.show_result;
-			console.log("show_result "+show_result);
+			//console.log("show_result "+show_result);
 			this.render(show_result);
 
 		},
@@ -756,16 +770,16 @@ var resultView = {
 				        contentType: false,
 				        processData: false,
 				        success: function(data) {
-				        	console.log(["Audio fetch Success"]);
+				        	//console.log(["Audio fetch Success"]);
 				        	spklink = value.submittedans;
 							t6.setAttribute("src", 'data:audio/webm;base64,'+data);
 				        },
 				        error: function(msg){
 				        	$("#message").text("Audio fetching failed");
 
-				        	console.log("Error occured");
+				        	//console.log("Error occured");
 
-				        	// console.log(msg);
+				        	// //console.log(msg);
 				        }
 				    });
 
@@ -811,7 +825,7 @@ var resultView = {
 			this.navBar.hide();
 			this.finalScore = totalScore;
 			this.spklink = spklink;
-			console.log(this.finalScore);
+			//console.log(this.finalScore);
 		},
 };
 

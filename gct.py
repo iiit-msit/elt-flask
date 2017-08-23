@@ -48,7 +48,10 @@ app.config['UPLOAD_FOLDER'] = APP_STATIC_JSON
 app.debug_log_format = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 #formatter = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 # logHandler = logging.FileHandler('logs/login.log')
-logHandler = RotatingFileHandler('/home/msit/Desktop/oes_logs/logs.log', maxBytes=10000, backupCount=1)
+log_path = os.path.join(os.getcwd(),'logs.log')
+log_path = '/home/msit/Desktop/oes_logs/logs.log'
+print(log_path)
+logHandler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
 #logHandler = logging.basicConfig(stream=sys.stderr)
 #logHandler.setFormatter(formatter)
 logHandler.setLevel(logging.NOTSET)
@@ -311,16 +314,14 @@ class Tests(db.Model):
     test_mode = db.Column(db.String(80), default="TOEFL")
     # json = db.Column(db.String(1000))
     creator = db.Column(db.String(180))
-    contentinside = db.Column(db.Boolean, default=False)
     time = db.Column(db.DateTime(), default=pytz.utc.localize(datetime.utcnow()), onupdate=pytz.utc.localize(datetime.utcnow()))
 
-    def __init__(self, name, creator, start_date, end_date, test_mode, contentinside):
+    def __init__(self, name, creator, start_date, end_date, test_mode):
         self.name = name
         self.creator = creator
         self.start_date = start_date
         self.end_date = end_date
         self.test_mode = test_mode
-        self.contentinside = contentinside
         self.time = pytz.utc.localize(datetime.utcnow())
         # self.json = json
     def isHosted(self):
@@ -450,13 +451,15 @@ class EssayTypeResponse(db.Model):
     ansText = db.Column(db.Text)
     qattemptedtime = db.Column(db.Float)
     test_name = db.Column(db.String(180))
+    analytics = db.Column(JSON)
 
-    def __init__(self, useremailid, qid, ansText, qattemptedtime, test_name):
+    def __init__(self, useremailid, qid, ansText, qattemptedtime, test_name, analytics):
         self.useremailid = useremailid
         self.qid = qid
         self.ansText = ansText
         self.qattemptedtime = qattemptedtime
         self.test_name = test_name
+        self.analytics = analytics
 
 class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -483,7 +486,7 @@ class ContentActivity(db.Model):
 
 def getQuestionPaper(qid_list,path):
     json_temp=json.loads(open(os.path.join(path,'QP_template.json')).read())
-    #app.logger.info("E2-template.json %s %s"%(json_temp, path))
+    app.logger.info("getQuestionPaper function %s %s qid_list %s"%(json_temp, path, qid_list))
     #print qid_list
     i=0;j=0;k=0;l=0;m=0;n=0;p=0;q=0;r=0;s=0;t=0
     for qid in qid_list:
@@ -494,13 +497,13 @@ def getQuestionPaper(qid_list,path):
                     for qn in key["questions"]:
                           pid=qn["id"]
                           if int(pid) == qid:
-                                json_temp["section"][2]["subsection"][0]["passage"]=key["passage"]
-                                json_temp["section"][2]["subsection"][0]["questions"].append(qn)
-                                json_temp["section"][2]["subsection"][0]["questions"][m]["serialno"] = qid_list[qid]
-                                m +=1
+                            json_temp["section"][2]["subsection"][0]["passage"]=key["passage"]
+                            json_temp["section"][2]["subsection"][0]["questions"].append(qn)
+                            json_temp["section"][2]["subsection"][0]["questions"][m]["serialno"] = qid_list[qid]
+                            m +=1
         if qid in list(range(e2_start,e2_end)):
               e2_lsnjson=json.loads(open(os.path.join(path,'E2-Listening.json'), encoding='utf-8').read())
-            #   app.logger.info("E2-listening.json %s"%e2_lsnjson)
+              app.logger.info("E2-listening.json %s"%e2_lsnjson)
               for key in e2_lsnjson["videoArray"]:
                     for qn in key["questions"]:
                           pid=qn["id"]
@@ -528,7 +531,7 @@ def getQuestionPaper(qid_list,path):
 
 def generateQuestionPaper(path):
     json_temp=json.loads(open(os.path.join(path,'QP_template.json'), encoding='utf-8').read())
-    #app.logger.info("Loaded question paper template is %s"%json_temp)
+    app.logger.info("Loaded question paper template is %s"%json_temp)
     for key in json_temp:
         if  key == "section":
             section=json_temp[key]
@@ -537,13 +540,15 @@ def generateQuestionPaper(path):
                     if key == "subsection":
                         for subs in s[key]:
                             cnt=int(subs["count"])
-                            app.logger.info(cnt)
                             name=subs["name"]
                             types=subs["types"]
+                            app.logger.info("Current Section name %s question count is %s"%(name, cnt))
                             #print name
                             if name == "E2-Listening":
                                 #print name
+                                app.logger.info("Loaded question paper is %s"%os.path.join(path,name+".json"))
                                 json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
+                                app.logger.info("Loaded question paper data is %s"%json_subs)
                                 video_list=json_subs["videoArray"]
                                 serialno=list(range(0,len(video_list)))
                                 shuffle(serialno)
@@ -556,7 +561,7 @@ def generateQuestionPaper(path):
                             if types =="question" or types =="record":
                                 #print name
                                 json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                #app.logger.info("Loaded question paper is %s"%json_subs)
+                                app.logger.info("Loaded speaking question paper is %s"%json_subs)
                                 qns_list=json_subs["questions"];
                                 serialno=list(range(0,len(qns_list)))
                                 shuffle(serialno)
@@ -578,6 +583,7 @@ def generateQuestionPaper(path):
                                     subs["questions"][j]["serialno"]=j+1
                                     j +=1
                                 subs["passage"]=psglist[serialno[0]]["passage"]
+
                             if types =="essay":
                                 #print name
                                 app.logger.info("essay came")
@@ -675,7 +681,7 @@ def error(error):
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     app.logger.info(root+"/content/DEP/08-08-2017/")
-    # return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
+    return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
     # return get_view_details_complete("Daily English Practise 1")
     email="ss@fju.us"
     password="ss"
@@ -786,9 +792,15 @@ def allowed_to_take_test(testid=None, email=None, role=None):
         entries = Response.query.filter_by(emailid=email).all()
         for entry in entries:
             db.session.delete(entry)
+        app.logger.info("deleted entries for Response")
         entries = TestDetails.query.filter_by(email=email).all()
         for entry in entries:
             db.session.delete(entry)
+        app.logger.info("deleted entries for TestDetails")
+        entries = Randomize.query.filter_by(user1=email).all()
+        for entry in entries:
+            db.session.delete(entry)
+        app.logger.info("deleted entries for Randomize")
         db.session.commit()
         return True
     if not studenttests:
@@ -967,7 +979,7 @@ def quizstatus(test_name, email=None):
 
 #pending
 def buildquizobject(email,isRandomized,json_data,test_name):
-    #app.logger.info(json_data)
+    app.logger.info("buildquizobject json_data %s"%json_data)
     for key in json_data:
         if  key == "section":
             section = json_data[key]
@@ -998,6 +1010,7 @@ def getquizstatus(email=None):
     email = email if email else get_email_from_session()
     role = get_role_from_session()
     test_name = str(request.get_data(),'utf-8')
+    # app.logger.info([test_name])
     isAllowed = allowed_to_take_test(test_name, email, role)
     question_ids = checkrandomizetable(email,test_name)
     if not isAllowed:
@@ -1009,15 +1022,18 @@ def getquizstatus(email=None):
     if test:
         path = root+"/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
         app.logger.info("constructed path for getquesiton paper %s"%path)
+
     if question_ids:
+        app.logger.info("user is resuming the test")
         isRandomized = True
         qid_dict = qidlisttodict(question_ids)
-        json_data=getQuestionPaper(qid_dict,path)
-        #app.logger.info("User is Resuming Test %s"%json_data)
+        json_data=getQuestionPaper(qid_dict, path)
+        app.logger.info("User is Resuming Test %s"%json_data)
     else:
+        app.logger.info("user is starting the test")
         isRandomized = False
         json_data=generateQuestionPaper(path)
-        #app.logger.info("User is Starting Test %s"%json_data)
+        app.logger.info("User is Starting Test %s"%json_data)
 
     # build quiz object based on get/generated question paper and set
     quiz_status_object = buildquizobject(email,isRandomized,json_data,test_name)
@@ -1266,24 +1282,28 @@ def getessayresponse(data):
     ans = vals['draft'] if 'draft' in vals else ""
     qattemptedtime = vals['responsetime']
     test_name = vals['test_name']
-    return vals, qid, ans, qattemptedtime, test_name
+    analytics = vals['analytics']
+    return vals, qid, ans, qattemptedtime, test_name, analytics
 
-def saveessay(test_name,row=None,email=None,qid=None,ansText=None,qattemptedtime=None):
+def saveessay(test_name,row=None,email=None,qid=None,ansText=None,qattemptedtime=None,analytics=None):
     if email == None or email == "":
         return False
     try:
         if row:
             row.qattemptedtime=qattemptedtime
             row.ansText = ansText
+            row.analytics = analytics
             db.session.add(row)
             db.session.commit()
+            app.logger.info(analytics)
         else:
-            data = EssayTypeResponse(useremailid=email, qid=qid, qattemptedtime=qattemptedtime, ansText = ansText, test_name=test_name)
+            data = EssayTypeResponse(useremailid=email, qid=qid, qattemptedtime=qattemptedtime, ansText = ansText, test_name=test_name, analytics=analytics)
             db.session.add(data)
             db.session.commit()
+            app.logger.info(analytics)
         return True
     except Exception as e:
-        #app.logger.info(e)
+        app.logger.info(e)
         return False
 
 @app.route('/autosaveEssay', methods=["POST"])
@@ -1292,10 +1312,11 @@ def autosaveEssay(email=None):
     email = email if email else get_email_from_session()
 
     data = request.get_data()
-    essay_response, qid, ans, qattemptedtime, test_name = getessayresponse(data)
+    app.logger.info(data)
+    essay_response, qid, ans, qattemptedtime, test_name, analytics = getessayresponse(data)
 
     data = EssayTypeResponse.query.filter_by(useremailid = email, qid = qid, test_name=test_name).first()
-    saveessay(test_name,data,email,qid,ans,qattemptedtime)
+    saveessay(test_name,data,email,qid,ans,qattemptedtime, analytics)
 
     return json.dumps(essay_response)
 
@@ -1746,6 +1767,7 @@ def send_content(test_mode, datetoday,filename):
     app.logger.info("date %s and type %s result %s"%(date1, date2, date1 >= date2))
     safe = is_safe_path(APP_ROOT, '/content/%s/%s/%s'%(test_mode, datetoday, filename))
     app.logger.info("safe %s"%safe)
+    app.logger.info(role)
     app.logger.info("app root %s"%APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday))
     #the below link is tested by putting the folder outside of the root
     # return send_from_directory(APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday), filename)
@@ -1871,10 +1893,11 @@ def after_request(response):
 @app.route('/play/<path:song>')
 def play(song):
     app.logger.info("listening video path %s"%"static/"+song)
+    role = get_role_from_session()
     date = song.split("/")[2]
     date = convert_string_date(date)
     date1 = convert_string_date(get_today_ddmmyyyy())
-    if date1 >= date:
+    if date1 >= date or role=="admin":
     	return send_file_partial(root+"/"+song)
     return "<h3>Error 404 in displaying the content you requested. Please contact Exam Admin.</h3>"
 
@@ -1996,9 +2019,9 @@ def dislike(test_name,section):
 #     session.pop('adminemail', None)
 #     return redirect(url_for('adminlogin'))
 
-def createDefaultTest(TestID, author, start_date,end_date, test_mode,contentinside):
+def createDefaultTest(TestID, author, start_date,end_date, test_mode):
     try:
-        test = Tests(TestID,author, start_date, end_date, test_mode,contentinside)
+        test = Tests(TestID,author, start_date, end_date, test_mode)
         db.session.add(test)
         db.session.commit()
         return True
@@ -2121,7 +2144,7 @@ def updatetests(test_name=None,email=None,start_date=None,end_date=None):
         app.logger.info(e)
     return False
 
-def create_test(test_name, test_mode, start_date, end_date, contentinside):
+def create_test(test_name, test_mode, start_date, end_date):
 
     if test_name and test_mode and start_date and end_date:
         # if not test_name:
@@ -2139,7 +2162,7 @@ def create_test(test_name, test_mode, start_date, end_date, contentinside):
 
         if nameValid and startdateValid and enddateValid:
             #app.logger.info('%s created a Test - %s' %(admin,test_name))
-            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode, contentinside)
+            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode)
             if is_created:
                 return True
             # settestsession(test_name,start_date,end_date)
@@ -2267,11 +2290,6 @@ def invitation_mail_sent():
         return False
     return dict(invitation_mail_sent=_invitation_mail_sent)
 
-def updateContentInside(test_name,boolean):
-    test = Tests.query.filter_by(name=test_name).first()
-    test.contentinside = boolean
-    db.session.commit()
-
 @app.route("/edit/<testid>/", defaults={'option': None})
 @app.route("/edit/<testid>/<option>", methods=["GET", "POST"])
 @admin_login_required
@@ -2287,9 +2305,8 @@ def edit(option, testid):
         # db.session.add(Users("ss@fju.us", "password", "student", True))
         # db.session.commit()
         all_registered_students = get_all_students()
-        contentinside = Tests.query.filter_by(name=testid).first().contentinside
         app.logger.info("All registered students %s"% all_registered_students)
-        return render_template("add_students.html", testid=testid, contentinside=contentinside, messages=False, invitedstudents=invitedstudents, allstudents=all_registered_students)
+        return render_template("add_students.html", testid=testid, messages=False, invitedstudents=invitedstudents, allstudents=all_registered_students)
 
     if request.method == "POST":
         invitedstudents = False
@@ -2298,16 +2315,11 @@ def edit(option, testid):
 
             startdatevalid = ""
             enddatevalid = ""
-            contentinside = False
             error = False
             try:
                 start_date = request.form.get("datetimepicker1")
                 end_date = request.form.get("datetimepicker2")
-                contentinside = request.form.get("contentinside")
                 # app.logger.info(request.form)
-                if contentinside == None:
-                    contentinside = False
-                updateContentInside(testid,contentinside)
                 if start_date != "" and end_date != "":
                     validate_start_date = validate_date(start_date)
                     validate_end_date = validate_date(end_date)
@@ -2326,7 +2338,7 @@ def edit(option, testid):
                     else:
                         startdatevalid = "Start Date %s is not Valid." %str(start_date)
                 else:
-                    startdatevalid = "Updated Exam. Content Kept Inside Quiz: "+str(contentinside)
+                    startdatevalid = "Updated Exam."
 
             except Exception as e:
                 app.logger.info(e)
@@ -2334,7 +2346,7 @@ def edit(option, testid):
                 error = e
 
             app.logger.info('%s %s %s' %(error, startdatevalid, enddatevalid))
-            return render_template("add_students.html", invitedstudents=invitedstudents, contentinside=contentinside, testid=testid, error=error, messages=True, startdatevalid=startdatevalid, enddatevalid=enddatevalid)
+            return render_template("add_students.html", invitedstudents=invitedstudents, testid=testid, error=error, messages=True, startdatevalid=startdatevalid, enddatevalid=enddatevalid)
         elif option == "invite_students":
             # app.logger.info("im in invite students functionality")
             students = {}
@@ -3054,9 +3066,11 @@ def sublist(child, parent):
 @admin_login_required
 def createexam():
     if request.method == 'GET':
+        app.logger.info('im in createexam get')
         return render_template('create_exam.html')
 
     if request.method == 'POST':
+        app.logger.info('im in createexam post')
 
         # check if the post request has the file part
         mode = request.form['mode']
@@ -3069,7 +3083,9 @@ def createexam():
             flash("Start Date is %s"%startdate)
             enddate = request.form['datetimepicker2']
             flash("End Date is %s"%enddate)
-            contentinsidequiz = request.form['insidequiz']
+            if not test_name or not mode or not startdate or not enddate:
+                flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
+                return redirect(request.url)
         else:
             test_name = request.form['dep_testname']
             flash("Test Name is %s"%test_name)
@@ -3077,41 +3093,14 @@ def createexam():
             flash("Exam Date is %s"%date)
             startdate = date+" 09:00"
             enddate = date+" 23:59"
-            contentinsidequiz = request.form['insidequiz']
-
-        if contentinsidequiz:
-            flash("You have Choosed to keep the news article and video inside the quiz.")
-
-        if not test_name or not mode or not date:
-            flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
-            return redirect(request.url)
+            if not test_name or not mode or not date:
+                flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
+                return redirect(request.url)
 
         if 'file' not in request.files:
             flash('Error: No File selected. Please upload a .zip file.')
             return redirect(request.url)
 
-        try:
-            test = create_test(test_name, mode, startdate, enddate,contentinsidequiz)
-            if test != True:
-                flash("Error: %s"%test)
-                return redirect(request.url)
-            else:
-                flash("Test Created Succesfully")
-        except Exception as e:
-            flash(e)
-            return redirect(request.url)
-
-        try:
-            registered = Users.query.all()
-            registered_emails = []
-            for i in registered:
-                registered_emails.append(i.emailid)
-            flash("Inviting %s"%str(registered_emails))
-            students_list = updateStudents(test_name,registered_emails)
-            flash("Success: %s"%str(students_list))
-        except Exception as e:
-            flash(e)
-            return redirect(request.url)
 
         folder_structure = {"DEP":
             ["E1-Reading.json",
@@ -3123,7 +3112,8 @@ def createexam():
              "QP_template.json"
             ]
             ,"TOEFL":
-            ["audio1.mp3",
+            ["listening.mp4",
+             "reading.pdf",
              "E1-Reading.json",
              "E3-Speaking.json",
              "QP_template.json",
@@ -3139,29 +3129,53 @@ def createexam():
             flash('Error: File not selected. Please upload a .zip file.')
             return redirect(request.url)
         if file:
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             flash('Uploading content from %s'%file.filename)
             filename = secure_filename(file.filename)
-            file.save(os.path.join('static/tmp_upload', filename))
-            flash("Success: %s is valid. \nExtracting contents..."%filename)
+            file.save(os.path.join(BASE_DIR, 'static/tmp_upload', filename))
             zip_exist = zipfile.is_zipfile('static/tmp_upload/'+filename)
-            if zip_exist:
-                zf = zipfile.ZipFile('static/tmp_upload/'+filename, 'r')
+            if zip_exist or True:
+                flash("Success: %s is valid. \nExtracting contents..."%filename)
+                zf = zipfile.ZipFile(os.path.join(BASE_DIR,'static/tmp_upload/',filename), 'r')
                 file_list = zf.namelist()
                 if sublist(folder_structure[mode], file_list):
                     if mode=="DEP":
-                        zf.extractall("static/content/"+mode+"/"+date)
+                        zf.extractall(os.path.join(BASE_DIR,"static/content/"+mode+"/"+date))
                     else:
-                        zf.extractall("static/content/"+mode+"/"+filename.split(".")[0])
+                        zf.extractall(os.path.join(BASE_DIR,"static/content/"+mode+"/"+filename.split(".")[0]))
                     zf.close()
                     flash("Success in extracting: Folder uploaded in test environment")
+                    try:
+                        test = create_test(test_name, mode, startdate, enddate)
+                        if test != True:
+                            flash("Error: %s"%test)
+                            return redirect(request.url)
+                        else:
+                            flash("Test Created Succesfully")
+                    except Exception as e:
+                        flash(e)
+                        return redirect(request.url)
+                    if mode=="DEP":
+                        try:
+                            registered = Users.query.all()
+                            registered_emails = []
+                            for i in registered:
+                                registered_emails.append(i.emailid)
+                                flash("Inviting %s"%str(registered_emails))
+                                students_list = updateStudents(test_name,registered_emails)
+                                flash("Success: %s"%str(students_list))
+                        except Exception as e:
+                            flash(e)
+                            return redirect(request.url)
                 else:
                     flash("Error in extracting: Uploaded zip file doesn't contain necessary files/folder structure.")
             else:
-                flash("Error: %s file is not a zip file"%filename)
+                flash("Error: %s file is not a zip file %s"%(filename, zip_exist))
             return redirect(url_for('createexam'))
         else:
             flash("Error: file format is not allowed")
         return redirect("createexam")
+
             # flash("Test Created: %s"%test)
 # ==================================================
                     # UNIT Tests
