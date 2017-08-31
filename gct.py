@@ -554,10 +554,12 @@ def generateQuestionPaper(path):
                                 shuffle(serialno)
                                 subs["link"]=video_list[serialno[0]]["link"]
                                 subs["questions"]=video_list[serialno[0]]["questions"]
-                                i=0
-                                for qn in subs["questions"]:
+                                # i=0
+                                # for qn in subs["questions"]:
+                                #     subs["questions"][i]["serialno"]=i+1
+                                #     i +=1
+                                for i in range(0, cnt):
                                     subs["questions"][i]["serialno"]=i+1
-                                    i +=1
                             if types =="question" or types =="record":
                                 #print name
                                 json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
@@ -991,7 +993,8 @@ def buildquizobject(email,isRandomized,json_data,test_name):
                                 if key == "questions":
                                     for q in subs[key]:
                                         if not isRandomized:
-                                            add_to_randomize(email,q['serialno'], q["id"],test_name)
+                                            # app.logger.info("%s %s %s %s"%(email,q['serialno'], q["id"],test_name))
+                                            add_to_randomize(email,q['serialno'] if 'serialno' in q else None, q["id"],test_name)
                                         #     r = Randomize.query.filter_by(user1 = session['user']['email'], qno = q["id"]).all()
                                         q1 = Response.query.filter_by(emailid=email, currentQuestion=q["id"], test_name=test_name).order_by(Response.time.desc()).first()
                                         # app.logger.info("respponse is %s "%q1)
@@ -1583,13 +1586,9 @@ def logout():
     # session.pop('TestID', None)
     return redirect(url_for('login'))
 
-def sendMail(encode='Testing', code='Testing', email='rguktemailtest@gmail.com'):
+def sendMail(encode='Testing', code='Testing', email='rguktemailtest@gmail.com', body='body'):
     try:
         #app.logger.debug("send mail function")
-        body = """Dear Student,<br> This email message is sent by the online quiz portal.
-        By clicking the link below you are verifying that this email belongs to you and your account will be activated.
-        Click on the link below and follow the instructions to complete the registration process.
-        <h1><a href=%s/verify/%s/%s>Verify</a></h1> """ % (request.host, encode, code)
         #app.logger.info(body)
         response = requests.post(
             "https://api.mailgun.net/v3/"+app.config['NUZVID_MAIL_GUN_DOMAIN']+"/messages",
@@ -1633,8 +1632,12 @@ def registration():
                 encode = base64.b64encode(email.encode()).decode()
                 code = hashlib.md5(code.encode('utf-8')).hexdigest()
                 #app.logger.info("Verifying code for %s with code %s"%(email, code))
-
-                sent = sendMail(encode, code, email)
+                body = """Dear Student,<br> This email message is sent by the online quiz portal.
+			By clicking the link below you are verifying that this email belongs to you and your account will be activated.
+			Click on the link below and follow the instructions to complete the registration process.
+			<h1><a href=%s/verify/%s/%s>Verify</a></h1> """ % (request.host, encode, code)
+ 
+                sent = sendMail(encode, code, email, body)
                 if sent:
                     #app.logger.debug("an email has been sent to your email address "+email+". Please go to your inbox and click on the link to verify and activate your account")
                     message = "An email has been sent to your email address "+email+". Please go to your inbox and click on the link to verify and activate your account"
@@ -1654,6 +1657,46 @@ def registration():
             message_staus = "danger"
 
         return render_template('registration.html', message=message, status=message_staus)
+
+@app.route('/forgot_password', methods=["GET", "POST"])
+def forgot_password():
+    if request.method=="GET":
+        return render_template('forgot_password.html')
+    elif request.method=="POST":
+        app.logger.info('in post forgot_password')
+
+        message = ""
+        message_staus = ""
+        login_log.debug("post registration Form")
+
+        email = request.form["email"]
+        user = db.session.query(Users).filter_by(emailid=email).first() 
+        # if email[-9:] != ".rgukt.in":
+        #     message = "Email ID must be from RGUKT"
+        #     message_staus = "danger"
+
+        if user:
+
+                encode = base64.b64encode(email.encode()).decode()
+                code = user.password
+                body = """Dear Student,<br> This email message is sent by the online quiz portal.
+                Click on the link below to reset password.
+	        <h1><a href=%s/verify/%s/%s>Reset Password</a></h1> """ % (request.host, encode, code)
+ 
+                sent = sendMail(encode, code, email, body)
+                if sent:
+                    message = "An email has been sent to your email address "+email+". Please go to your inbox and click on the link to reset your password for quiz portal."
+                    message_staus = "success"
+                else:
+                    #app.logger.debug("Something went wrong in sending verification mail, please try again")
+                    message = "Something went wrong in sending verification mail, please try again"
+                    message_staus = "danger"
+        else:
+            message = str(email) + " not exists, Please provide a valid email address which you used for registration."
+            message_staus = "danger"
+
+        return render_template('registration.html', message=message, status=message_staus)
+
 
 def update_password(user, password):
     try:
@@ -2576,8 +2619,11 @@ def get_all_student_details(test_name):
     student_table = {}
     for student in test_students:
         student = get_student_details(student.emailid)
-        if student.email not in student_table:
-            student_table[student.email] = {"name": student.name, "rollno":student.rollno}
+        try:
+            if student.email not in student_table:
+                student_table[student.email] = {"name": student.name, "rollno":student.rollno}
+        except Exception as e:
+            app.logger.info(e)
     # app.logger.info(json.dumps(student_table))
     return json.dumps(student_table)
 
