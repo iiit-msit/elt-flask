@@ -1,3 +1,4 @@
+
 {%extends "base.html"%}
 {%block title%}View Results{%endblock%}
 {%block script%}
@@ -20,7 +21,7 @@
 					<th>File</th>
 					<th>Content Analytics</th>
 					<th>Content Analytics Summary</th>
-					<th>Publish Results</th>
+					<th>Plagiarism Data</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -34,7 +35,7 @@
 						<td><a href="/downloadTestResultsSummary/{{test.name}}" class="btn btn-sm btn-primary">Download Summary as CSV</a></td>
 						<td><a href="/contentAnalytics/{{test.name}}" class="btn btn-sm btn-primary">Content Analytics</a></td>
 						<td><a href="/contentAnalyticsSummary/{{test.name}}" class="btn btn-sm btn-primary">Content Analytics Summary</a></td>
-						<td><a href="/releaseResults/{{test.name}}" class="btn btn-sm btn-primary">Publish Results</a></td>
+						<td><a href="/plagiarismData/{{test.name}}" class="btn btn-sm btn-primary">Plagiarism Data</a></td>
 					</tr>
 				{%endfor%}
 			</tbody>

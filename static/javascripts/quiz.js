@@ -12,6 +12,7 @@ var quizModel = {
 			// get questions from the json and assign it to questions array
 			// add section and subsection to the question object
 			var questionsArray = [];
+			var questionsArrayWithAnswers = [];
 			$.each(data, function (key, value) {
 
 				/*
@@ -42,12 +43,19 @@ var quizModel = {
 												return 0;
 											}
 											value.sort(compare);
+											value1 = {};
 											$.each(value, function(index, value){
 												value.section = sections.name;
 												value.subsections = subsections;
 												value.options = Randomiser.shuffle(value.options);
-												if (quizModel.quizStatus != "END")
-													value.options = (value.options).map(function(d) { return d.substring(1); });
+												/*
+												*  Figuring this out was a big pain and so be the optimization.
+												*  Increment or remove counter after you are done.
+												*  hours_wasted = 4
+												*/
+												var valuecopy = $.extend({}, value)
+												questionsArrayWithAnswers.push(valuecopy);
+												value.options = (value.options).map(function(d) { return d.substring(1); });
 												questionsArray.push(value);
 											});
 										}
@@ -59,7 +67,8 @@ var quizModel = {
 				}
 			});
 			this.questions = questionsArray;
-
+			this.questionswithanswers = questionsArrayWithAnswers;
+			// console.log(this.questionswithanswers)
 			/*
 			 *	Set the question index to the first question that is not attempted
 			 */
@@ -150,6 +159,7 @@ var octopus = {
 			var submittedQuestion = $.extend({},quizModel.question);
 
 			if(quizModel.question.subsections.types == 'essay')
+				// octopus.autosaveContent(selectedAnswer,Date.now()/(1000*60),analytics);
 				questionView.stopautosave();
 
 			submittedQuestion.subsections = undefined;
@@ -158,7 +168,7 @@ var octopus = {
 			//console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
 				.done(function(data){
-					////console.log("Success:" + data);
+					console.log("Success:" + data);
 					data = JSON.parse(data)
 					if(data.testEnd) {
 						quizModel.testEnd = true;
@@ -189,7 +199,7 @@ var octopus = {
 			//console.log(data);
 			$.post("/autosaveEssay", data)
 				.done(function(data){
-					////console.log("Success:" + data);
+					console.log("Success:" + data);
 				});
 		},
 		getResults : function() {
@@ -383,8 +393,10 @@ var questionView = {
 				var audiolink = $("#audiolink").val();
 				if (q.subsections.types == "essay") {
 					selectedAnswer = $("textarea").val();
+					analytics = KeystrokeAnalaytics.render();
 					if (!selectedAnswer)
 						selectedAnswer = "skip";
+					// octopus.autosaveContent(selectedAnswer,Date.now()/(1000*60),analytics);
 				}
 
 				if (q.subsections.types == "record") {
@@ -513,7 +525,13 @@ var questionView = {
 				////console.log("word count" + wordCount);
 				$("#words").html("Word Count: " + wordCount);
 			});
-			KeystrokeAnalaytics.init();
+			var test_name = octopus.test_name;
+			var qid = quizModel.question.id;
+
+			$.get( "/getPlagiarismDataStudent/"+test_name+"/"+qid, function( data ) {
+				KeystrokeAnalaytics.init(data);
+			});
+
 		},
 
 		displayVideo : function() {
@@ -691,7 +709,6 @@ var resultView = {
 			 *  Toggle this variable to switch between showing/hiding results page
 			 */
 			show_result = octopus.show_result;
-			//console.log("show_result "+show_result);
 			this.render(show_result);
 
 		},
@@ -699,14 +716,6 @@ var resultView = {
 		render : function(show_result) {
 			//progressView.init();
 			//progressView.reset();
-			if (!show_result){
-				this.sectionName.html("You have completed the test.<br><br>");
-				this.sectionName.append("Exam Admin will release the results soon. Check your email to get notified.<br><br>");
-				this.questionPane.html('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a>');
-				this.navBar.hide();
-				this.questionNote.hide();
-				return false;
-			}
 			this.sectionName.html("You have completed the test.");
 			octopus.getResults();
 			this.questionPane.html("");
@@ -820,11 +829,19 @@ var resultView = {
 			});
 
 			this.questionNote.html('<p class="lead">Your total score is: ' + totalScore + '</p>');
-			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
+			// this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a><a href="/readingtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Reading Task</a><a href="/listeningtask/'+octopus.test_name+'" style="margin:5px" class="btn btn-primary ">View Listening Task</a>');
+			this.questionPane.append('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a>');
 			//this.questionPane.hide();
 			this.navBar.hide();
 			this.finalScore = totalScore;
 			this.spklink = spklink;
+			if (show_result == "False"){
+				this.sectionName.html("You have completed the test.<br><br>");
+				this.sectionName.append("Exam Admin will release the results soon. Check your email to get notified.<br><br>");
+				this.questionPane.html('<a href="/" style="margin:5px" class="btn btn-primary ">Back to Dashboard</a>');
+				this.navBar.hide();
+				this.questionNote.hide();
+			}
 			//console.log(this.finalScore);
 		},
 };

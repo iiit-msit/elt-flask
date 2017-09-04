@@ -527,6 +527,7 @@ def getQuestionPaper(qid_list,path):
                           json_temp["section"][3]["subsection"][0]["questions"][q]["serialno"] = qid_list[qid]
                           q += 1
     # app.logger.info("json template %s %s"%(json_temp, path))
+    app.logger.info("Get QP %s",json_temp)
     return json_temp
 
 def generateQuestionPaper(path):
@@ -611,6 +612,7 @@ def generateQuestionPaper(path):
                                   subs["questions"][k]["serialno"]=k+1
                                   k +=1
     #ss=json.dumps(json_temp)
+    app.logger.info("Generate QP %s",json_temp)
     return json_temp
 
 def getAnswer(qid,path):
@@ -1402,6 +1404,7 @@ def endtest(email=None):
         if not learningcenter:
             learningcenter = ""
         updatetestdetails(data1,testend,score,learningcenter)
+    return ""
 
 def get_rollno(email=None):
     if email:
@@ -1420,9 +1423,12 @@ def startquiz(test_name):
         test = Tests.query.filter_by(name=test_name).first()
         mode = test.test_mode
         show_result = False
-        studentTest = StudentTests.query.filter(StudentTests.emailid==email and StudentTests.test_name==testid and StudentTests.result_email_sent.is_(True)).first()
+        studentTest = StudentTests.query.filter_by(emailid=email, test_name=test_name, result_email_sent=True).first()
         if studentTest:
             show_result = studentTest.result_email_sent
+        if session['user']['role']=="admin":
+            show_result = True
+
         app.logger.info("startquiz for %s with mode %s and show result %s"%(test_name, mode, show_result))
         return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode, show_result=show_result)
     return redirect("/")
@@ -1636,7 +1642,7 @@ def registration():
 			By clicking the link below you are verifying that this email belongs to you and your account will be activated.
 			Click on the link below and follow the instructions to complete the registration process.
 			<h1><a href=%s/verify/%s/%s>Verify</a></h1> """ % (request.host, encode, code)
- 
+
                 sent = sendMail(encode, code, email, body)
                 if sent:
                     #app.logger.debug("an email has been sent to your email address "+email+". Please go to your inbox and click on the link to verify and activate your account")
@@ -1670,7 +1676,7 @@ def forgot_password():
         login_log.debug("post registration Form")
 
         email = request.form["email"]
-        user = db.session.query(Users).filter_by(emailid=email).first() 
+        user = db.session.query(Users).filter_by(emailid=email).first()
         # if email[-9:] != ".rgukt.in":
         #     message = "Email ID must be from RGUKT"
         #     message_staus = "danger"
@@ -1682,7 +1688,7 @@ def forgot_password():
                 body = """Dear Student,<br> This email message is sent by the online quiz portal.
                 Click on the link below to reset password.
 	        <h1><a href=%s/verify/%s/%s>Reset Password</a></h1> """ % (request.host, encode, code)
- 
+
                 sent = sendMail(encode, code, email, body)
                 if sent:
                     message = "An email has been sent to your email address "+email+". Please go to your inbox and click on the link to reset your password for quiz portal."
@@ -2758,6 +2764,97 @@ def get_student_details(student):
 @admin_login_required
 def getAllStudentDetails(test_name):
     return get_all_student_details(test_name)
+
+
+# Plagiarism in Essay Type Questions
+def get_plagiarism_data(test_name=None):
+
+    result = EssayTypeResponse.query.filter_by(test_name=test_name).all()
+    students = json.loads(get_all_student_details(test_name))
+
+    table = {}
+
+    for entry in result:
+        # student_temp = {"name":None, "email":None, "rollno":None, "qid":None, "answer":None, "analytics":None}
+        student_temp = {"qid":None, "answer":None, "analytics":None}
+        emailid = entry.useremailid
+
+        if emailid not in table:
+            table[emailid] = []
+
+        if emailid in students:
+            # student_temp["name"] = students[emailid]['name']
+            # student_temp["email"] = emailid
+            # student_temp["rollno"] = students[emailid]['rollno']
+            student_temp["qid"] = entry.qid
+            student_temp["answer"] = entry.ansText
+            student_temp["analytics"] = entry.analytics
+
+        table[emailid].append(student_temp)
+
+    return table
+
+def render_csv_from_plagiarism_data(data):
+        csvList = []
+        header = [
+                    "name",
+                    "rollno",
+                    "email",
+                    "qid",
+                    "answer",
+                    "analytics",
+                ]
+
+        csvList.append(header)
+
+        for student_object in data:
+            student = data[student_object]
+            for student_response in student:
+                row = [student_response["name"],
+                        student_response["rollno"],
+                        student_response["email"],
+                        student_response["qid"],
+                        student_response["answer"],
+                        student_response["analytics"]
+                    ]
+
+                csvList.append(row)
+
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerows(csvList)
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=Plagiarism_Data.csv"
+        output.headers["Content-type"] = "text/csv"
+        return output
+
+
+@app.route('/getPlagiarismDataStudent/<test_name>/<qid>')
+@login_required
+def getPlagiarismDataStudent(test_name,qid):
+    if request.method == 'GET':
+        result = EssayTypeResponse.query.filter_by(test_name=test_name, useremailid=session['user']['email'], qid=qid).first()
+        if result:
+            return json.dumps(result.analytics)
+        else:
+            return json.dumps({})
+
+@app.route('/plagiarismData/<test_name>')
+@admin_login_required
+def plagiarismData(test_name):
+    if request.method == 'GET':
+        table = get_plagiarism_data(test_name)
+        # data = table.values()
+        # return render_csv_from_plagiarism_data(table)
+        # table = sorted([(k, table[k]) for k in table], key = lambda i: i[0])
+        table = json.dumps(table, sort_keys=True)
+        # si = io.StringIO()
+        # cw = csv.writer(si)
+        # cw.writerows(table)
+        output = make_response(table)
+        output.headers["Content-Disposition"] = "attachment; filename=Plagiarism_Data.json"
+        output.headers["Content-type"] = "application/json"
+        return output
 
 def get_test_responses_as_dict(testid=None):
 

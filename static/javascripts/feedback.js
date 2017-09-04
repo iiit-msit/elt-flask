@@ -24,9 +24,11 @@ var feedbackView={
 				});
 			},
 			getQid : function(qid){
-				$.each(quizModel.questions, function(index, value) {
+				// console.log(quizModel.questionswithanswers);
+				// console.log(quizModel.questions);
+				$.each(quizModel.questionswithanswers, function(index, value) {
 					if (value.id == qid){
-						console.log(value);
+						// console.log(value);
 						feedbackView.render(value);
 						return;
 					}
@@ -76,14 +78,14 @@ var feedbackView={
 				}
 				this.progressbox.append('<br><br><br><h4><b>Feedback:</b></h4><div style="display: flex">');
 				if (q.subsections.types == "video"){
-					this.progressbox.append('<br>Please watch the video between the time stamps specified to identify the correct answer for the given question.<br><b>Time stamp:</b>' + q.answer + '<br>');
+					this.progressbox.append('<br>Please watch the video between the time stamps specified to identify the correct answer for the given question.<br><br><b>Time stamp:</b>' + q.answer + '<br>');
 				}
 				else if(q.subsections.types == "passage"){
 					if(q.subsections.name=="A2-Reading"){
 						this.progressbox.append('<br>' + q.answer + '<br>');
 					}
 					else{
-						this.progressbox.append('<br><div><image src="img/arrow_r.png" width="55" height="25"> The highlighted text in the passage is the pointer to the correct option.<br><br><b>Following is the text from the passage that indicates the answer for the given question:</b><br><image src="img/bullet_h.png" width="25",height="10">' + q.answer + '<br></div>');
+						this.progressbox.append('<br><div><b>Following is the text from the passage that indicates the answer for the given question:</b><br><br>' + q.answer + '<br></div>');
 					}
 				}
 				else{
@@ -117,12 +119,15 @@ var feedbackView={
 			displayOptions : function(data) {
 				var q =data;
 				var optionsHTML = '';
+				var checked = false;
 				for (var i = 0; i < q.options.length; i++) {
 					var optionText = q.options[i].substring(1, q.options[i].length);
 					optionsHTML += '<div class="radio">';
 					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
-					if(q.status && q.responseAnswer == optionText)
+					if(q.status && q.responseAnswer == optionText){
 						optionsHTML += 'checked';
+						checked = true;
+					}
 					if (q.options[i].substring(0,1)=="="){
 						optionsHTML += ' disabled><mark style="background-color: #99FF99;color: black;">' + optionText + '</mark></label>';
 					}
@@ -132,7 +137,11 @@ var feedbackView={
 					optionsHTML += '</div>';
 				}
 				optionsHTML += '<div class="radio">';
-				optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip" disabled>Skip Question</label>';
+				if (!checked){
+					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip" checked disabled>Skip Question</label>';
+				}else{
+					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip" disabled>Skip Question</label>';
+				}
 				optionsHTML += '</div>';
 				this.questionPane.append(optionsHTML);
 			},

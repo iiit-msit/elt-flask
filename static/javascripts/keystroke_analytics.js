@@ -3,14 +3,14 @@
  */
 
 var KeystrokeAnalaytics = {
-  init: function(){
+  init: function(logs){
     this.textarea = document.getElementById("essayinput");
-    this.logs = {};
+    this.logs = JSON.parse(logs);
     this.lastUpdate = Date.now()
     this.getPrinatableEvents();
   },
+
   getPrinatableEvents: function(){
-    console.log("im in")
     inp = this.textarea;
     logs = this.logs;
     this.currentText = "";
@@ -34,7 +34,7 @@ var KeystrokeAnalaytics = {
         }, inp));
 
     /*
-    **  Listen to printable events of input field
+    **  Listen to printable events of input field. Happy debugging
     */
 
     else
@@ -57,14 +57,12 @@ var KeystrokeAnalaytics = {
               newTextIndex++;
             }
             currentTextIndex++;
-            console.log(result, addedWord);
         }
         key = result;
         operation = "removed"
       }
       else{
         key = newText.replace(currentText,'');
-        // console.log((newText.match(new RegExp(key, "g")) || []).length);
         if (key.length > 1 && (newText.match(new RegExp(key, "g")) || []).length > 1)
           status = "copied"
         operation = "added"
@@ -77,11 +75,14 @@ var KeystrokeAnalaytics = {
       else
         timetaken = Math.abs(timestamp - lastUpdate)/1000
 
-      logs[timestamp] = {"previoustext":currentText, "text":newText, "status":status, "chars": key.length, "operation":operation, "timetaken":timetaken.toString()+" s"}
+      // logs[timestamp] = {"previoustext":currentText, "text":newText, "status":status, "chars": key.length, "operation":operation, "timetaken":timetaken.toString()+" s"}
+      logs[timestamp] = {"previoustext":currentText, "currenttext":newText, "timetaken":timetaken.toString()+" s"}
       currentText = this.value;
       lastUpdate = timestamp;
     }, false);
-
+    /*
+    **  Now that you understood :input: is not right one, good time detecting key combos!
+    */
   },
   render: function(){
     const ordered = {};
@@ -89,7 +90,6 @@ var KeystrokeAnalaytics = {
       ordered[key] = this.logs[key];
     });
 
-    console.log(JSON.stringify(ordered));
     return this.logs;
   }
 }
