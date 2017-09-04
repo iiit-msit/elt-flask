@@ -65,7 +65,7 @@ app.config.from_object(BaseConfig)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/multiple_tests'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://gct:gct123@oes.rguktn.ac.in/gct'
 app.config.from_object(EmailConfig)
-# app.logger.info("app key is %s"%app.config['NUZVID_MAIL_GUN_KEY'])
+# app.logger.info("app key is %s"%app.config['MAIL_GUN_KEY'])
 db = SQLAlchemy(app)
 
 # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -1597,9 +1597,9 @@ def sendMail(encode='Testing', code='Testing', email='rguktemailtest@gmail.com',
         #app.logger.debug("send mail function")
         #app.logger.info(body)
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['NUZVID_MAIL_GUN_DOMAIN']+"/messages",
-            auth=("api", app.config['NUZVID_MAIL_GUN_KEY']),
-            data={"from": "RGUKT QUIZ <news@"+app.config['NUZVID_MAIL_GUN_DOMAIN']+">",
+            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
+            auth=("api", app.config['MAIL_GUN_KEY']),
+            data={"from": "RGUKT QUIZ <news@"+app.config['MAIL_GUN_DOMAIN']+">",
                   "to": [email],
                   "subject": 'Account Verification for RGUKT QUIZ',
                   "text": '',
@@ -1723,9 +1723,9 @@ def send_email_with_password(email, password):
         """ % (request.host, email, password)
         #app.logger.info(body)
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['NUZVID_MAIL_GUN_DOMAIN']+"/messages",
-            auth=("api", app.config['NUZVID_MAIL_GUN_KEY']),
-            data={"from": "RGUKT QUIZ <news@"+app.config['NUZVID_MAIL_GUN_DOMAIN']+">",
+            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
+            auth=("api", app.config['MAIL_GUN_KEY']),
+            data={"from": "RGUKT QUIZ <news@"+app.config['MAIL_GUN_DOMAIN']+">",
                   "to": [email],
                   "subject": 'Account Verification for RGUKT QUIZ',
                   "text": '',
@@ -2455,9 +2455,9 @@ def sendNotifyMail(body="None", email='rguktemailtest@gmail.com', test_name=None
             app.logger.info("To send mail and mark column as mail sent a test_name must be provided.")
             return False
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['NUZVID_MAIL_GUN_DOMAIN']+"/messages",
-            auth=("api", app.config['NUZVID_MAIL_GUN_KEY']),
-            data={"from": "RGUKT QUIZ <news@"+app.config['NUZVID_MAIL_GUN_DOMAIN']+">",
+            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
+            auth=("api", app.config['MAIL_GUN_KEY']),
+            data={"from": "RGUKT QUIZ <news@"+app.config['MAIL_GUN_DOMAIN']+">",
                   "to": [email],
                   "subject": 'RGUKT QUIZ LINK' if column == "invitation_email_sent" else "RGUKT QUIZ RESULT LINK",
                   "text": '',

@@ -5,8 +5,8 @@ import os
 
 
 class EmailConfig(object):
-    NUZVID_MAIL_GUN_DOMAIN = env.NUZVID_MAIL_GUN_DOMAIN
-    NUZVID_MAIL_GUN_KEY = env.NUZVID_MAIL_GUN_KEY
+    MAIL_GUN_DOMAIN = env.NUZVID_MAIL_GUN_DOMAIN
+    MAIL_GUN_KEY = env.NUZVID_MAIL_GUN_KEY
 
 class BaseConfig(object):
     SECRET_KEY = env.SECRET_KEY
