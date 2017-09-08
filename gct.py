@@ -744,9 +744,20 @@ def get_audio(test_name, user=None):
     if not event:
         return "Audio not found"
     # app.logger.info(event.blob1)
-    return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
-    # return '<audio src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" controls></audio>'
+    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
+    return '<audio src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" controls></audio>'
 
+@app.route('/get_audio_by_qid/<test_name>', methods=["GET"])
+@login_required
+def get_audio_by_qid(test_name, user=None, qid=None):
+    #app.logger.info("get audio called")
+    user = user if user else session['user']['email']
+    event = UserAudio.query.filter_by(user=user, test_name=test_name).order_by(UserAudio.time.desc()).all()
+    if len(event) < qid+1:
+        return "Audio not found"
+    # app.logger.info(event.blob1)
+    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
+    return '<audio controls><source src="data:audio/webm;base64,'+base64.b64encode(event[qid].blob1).decode('utf-8')+'" type="audio/webm"></audio>'
 
 @app.route('/', methods=['GET'])
 @login_required
@@ -1217,6 +1228,12 @@ def getResultOfStudent(email=None, test_name=None):
     s1="0"
     for q in q1:
         if q.responsetime is not None:
+            if 200 < int(q.currentQuestion) < 300:
+                s1=q.currentQuestion
+                data = get_audio_by_qid(test_name,email,int(q.currentQuestion)-201)
+                submittedans = data
+                question = {"user":email,"submittedans":submittedans, "q_score":q.q_score,"currentQuestion":s1,"responsetime":q.responsetime, "ip":q.ip}
+                question_records.append(question)
             if q.currentQuestion != s1 :
                 s1=q.currentQuestion
                 #totalscore=q.responsetime+q.q_score

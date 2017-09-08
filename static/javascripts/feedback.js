@@ -119,14 +119,12 @@ var feedbackView={
 			displayOptions : function(data) {
 				var q =data;
 				var optionsHTML = '';
-				var checked = false;
 				for (var i = 0; i < q.options.length; i++) {
 					var optionText = q.options[i].substring(1, q.options[i].length);
 					optionsHTML += '<div class="radio">';
 					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
-					if(q.status && q.responseAnswer == optionText){
-						optionsHTML += 'checked';
-						checked = true;
+					if(q.status && (q.responseAnswer == optionText)){
+						optionsHTML += ' checked';
 					}
 					if (q.options[i].substring(0,1)=="="){
 						optionsHTML += ' disabled><mark style="background-color: #99FF99;color: black;">' + optionText + '</mark></label>';
@@ -136,13 +134,6 @@ var feedbackView={
 					}
 					optionsHTML += '</div>';
 				}
-				optionsHTML += '<div class="radio">';
-				if (!checked){
-					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip" checked disabled>Skip Question</label>';
-				}else{
-					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip" disabled>Skip Question</label>';
-				}
-				optionsHTML += '</div>';
 				this.questionPane.append(optionsHTML);
 			},
 		displayPassage : function(data) {

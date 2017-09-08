@@ -6,10 +6,10 @@
 	</head>
  	<body>
  		<div id="recordercontainer">
-	 		<div class="container"> 
-		 		<div> 
+	 		<div class="container">
+		 		<div>
 			 		<h3>Record: </h3>
-			 		<hr> 
+			 		<hr>
 			 		<button class="btn btn-primary" id="record">Record</button>
 			 		<button class="btn btn-primary" id="stop" disabled>Stop</button>
 		 		</div>
@@ -73,7 +73,7 @@
 			            recorder.stop();
 			        });
 			        $("#save").click(function() {
-			        	
+
 			            // console.log(blobkey.type);
 			            var formData = new FormData();
 			              formData.append('test_name', "{{test_name}}")
@@ -99,7 +99,7 @@
 					        	console.log("Error occured");
 
 					        	// console.log(msg);
-					        }	
+					        }
 					      });
 			        });
 			        setTimeout(() => {

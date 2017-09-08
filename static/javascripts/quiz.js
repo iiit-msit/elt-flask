@@ -165,10 +165,10 @@ var octopus = {
 			submittedQuestion.subsections = undefined;
 			submittedQuestion.test_name = octopus.test_name;
 			data = JSON.stringify({jsonData: submittedQuestion});
-			//console.log("submittedquestion:" + data);
+			console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
 				.done(function(data){
-					console.log("Success:" + data);
+					// console.log("Success:" + data);
 					data = JSON.parse(data)
 					if(data.testEnd) {
 						quizModel.testEnd = true;
@@ -771,8 +771,8 @@ var resultView = {
 				var td6 = document.createElement("TD");
 				if(section=="E3-Speaking"){
 					// alert("im in");
-					var t6 = document.createElement("audio");
-					t6.setAttribute("controls", "controls")
+					var t6 = document.createElement("span");
+					// t6.setAttribute("controls", "controls")
 					$.ajax({
 				        url: "/get_audio/"+octopus.test_name,
 				        type: 'GET',
@@ -781,7 +781,8 @@ var resultView = {
 				        success: function(data) {
 				        	//console.log(["Audio fetch Success"]);
 				        	spklink = value.submittedans;
-							t6.setAttribute("src", 'data:audio/webm;base64,'+data);
+							// t6.setAttribute("src", 'data:audio/webm;base64,'+data);
+									t6.innerHTML = data;
 				        },
 				        error: function(msg){
 				        	$("#message").text("Audio fetching failed");
