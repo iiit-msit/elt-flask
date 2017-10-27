@@ -42,7 +42,7 @@ import sys
 app = Flask(__name__, static_url_path='')
 
 # Check Configuring Flask-Caching section for more details
-cache = Cache(app, config={'CACHE_TYPE': 'null'})
+# cache = Cache(app, config={'CACHE_TYPE': 'Simple'})
 # cache.init_app(app)
 
 app.config['UPLOAD_FOLDER'] = APP_STATIC_JSON
@@ -51,7 +51,7 @@ app.debug_log_format = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - 
 #formatter = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 # logHandler = logging.FileHandler('logs/login.log')
 log_path = os.path.join(os.getcwd(),'logs.log')
-log_path = '/home/msit/Desktop/oes_logs/logs.log'
+# log_path = '/home/msit/Desktop/oes_logs/logs.log'
 print(log_path)
 logHandler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
 #logHandler = logging.basicConfig(stream=sys.stderr)
@@ -740,7 +740,8 @@ def audio_upload():
         if useraudio:
             return app.response_class(base64.b64encode(useraudio), mimetype="audio/webm")
         else:
-            return "Record Not Saved.\n\n"+str(useraudio)
+            return "Record Not Saved.\n\n"
+            # return "Record Not Saved.\n\n"+str(useraudio)
     else:
         return "Audio not recieved from user."
 

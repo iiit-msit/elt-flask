@@ -98,11 +98,22 @@
 					        data: formData,
 					        contentType: false,
 					        processData: false,
-					        success: function(url) {
-					        	console.log("Success occured");
-					        	$("#message").text("Audio upload success");
+					        success: function(url, status, xhr) {
+					        	// console.log("Success occured");
 				        		// $("audio").attr("src", 'https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3');
-				        		$("audio").attr("src",'data:audio/webm;base64,'+url);
+				        		var ct = xhr.getResponseHeader("content-type") || "";
+				        		// console.log(ct);
+							    if (ct.indexOf('webm') > -1) {
+							      //do something
+				        		// console.log(ct);
+							      	
+					        		$("#message").text("Audio upload success");
+				        			$("audio").attr("src",'data:audio/webm;base64,'+url);
+							    }
+							    else{
+					        		$("#message").text(url);
+
+							    }
 					          // console.log(url);
 
 					        },
