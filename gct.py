@@ -6,6 +6,8 @@ from flask_caching import Cache
 from cerberus import Validator
 from sqlalchemy import cast, func, distinct
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import asc
+from sqlalchemy import Integer
 from sqlalchemy.dialects.postgresql import JSON
 from functools import wraps
 from datetime import datetime, timedelta
@@ -357,11 +359,13 @@ class UserAudio(db.Model):
     test_name = db.Column(db.String(180))
     blob1 = db.Column(db.LargeBinary)
     time = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    qid = db.Column(db.String(80))
 
-    def __init__(self, user, blob1, test_name):
+    def __init__(self, user, blob1, test_name, qid):
         self.user = user
         self.test_name = test_name
         self.blob1 = blob1
+        self.qid = qid
 
 class TestAudio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -684,33 +688,38 @@ def error(error):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    app.logger.info(root+"/content/DEP/08-08-2017/")
-    return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
-    # return get_view_details_complete("Daily English Practise 1")
-    email="ss@fju.us"
-    password="ss"
-    password = hashlib.md5(password.encode('utf-8')).hexdigest()
-    verified=True
-    user_type="student"
-    user = Users(email, password, user_type, verified)
-    db.session.add(user)
-    db.session.commit()
-    # response = sendNotifyMail()
-    # res = Response(serialno="123",emailid="email",name="email",currentQuestion=str("123"),submittedans="submittedans",responsetime=1.2,q_status="tre",q_score=1)
-    # db.session.add(res)
-    # app.logger.info(["result object", res, res.get_q_section])
-    # res = db.session.query(Response).filter_by(get_q_section="Reading")
-    # app.logger.info(["result object", res, res.get_q_section])
-    #app.logger.info(['path', ])
-    result = [request.headers.get('X-Forwarded-For', request.remote_addr),
-        request.environ['REMOTE_ADDR'],
-        request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
-    app.logger.info(result)
-    return json.dumps(result)
+    # app.logger.info(root+"/content/DEP/08-08-2017/")
+    # return send_from_directory(root+"/content/DEP/08-08-2017/", "listening.mp4")
+    # # return get_view_details_complete("Daily English Practise 1")
+    # email="ss@fju.us"
+    # password="ss"
+    # password = hashlib.md5(password.encode('utf-8')).hexdigest()
+    # verified=True
+    # user_type="student"
+    # user = Users(email, password, user_type, verified)
+    # db.session.add(user)
+    # db.session.commit()
+    # # response = sendNotifyMail()
+    # # res = Response(serialno="123",emailid="email",name="email",currentQuestion=str("123"),submittedans="submittedans",responsetime=1.2,q_status="tre",q_score=1)
+    # # db.session.add(res)
+    # # app.logger.info(["result object", res, res.get_q_section])
+    # # res = db.session.query(Response).filter_by(get_q_section="Reading")
+    # # app.logger.info(["result object", res, res.get_q_section])
+    # #app.logger.info(['path', ])
+    # result = [request.headers.get('X-Forwarded-For', request.remote_addr),
+    #     request.environ['REMOTE_ADDR'],
+    #     request.environ.get('HTTP_X_REAL_IP', request.remote_addr)]
+    # app.logger.info(result)
+    # return json.dumps(result)
 
-def store_audio(user, blob, test_name):
+    #result = UserAudio.query.filter_by(test_name='TOEFL 09-09-2017').all()
+    responses = Response.query.filter_by(test_name='TOEFL 09-09-2017').all()
+    app.logger.info(['ip responses', responses])
+    return render_template('error.html', responses=responses)
+def store_audio(user, blob, test_name, qid):
     try:
-        useraudio = UserAudio(user=user, blob1=blob, test_name=test_name)
+        app.logger.info("Result of store_audio. User: %s Test_name: %s Qid: %s"%(user, test_name, qid))
+        useraudio = UserAudio(user=user, blob1=blob, test_name=test_name, qid=qid)
         db.session.add(useraudio)
         db.session.commit()
         return useraudio.blob1
@@ -723,10 +732,11 @@ def store_audio(user, blob, test_name):
 def audio_upload():
     file = request.files['file']
     test_name = request.form['test_name']
+    qid = request.form['qid']
     app.logger.info("test name in audio upload %s"%(test_name))
     user=session['user']['email']
     if file:
-        useraudio = store_audio(user, file.read(), test_name)
+        useraudio = store_audio(user, file.read(), test_name, qid)
         if useraudio:
             return app.response_class(base64.b64encode(useraudio), mimetype="audio/webm")
         else:
@@ -747,17 +757,143 @@ def get_audio(test_name, user=None):
     # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
     return '<audio src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" controls></audio>'
 
-@app.route('/get_audio_by_qid/<test_name>', methods=["GET"])
+@app.route('/get_audio_by_qid/<test_name>/<qid>', methods=["GET"])
 @login_required
-def get_audio_by_qid(test_name, user=None, qid=None):
-    #app.logger.info("get audio called")
+def get_audio_by_qid(test_name, qid, user=None):
+    app.logger.info("get audio called")
     user = user if user else session['user']['email']
-    event = UserAudio.query.filter_by(user=user, test_name=test_name).order_by(UserAudio.time.desc()).all()
-    if len(event) < qid+1:
+    event = UserAudio.query.filter_by(user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
+    if not event:
         return "Audio not found"
     # app.logger.info(event.blob1)
     # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
-    return '<audio controls><source src="data:audio/webm;base64,'+base64.b64encode(event[qid].blob1).decode('utf-8')+'" type="audio/webm"></audio>'
+    return '<audio controls><source src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" type="audio/webm"></audio>'
+
+def get_audio_by_qid1(test_name, qid, user=None):
+    # app.logger.info("get audio called")
+    user = user if user else session['user']['email']
+    event = UserAudio.query.filter_by(user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
+    if not event:
+        return False
+    # app.logger.info(event.blob1)
+    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
+    return True
+
+def get_sorted_test_responses_as_dict1(testid=None):
+
+        result = Response.query.filter_by(test_name=testid).all()
+
+        students = json.loads(get_all_student_details(testid))
+        questions = ""
+        # app.logger.info(students)
+        table = {}
+        for entry in result:
+            id = entry.id
+            name = entry.name
+            rollno = ""
+            emailid = entry.emailid
+            pin = entry.pin
+            testctime = entry.testctime
+            submittedans = entry.submittedans
+            responsetime = entry.responsetime
+            q_score = entry.q_score
+            q_status = entry.q_status
+            time = entry.time
+            currentQuestion = entry.currentQuestion
+            serialno = entry.serialno
+            audio_found = get_audio_by_qid1(testid, currentQuestion, emailid)
+            if emailid in students:
+                student = students[emailid]
+                name = student['name']
+                rollno = student['rollno']
+
+
+            if rollno not in table:
+                table[rollno] = {
+                    "rollno":rollno,
+                    "name":name,
+                    "emailid":emailid,
+                    "testctime":testctime,
+                    "count": 1
+                }
+
+            if currentQuestion is None:
+                continue
+
+            table[rollno].update({
+                            "Question_"+str(currentQuestion)+"_Submittedans":submittedans,
+                            "Question_"+str(currentQuestion)+"_Responsetime":convert_to_minutes(responsetime),
+                            "Question_"+str(currentQuestion)+"_Score":q_score,
+                            "Question_"+str(currentQuestion)+"_Status":q_status,
+                            "Question_"+str(currentQuestion)+"_Time":time,
+                            "Question_"+str(currentQuestion)+"_Audio_Found":audio_found,
+                            "Question_"+str(currentQuestion)+"":currentQuestion,
+                        })
+            table[rollno]['count'] += 1
+        # app.logger.info(table)
+        return table
+
+def render_sorted_csv_from_test_responses1(data, test_name):
+        csvList = []
+        header = [
+                    "name",
+                    "rollno",
+                    "emailid",
+                    "testctime",
+                ]
+        # app.logger.info(list(data)[0])
+
+        user = Randomize.query.filter_by(test_name=test_name).first()
+        if user:
+            Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).order_by(cast(Randomize.qno, Integer).asc()).all()
+            # app.logger.info(["number is ", Questions_count])
+            # return ""
+            count = 1
+            for i in Questions_count:
+                # app.logger.info("hi ra --> Question"+ str(i))
+                header.extend(
+                        [
+                            "Question_"+str(count)+"",
+                            "Question_"+str(count)+"_Score",
+                            "Question_"+str(count)+"_Submittedans",
+                            "Question_"+str(count)+"_Responsetime",
+                            "Question_"+str(count)+"_Status",
+                            "Question_"+str(count)+"_Time",
+                            "Question_"+str(count)+"_Audio_Found"
+                        ]
+                    )
+                count+=1;
+            csvList.append(header)
+
+            for csv_line in data:
+                #app.logger.info(csv_line)
+                row = [csv_line["name"],
+                        csv_line["rollno"],
+                        csv_line["emailid"],
+                        csv_line["testctime"]
+                        ]
+                for i in Questions_count:
+                    row.extend(
+                            [
+                                csv_line["Question_"+str(i.qno)+""] if "Question_"+str(i.qno)+"" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Score"] if "Question_"+str(i.qno)+"_Score" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Submittedans"] if "Question_"+str(i.qno)+"_Submittedans" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Responsetime"] if "Question_"+str(i.qno)+"_Responsetime" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Status"] if "Question_"+str(i.qno)+"_Status" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Time"] if "Question_"+str(i.qno)+"_Time" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Audio_Found"] if "Question_"+str(i.qno)+"_Audio_Found" in csv_line else "N/A",
+
+                            ]
+                        )
+                csvList.append(row)
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerows(csvList)
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
+        output.headers["Content-type"] = "text/csv"
+        return output
+
 
 @app.route('/', methods=['GET'])
 @login_required
@@ -1031,7 +1167,7 @@ def getquizstatus(email=None):
     question_ids = checkrandomizetable(email,test_name)
     if not isAllowed:
         app.logger.info("is not allowed %s"%isAllowed)
-        self.redirect("/")
+        return redirect(request.referrer)
     # check if user resumes the test and get/generate accordingly
     test = Tests.query.filter_by(name=test_name).first()
     path = ""
@@ -1069,7 +1205,7 @@ def addtestdetails(email=None,test=None,delays=None,test_name=None):
 
 #pending
 def updatetimeobj(td):
-    duration = 60*60
+    duration = 60*60*4
     if not td.testend:
         currTime = datetime.now()
         deltaTime = (currTime - td.lastPing).total_seconds()
@@ -1097,7 +1233,7 @@ def testtime(email=None):
     email = email if email else get_email_from_session()
     #app.logger.info(email)
     test_name = str(request.get_data(),'utf-8')
-    duration = 60 * 60
+    duration = 60 * 60 * 4
 
     td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
     #app.logger.info(td)
@@ -1228,9 +1364,9 @@ def getResultOfStudent(email=None, test_name=None):
     s1="0"
     for q in q1:
         if q.responsetime is not None:
-            if 200 < int(q.currentQuestion) < 300:
+            if 200 < int(q.currentQuestion) < 300 and q.currentQuestion!=s1:
                 s1=q.currentQuestion
-                data = get_audio_by_qid(test_name,email,int(q.currentQuestion)-201)
+                data = get_audio_by_qid(test_name,q.currentQuestion,email)
                 submittedans = data
                 question = {"user":email,"submittedans":submittedans, "q_score":q.q_score,"currentQuestion":s1,"responsetime":q.responsetime, "ip":q.ip}
                 question_records.append(question)
@@ -2981,6 +3117,127 @@ def render_csv_from_test_responses(data, test_name):
         output.headers["Content-type"] = "text/csv"
         return output
 
+def get_sorted_test_responses_as_dict(testid=None):
+
+        result = Response.query.filter_by(test_name=testid).all()
+
+        students = json.loads(get_all_student_details(testid))
+        questions = ""
+        # app.logger.info(students)
+        table = {}
+        for entry in result:
+            id = entry.id
+            name = entry.name
+            rollno = ""
+            emailid = entry.emailid
+            pin = entry.pin
+            testctime = entry.testctime
+            submittedans = entry.submittedans
+            responsetime = entry.responsetime
+            q_score = entry.q_score
+            q_status = entry.q_status
+            time = entry.time
+            currentQuestion = entry.currentQuestion
+            serialno = entry.serialno
+            if emailid in students:
+                student = students[emailid]
+                name = student['name']
+                rollno = student['rollno']
+
+
+            if rollno not in table:
+                table[rollno] = {
+                    "rollno":rollno,
+                    "name":name,
+                    "emailid":emailid,
+                    "testctime":testctime,
+                    "count": 1
+                }
+
+            if currentQuestion is None:
+                continue
+
+            table[rollno].update({
+                            "Question_"+str(currentQuestion)+"_Submittedans":submittedans,
+                            "Question_"+str(currentQuestion)+"_Responsetime":convert_to_minutes(responsetime),
+                            "Question_"+str(currentQuestion)+"_Score":q_score,
+                            "Question_"+str(currentQuestion)+"_Status":q_status,
+                            "Question_"+str(currentQuestion)+"_Time":time,
+                            "Question_"+str(currentQuestion)+"":currentQuestion,
+                        })
+            table[rollno]['count'] += 1
+        # app.logger.info(table)
+        return table
+
+def render_sorted_csv_from_test_responses(data, test_name):
+        csvList = []
+        header = [
+                    "name",
+                    "rollno",
+                    "emailid",
+                    "testctime",
+                ]
+        # app.logger.info(list(data)[0])
+
+        user = Randomize.query.filter_by(test_name=test_name).first()
+        if user:
+            Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).order_by(cast(Randomize.qno, Integer).asc()).all()
+            # app.logger.info(["number is ", Questions_count])
+            # return ""
+            count = 1
+            for i in Questions_count:
+                # app.logger.info("hi ra --> Question"+ str(i))
+                header.extend(
+                        [
+                            "Question_"+str(count)+"",
+                            "Question_"+str(count)+"_Score",
+                            "Question_"+str(count)+"_Submittedans",
+                            "Question_"+str(count)+"_Responsetime",
+                            "Question_"+str(count)+"_Status",
+                            "Question_"+str(count)+"_Time"
+                        ]
+                    )
+                count+=1;
+            csvList.append(header)
+
+            for csv_line in data:
+                #app.logger.info(csv_line)
+                row = [csv_line["name"],
+                        csv_line["rollno"],
+                        csv_line["emailid"],
+                        csv_line["testctime"]
+                        ]
+                for i in Questions_count:
+                    row.extend(
+                            [
+                                csv_line["Question_"+str(i.qno)+""] if "Question_"+str(i.qno)+"" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Score"] if "Question_"+str(i.qno)+"_Score" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Submittedans"] if "Question_"+str(i.qno)+"_Submittedans" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Responsetime"] if "Question_"+str(i.qno)+"_Responsetime" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Status"] if "Question_"+str(i.qno)+"_Status" in csv_line else "N/A",
+                                csv_line["Question_"+str(i.qno)+"_Time"] if "Question_"+str(i.qno)+"_Time" in csv_line else "N/A",
+                            ]
+                        )
+                csvList.append(row)
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerows(csvList)
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
+        output.headers["Content-type"] = "text/csv"
+        return output
+
+@app.route('/downloadSortedTestResults/<testid>')
+@admin_login_required
+def downloadSortedTestResults(testid):
+    if request.method == 'GET':
+
+        #app.logger.info(["Requested result for test with id ",testid])
+        table = get_sorted_test_responses_as_dict(testid)
+
+        data = table.values()
+        return render_sorted_csv_from_test_responses(data, testid)
+
 def get_test_responses_summary_as_dict(testid=None):
 
         result = Response.query.filter_by(test_name=testid).all()
@@ -3200,13 +3457,13 @@ def testrecorder():
         '''
         return html;
 
-@app.route('/showrecorder/<test_name>', methods=['GET'])
+@app.route('/showrecorder/<test_name>/<qid>', methods=['GET'])
 @login_required
-def showrecorder(test_name):
+def showrecorder(test_name,qid):
     if request.method == "GET":
         # app.logger.info(request.host)
         if request.is_secure or "localhost" in request.host:
-            return render_template('recorder.html', test_name=test_name)
+            return render_template('recorder.html', test_name=test_name, qid=qid)
         else:
             #To show audio recording for students on only HTTPS, flip the commenting below two lines
             # return render_template('recorder.html')
@@ -3272,8 +3529,7 @@ def createexam():
              "QP_template.json"
             ]
             ,"TOEFL":
-            ["listening.mp4",
-             "reading.pdf",
+            [
              "E1-Reading.json",
              "E3-Speaking.json",
              "QP_template.json",

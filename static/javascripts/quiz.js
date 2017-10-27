@@ -165,7 +165,7 @@ var octopus = {
 			submittedQuestion.subsections = undefined;
 			submittedQuestion.test_name = octopus.test_name;
 			data = JSON.stringify({jsonData: submittedQuestion});
-			console.log("submittedquestion:" + data);
+			//console.log("submittedquestion:" + data);
 			$.post("/submitanswer", data)
 				.done(function(data){
 					// console.log("Success:" + data);
@@ -210,6 +210,7 @@ var octopus = {
 				async: false,
 				success: function (data) {
 					data = JSON.stringify(data);
+
 					quizModel.result = JSON.parse(data);
 				},
 				error: function () {
@@ -403,6 +404,7 @@ var questionView = {
 					selectedAnswer = audiolink;
 					if (!selectedAnswer)
 						selectedAnswer = "skip";
+						q.status = "skip";
 
 					//Wami.stopRecording();
 				}
@@ -479,8 +481,8 @@ var questionView = {
 			//if (octopus.mode == "TOEFL"){
 				if (q.subsections.types == "record")
 				{
-					this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder/'+octopus.test_name+'\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
-					this.questionPane.append('<div><label>Audio Link: </label><input type="text" id="audiolink" value="#" hidden> </input></div>');
+					this.questionPane.append('<div><label>Please Watch the instructions:</label><br><iframe width=\"560\" height=\"315\" src=\"/showrecorder/'+octopus.test_name+'/'+q.id+'\" frameborder=\"0\" allowfullscreen></iframe></div><br>');
+					this.questionPane.append('<div><input type="text" id="audiolink" value="#" hidden> </input></div>');
 					this.questionPane.append('<br><label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip"> Skip Question</input></label>');
 
 				}
@@ -647,8 +649,11 @@ var progressView = {
 
 				progressView.progressBox.append(btn);
 				$("#"+index).addClass("btn btn-xs " + buttonColor);
-				if(!question.status){
+				if(!question.status && index!=0){
 					$("#"+index).attr('disabled','disabled');
+				}
+				if(question.status && index==1){
+					$("#"+index).removeAttr('disabled');
 				}
 				$("#"+index).click(function(){
 					////console.log("progress:" + this.id);
@@ -666,6 +671,7 @@ var progressView = {
 			if(!remainingTime)
 				remainingTime = 0;
 			buttonColor = "btn-primary";
+			// console.log("remaining time "+ remainingTime);
 			remainingTime = Math.round(remainingTime/60);
 			buttonText = remainingTime + " minutes remaining";
 			if(remainingTime <= 5) {
@@ -774,7 +780,7 @@ var resultView = {
 					var t6 = document.createElement("span");
 					// t6.setAttribute("controls", "controls")
 					$.ajax({
-				        url: "/get_audio/"+octopus.test_name,
+				        url: "/get_audio_by_qid/"+octopus.test_name+"/"+value.currentQuestion,
 				        type: 'GET',
 				        contentType: false,
 				        processData: false,
@@ -792,7 +798,6 @@ var resultView = {
 				        	// //console.log(msg);
 				        }
 				    });
-
 				}
 				else{
 					var t6 = document.createTextNode(value.submittedans);

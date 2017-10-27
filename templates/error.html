@@ -1,5 +1,25 @@
 
 <div class="container">
 	<h2>{{error}}</h2>
-</div>
+	<table>
+		<thead>
+			<tr><th>#</th><th>user</th><th>timestamp</th><th>testname</th><th>question id</th>
+		</thead>
+		<tbody>
+			{%for row in result | sort(attribute='user')%}
+				<tr><td>{{loop.index}}</td><td>{{row.user}}</td> <td>{{row.time}}</td><td>{{row.test_name}}</td> <td>{{row.qid}}</td></tr>
+			{%endfor%}
+		</tbody>
+	</table>
+	<table>
+		<thead>
+			<tr><th>#</th><th>user</th><th>timestamp</th><th>testname</th><th>question id</th><th>ip</th></tr>
+		</thead>
+		<tbody>
+			{%for row in responses | sort(attribute='ip')%}
+				<tr><td>{{loop.index}}</td><td>{{row.emailid}}</td> <td>{{row.time}}</td><td>{{row.test_name}}</td> <td>{{row.currentQuestion}}</td><td>{{row.ip}}</td></tr>
+			{%endfor%}
+		</tbody>
+	</table>
 
+</div>

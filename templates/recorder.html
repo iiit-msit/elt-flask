@@ -32,6 +32,18 @@
  			// })
 
  			$(document).ready(function() {
+					$.ajax({
+							url: "/get_audio_by_qid/{{test_name}}/{{qid}}",
+							type: 'GET',
+							contentType: false,
+							processData: false,
+							success: function(data) {
+								$("#recorded").html(data);
+							},
+							error: function(msg){
+								$("#recorded").html("Audio fetching failed");
+							}
+					});
 			    function createAudioElement(blobURL) {
 			        const audioEl = document.createElement("audio");
 			        audioEl.controls = true;
@@ -76,6 +88,7 @@
 
 			            // console.log(blobkey.type);
 			            var formData = new FormData();
+										formData.append('qid', "{{qid}}")
 			              formData.append('test_name', "{{test_name}}")
 					      formData.append('file', blobkey);
 
