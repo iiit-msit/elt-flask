@@ -4,7 +4,7 @@ var quizModel = {
 		init : function(data) {
 			// create questions array from the JSON data
 			this.createQuizModel(data);
-			//console.log(data)
+			console.log(data)
 		},
 
 		// parse JSON data and create an array of questions
@@ -130,10 +130,13 @@ var octopus = {
 				})
 				.done(function(data){
 					data = JSON.parse(data);
+					console.log("--------");
+					console.log(data);
+					console.log("--------");
 					quizModel.init(data)
 					startView.init();
 					var status = quizModel.getQuizStatus();
-					// //console.log("quiz result" + data);
+					
 					//console.log("quiz status" + status);
 					if (status == "END")
 						resultView.init();
@@ -431,6 +434,7 @@ var questionView = {
 		},
 
 		showQuestion : function(){
+		    console.log(quizModel.question);
 			if(quizModel.question){
 				questionView.render();
 				progressView.init();
@@ -575,6 +579,19 @@ var questionView = {
 		displayOptions : function() {
 			var q = quizModel.question;
 			var optionsHTML = '';
+			questionType = "radio";
+			answerCount = 0;
+			for (var i = 0; i < q.options.length; i++) {
+				var optionText = q.options[i];
+				if (optionText.startsWith("=")){
+				    answerCount += 1;
+				}
+			}
+			console.log(q.options);
+			if (answerCount > 1){
+			    questionType = "checkbox";
+			    console.log("found checkbox");
+			}
 			for (var i = 0; i < q.options.length; i++) {
 				var optionText = q.options[i];
 				optionsHTML += '<div class="radio">';
