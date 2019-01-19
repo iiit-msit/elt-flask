@@ -624,21 +624,28 @@ def getAnswer(qid,path):
 
     if qid in list(range(e1_start,e1_end)):
         e1_readjson=json.loads(open(os.path.join(path, 'E1-Reading.json'), encoding='utf-8').read())
+        answer = []
         for psg in e1_readjson["passageArray"]:
             for key in psg["questions"]:
                 if int(key["id"]) == qid:
                     for op in key["options"]:
                         if op[0] == "=":
-                            return op[1:len(op)]
+                            #return op[1:len(op)]
+                            answer.append(op[1:len(op)])
+        return answer
+
+                            
     if qid in list(range(e2_start,e2_end)):
         e2_lsnjson=json.loads(open(os.path.join(path, 'E2-Listening.json'), encoding='utf-8').read())
+        answer = []
         for key in e2_lsnjson["videoArray"]:
             for qn in key["questions"]:
                 if int(qn["id"]) == qid:
                     for op in qn["options"]:
                         if op[0] == "=":
-                            return op[1:len(op)]
-
+                            #return op[1:len(op)]
+                            answer.append(op[1:len(op)])
+        return answer
 def admin_login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -1308,7 +1315,7 @@ def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,re
             test = Tests.query.filter_by(name=test_name).first()
             path = root+"/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
             cans=getAnswer(currentQuestion,path)
-            if cans == submittedans:
+            if sorted(cans) == sorted(submittedans):
                 score = 1
 
         if validresponse=="true":

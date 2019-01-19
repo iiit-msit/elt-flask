@@ -130,7 +130,9 @@ var octopus = {
 				})
 				.done(function(data){
 					data = JSON.parse(data);
+					console.log("--------");
 					console.log(data);
+					console.log("--------");
 					quizModel.init(data)
 					startView.init();
 					var status = quizModel.getQuizStatus();
@@ -391,7 +393,23 @@ var questionView = {
 			this.answerButton.click(function(){
 			        this.disabled = true;
 				var q = quizModel.question;
-				var selectedAnswer = $("input:checked").val();
+				//var selectedAnswer = $("input:checked").val();
+				var values = [];
+				var currentValue = "";
+				var currentType = "";
+    			$.each($("input:checked"), function(){
+	                currentValue = $(this).val();
+	                currentType = $(this).attr('type');
+	                values.push($(this).val());
+	            });
+	            console.log([currentValue, currentType]);
+	            if(currentValue=='skip' && currentType=='radio'){
+	            	console.log("you are skipping question");
+	            	selectedAnswer = "skip";
+	            }else{
+	            	selectedAnswer = values;
+	            }
+				console.log(values);				
 				var audiolink = $("#audiolink").val();
 				if (q.subsections.types == "essay") {
 					selectedAnswer = $("textarea").val();
@@ -577,32 +595,39 @@ var questionView = {
 		displayOptions : function() {
 			var q = quizModel.question;
 			var optionsHTML = '';
-			questionType = "radio";
-			answerCount = 0;
-			for (var i = 0; i < q.options.length; i++) {
-				var optionText = q.options[i];
-				if (optionText.startsWith("=")){
-				    answerCount += 1;
+			console.log(['questionType', q.questionType, ["", "radio"].indexOf(q.questionType)]);
+			if([undefined, "", "radio"].indexOf(q.questionType)>=0){
+				for (var i = 0; i < q.options.length; i++) {
+					var optionText = q.options[i];
+					optionsHTML += '<div class="radio">';
+					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
+					if(q.status && q.responseAnswer == optionText)
+						optionsHTML += 'checked';
+					optionsHTML += '>' + optionText + '</label>';
+					optionsHTML += '</div>';
 				}
-			}
-			console.log(q.options);
-			if (answerCount > 1){
-			    questionType = "checkbox";
-			    console.log("found checkbox");
-			}
-			for (var i = 0; i < q.options.length; i++) {
-				var optionText = q.options[i];
 				optionsHTML += '<div class="radio">';
-				optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
-				if(q.status && q.responseAnswer == optionText)
-					optionsHTML += 'checked';
-				optionsHTML += '>' + optionText + '</label>';
+				optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip">Skip Question</label>';
 				optionsHTML += '</div>';
+				this.questionPane.append(optionsHTML);
+			}else if(["checkbox"].indexOf(q.questionType)>=0){
+				console.log("found checkbox");
+				for (var i = 0; i < q.options.length; i++) {
+					var optionText = q.options[i];
+					optionsHTML += '<div class="checkbox">';
+					optionsHTML += '<label><input type="checkbox" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
+					if(q.status && q.responseAnswer.includes(optionText))
+						optionsHTML += 'checked';
+					optionsHTML += '>' + optionText + '</label>';
+					optionsHTML += '</div>';
+				}
+				optionsHTML += '<div class="radio">';
+				optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip">Skip Question</label>';
+				optionsHTML += '</div>';
+				this.questionPane.append(optionsHTML);
+			}else{
+				alert("unknown question type. Please contact admin.")
 			}
-			optionsHTML += '<div class="radio">';
-			optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="skip">Skip Question</label>';
-			optionsHTML += '</div>';
-			this.questionPane.append(optionsHTML);
 		},
 
 		getResponseTime : function() {
