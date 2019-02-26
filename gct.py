@@ -1213,7 +1213,7 @@ def addtestdetails(email=None,test=None,delays=None,test_name=None):
 
 #pending
 def updatetimeobj(td):
-    duration = 60*60*4
+    duration = 60*60
     if not td.testend:
         currTime = datetime.now()
         deltaTime = (currTime - td.lastPing).total_seconds()
@@ -1241,7 +1241,7 @@ def testtime(email=None):
     email = email if email else get_email_from_session()
     #app.logger.info(email)
     test_name = str(request.get_data(),'utf-8')
-    duration = 60 * 60 * 4
+    duration = 60 * 60
 
     td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
     #app.logger.info(td)
@@ -1802,7 +1802,7 @@ def registration():
                 body = """Dear Student,<br> This email message is sent by the online quiz portal.
 			By clicking the link below you are verifying that this email belongs to you and your account will be activated.
 			Click on the link below and follow the instructions to complete the registration process.
-			<h1><a href=%s/verify/%s/%s>Verify</a></h1> """ % (request.host, encode, code)
+			<h1><a href=https://%s/verify/%s/%s>Verify</a></h1> """ % (request.host, encode, code)
 
                 sent = sendMail(encode, code, email, body)
                 if sent:

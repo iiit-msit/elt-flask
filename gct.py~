@@ -1213,7 +1213,7 @@ def addtestdetails(email=None,test=None,delays=None,test_name=None):
 
 #pending
 def updatetimeobj(td):
-    duration = 60*60*4
+    duration = 60*60
     if not td.testend:
         currTime = datetime.now()
         deltaTime = (currTime - td.lastPing).total_seconds()
@@ -1241,7 +1241,7 @@ def testtime(email=None):
     email = email if email else get_email_from_session()
     #app.logger.info(email)
     test_name = str(request.get_data(),'utf-8')
-    duration = 60 * 60 * 4
+    duration = 60 * 60
 
     td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
     #app.logger.info(td)
