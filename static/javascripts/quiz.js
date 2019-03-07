@@ -403,7 +403,7 @@ var questionView = {
 	                currentType = $(this).attr('type');
 	                values.push($(this).val());
 	            });
-	            console.log([currentValue, currentType]);
+	            console.log([values, currentValue, currentType]);
 	            if(currentValue=='skip' && currentType=='radio'){
 	            	console.log("you are skipping question");
 	            	selectedAnswer = "skip";
@@ -435,7 +435,8 @@ var questionView = {
 					questionView.submittedTS = Date.now();
 					q.responseTime = questionView.getResponseTime();
 					octopus.submitAnswer();
-				} else if (selectedAnswer){
+				} else if (selectedAnswer && selectedAnswer.length > 0){
+				    console.log(["this is the culprit", selectedAnswer, selectedAnswer.length > 0]);
 					q.status = "submitted";
 					q.responseAnswer = selectedAnswer;
 					questionView.submittedTS = Date.now();

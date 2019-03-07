@@ -39,6 +39,7 @@ import mimetypes
 import zipfile
 from sqlalchemy.ext.hybrid import hybrid_property
 import sys
+import traceback
 app = Flask(__name__, static_url_path='')
 
 # Check Configuring Flask-Caching section for more details
@@ -568,7 +569,7 @@ def generateQuestionPaper(path):
                             if types =="question" or types =="record":
                                 #print name
                                 json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                app.logger.info("Loaded speaking question paper is %s"%json_subs)
+                                #app.logger.info("Loaded speaking question paper is %s"%json_subs)
                                 qns_list=json_subs["questions"];
                                 serialno=list(range(0,len(qns_list)))
                                 shuffle(serialno)
@@ -616,7 +617,7 @@ def generateQuestionPaper(path):
                                   subs["questions"][k]["serialno"]=k+1
                                   k +=1
     #ss=json.dumps(json_temp)
-    app.logger.info("Generate QP %s",json_temp)
+    #app.logger.info("Generate QP %s",json_temp)
     return json_temp
 
 def getAnswer(qid,path):
@@ -1293,10 +1294,7 @@ def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,re
     if email == None or email == "" or test_name==None:
         return {u"status":"error" , u"q_status":None, u"validresponse":"false", u"qid":None, u"test_name":None}
     try:
-        if submittedans == "skip":
-            validresponse="true"
-            q_status="skip"
-
+        
         if currentQuestion in range(e3_start,e3_end):
             r=UserAudio.query.filter_by(user=email).first()
             if r :
@@ -1307,20 +1305,26 @@ def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,re
                 q_status="submitted"
                 status="success"
                 validresponse="true"
-        if currentQuestion in range(e4_start,e4_end):
+        elif currentQuestion in range(e4_start,e4_end):
             q_status="submitted"
             status="success"
             validresponse="true"
-        else :
-            q_status="submitted"
-            status="success"
-            validresponse="true"
+        else:
+            if submittedans == "skip" or submittedans == ["skip"]:
+                validresponse="true"
+                status="success"
+                q_status="skip"
+            else:
+                q_status="submitted"
+                status="success"
+                validresponse="true"
             test = Tests.query.filter_by(name=test_name).first()
             path = root+"/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
             cans=getAnswer(currentQuestion,path)
+            app.logger.info([sorted(cans), sorted(submittedans)])
             if sorted(cans) == sorted(submittedans):
                 score = 1
-
+        app.logger.info([test_name,email,currentQuestion,submittedans,responsetime,score])
         if validresponse=="true":
             status="success"
             if q_status!="skip":
@@ -1333,6 +1337,7 @@ def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,re
         db.session.commit()
         status="success"
     except Exception as e:
+        traceback.print_exc()
         app.logger.info(e)
         status="error"
 
