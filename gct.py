@@ -42,7 +42,7 @@ import sys
 app = Flask(__name__, static_url_path='')
 
 # Check Configuring Flask-Caching section for more details
-cache = Cache(app, config={'CACHE_TYPE': 'null'})
+#cache = Cache(app, config={'CACHE_TYPE': 'null'})
 # cache.init_app(app)
 
 app.config['UPLOAD_FOLDER'] = APP_STATIC_JSON
@@ -767,8 +767,9 @@ def get_audio(test_name, user=None):
 @app.route('/get_audio_by_qid/<test_name>/<qid>', methods=["GET"])
 @login_required
 def get_audio_by_qid(test_name, qid, user=None):
-    app.logger.info("get audio called")
+    app.logger.info("get audio called /get_audio_by_qid/<test_name>/<qid>")
     user = user if user else session['user']['email']
+    print("user is %s"%user)
     event = UserAudio.query.filter_by(user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
     if not event:
         return "Audio not found"
@@ -1137,7 +1138,7 @@ def quizstatus(test_name, email=None):
 
 #pending
 def buildquizobject(email,isRandomized,json_data,test_name):
-    app.logger.info("buildquizobject json_data %s"%json_data)
+    #app.logger.info("buildquizobject json_data %s"%json_data)
     for key in json_data:
         if  key == "section":
             section = json_data[key]
@@ -1160,7 +1161,9 @@ def buildquizobject(email,isRandomized,json_data,test_name):
                                             q["status"]=q1.q_status
                                             q["test_name"] = q1.test_name
     json_data['quizStatus'] = quizstatus(test_name, email)
-    # app.logger.info(json_data)
+    app.logger.info("-----------------------------------")
+    #app.logger.info(json_data)
+    app.logger.info("-----------------------------------")
     return json_data
 
 @app.route('/getquizstatus', methods=['POST'])
@@ -1169,7 +1172,7 @@ def getquizstatus(email=None):
     email = email if email else get_email_from_session()
     role = get_role_from_session()
     test_name = str(request.get_data(),'utf-8')
-    # app.logger.info([test_name])
+    app.logger.info(["getquizstatus for quz", test_name])
     isAllowed = allowed_to_take_test(test_name, email, role)
     question_ids = checkrandomizetable(email,test_name)
     if not isAllowed:
@@ -1192,11 +1195,11 @@ def getquizstatus(email=None):
         app.logger.info("user is starting the test")
         isRandomized = False
         json_data=generateQuestionPaper(path)
-        print("User is Starting Test %s"%json_data)
+        #print("User is Starting Test %s"%json_data)
 
     # build quiz object based on get/generated question paper and set
     quiz_status_object = buildquizobject(email,isRandomized,json_data,test_name)
-    print("quiz_status_object %s"%quiz_status_object)
+    #print("quiz_status_object %s"%quiz_status_object)
     return json.dumps(quiz_status_object)
 
 def addtestdetails(email=None,test=None,delays=None,test_name=None):
@@ -1371,8 +1374,10 @@ def getResultOfStudent(email=None, test_name=None):
     totalscore=0
     s1="0"
     for q in q1:
+        print("current qu is %s"%q.currentQuestion)
         if q.responsetime is not None:
             if 200 < int(q.currentQuestion) < 300 and q.currentQuestion!=s1:
+                print("found audion %s"%q.currentQuestion)
                 s1=q.currentQuestion
                 data = get_audio_by_qid(test_name,q.currentQuestion,email)
                 submittedans = data
@@ -1848,7 +1853,7 @@ def forgot_password():
                 code = user.password
                 body = """Dear Student,<br> This email message is sent by the online quiz portal.
                 Click on the link below to reset password.
-	        <h1><a href=%s/verify/%s/%s>Reset Password</a></h1> """ % (request.host, encode, code)
+	        <h1><a href=https://%s/verify/%s/%s>Reset Password</a></h1> """ % (request.host, encode, code)
 
                 sent = sendMail(encode, code, email, body)
                 if sent:
@@ -1879,7 +1884,7 @@ def send_email_with_password(email, password):
     try:
         #app.logger.debug("send mail function")
         body = """Dear Student,<br> This email message is sent by the online quiz portal.
-        Use below password to <h1><a href=%s/login>Login</a></h1>
+        Use below password to <h1><a href=https://%s/login>Login</a></h1>
         <br><br>Login : %s <br>Password : %s
         """ % (request.host, email, password)
         #app.logger.info(body)
@@ -2691,7 +2696,7 @@ def notify(testid, emailid, start_date, end_date):
         body = """Dear Student,<br> This email message is sent by the online quiz portal.
         The test starts at %s and ends by %s
         Click on the link below and follow the instructions to take the test.
-        <a href=%s/quiz/%s>Test Link</a> """ % (start_date, end_date, request.host, testid)
+        <a href=https://%s/quiz/%s>Test Link</a> """ % (start_date, end_date, request.host, testid)
         column = "invitation_email_sent"
         # app.logger.info(body)
     elif 'release' in rule.rule:
@@ -2700,7 +2705,7 @@ def notify(testid, emailid, start_date, end_date):
         body = """Dear Student,<br> This email message is sent by the online quiz portal.
         The results for test held in between %s and %s
         Click on the link below to check your results.
-        <a href=%s/quiz/%s>Result Link</a> """ % (start_date, end_date, request.host, testid)
+        <a href=https://%s/quiz/%s>Result Link</a> """ % (start_date, end_date, request.host, testid)
         column = "result_email_sent"
         # app.logger.info(body)
 

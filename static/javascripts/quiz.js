@@ -200,10 +200,11 @@ var octopus = {
 			//console.log(data);
 			data=JSON.stringify({jsonData: data});
 			//console.log(data);
-			$.post("/autosaveEssay", data)
-				.done(function(data){
-					console.log("Success:" + data);
-				});
+			//on 07032019 dropping autosave feature
+			//$.post("/autosaveEssay", data)
+			//	.done(function(data){
+			//		console.log("Success:" + data);
+			//	});
 		},
 		getResults : function() {
 			$.ajax({
@@ -413,7 +414,7 @@ var questionView = {
 				var audiolink = $("#audiolink").val();
 				if (q.subsections.types == "essay") {
 					selectedAnswer = $("textarea").val();
-					analytics = KeystrokeAnalaytics.render();
+					//analytics = KeystrokeAnalaytics.render();
 					if (!selectedAnswer)
 						selectedAnswer = "skip";
 					// octopus.autosaveContent(selectedAnswer,Date.now()/(1000*60),analytics);
@@ -483,8 +484,8 @@ var questionView = {
 				this.displayEssay();
 				this.myvar = setInterval(function() {
 					var text = $('textarea').val();
-					analytics = KeystrokeAnalaytics.render();
-					octopus.autosaveContent(text,Date.now()/(1000*60),analytics);
+					//analytics = KeystrokeAnalaytics.render();
+					//octopus.autosaveContent(text,Date.now()/(1000*60),analytics);
 				},30000);
 
 			}
@@ -550,9 +551,9 @@ var questionView = {
 			var test_name = octopus.test_name;
 			var qid = quizModel.question.id;
 
-			$.get( "/getPlagiarismDataStudent/"+test_name+"/"+qid, function( data ) {
-				KeystrokeAnalaytics.init(data);
-			});
+			//$.get( "/getPlagiarismDataStudent/"+test_name+"/"+qid, function( data ) {
+			//	KeystrokeAnalaytics.init(data);
+			//});
 
 		},
 
