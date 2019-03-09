@@ -603,7 +603,7 @@ var questionView = {
 					var optionText = q.options[i];
 					optionsHTML += '<div class="radio">';
 					optionsHTML += '<label><input type="radio" name="optionsRadios" id="optionsRadios1" value="' + optionText + '"';
-					if(q.status && q.responseAnswer == optionText)
+					if(q.status && q.responseAnswer.includes(optionText))
 						optionsHTML += 'checked';
 					optionsHTML += '>' + optionText + '</label>';
 					optionsHTML += '</div>';

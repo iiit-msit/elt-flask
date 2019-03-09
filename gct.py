@@ -3384,6 +3384,9 @@ def downloadInvitedStudents(testid):
         output.headers["Content-type"] = "text/csv"
         return output
 
+@app.route('/test_audio')
+def testaudio():
+    return """<div><audio controls controlslist='nodownload' src="https://www.w3schools.com/tags/horse.mp3"> Your browser does not support the audio tag. </audio></div>"""
 
 @app.route('/test_recorder', methods=['GET'])
 def testrecorder():
