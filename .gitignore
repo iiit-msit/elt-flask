@@ -5,3 +5,4 @@ logs.log*
 env.py
 static/tmp_upload/
 __pycache__/
+*~
