@@ -1,6 +1,10 @@
+"""
+This is the backend server for the quiz.
+"""
+
 from flask import Flask, flash, redirect, render_template, \
-     request, jsonify, url_for, session, send_from_directory, \
-     make_response, Response as ress, send_file
+    request, jsonify, url_for, session, send_from_directory, \
+    make_response, Response as ress, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
 from cerberus import Validator
@@ -51,12 +55,12 @@ app.config['UPLOAD_FOLDER'] = APP_STATIC_JSON
 app.debug_log_format = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 #formatter = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 # logHandler = logging.FileHandler('logs/login.log')
-log_path = os.path.join(os.getcwd(),'logs.log')
-log_path = 'logs.log'
-print(log_path)
-logHandler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
+log_Path = os.path.join(os.getcwd(), 'logs.log')
+log_Path = 'logs.log'
+print(log_Path)
+logHandler = RotatingFileHandler(log_Path, maxBytes=10000, backupCount=1)
 #logHandler = logging.basicConfig(stream=sys.stderr)
-#logHandler.setFormatter(formatter)
+# logHandler.setFormatter(formatter)
 logHandler.setLevel(logging.NOTSET)
 app.logger.addHandler(logHandler)
 app.logger.setLevel(logging.NOTSET)
@@ -100,7 +104,8 @@ QP_TEMPLATE_SCHEMA = {
                             'count': {'type': 'string', 'required': True},
                             'questions': {'type': 'list', 'maxlength': 0, 'required': True},
                             'note': {'type': 'string', 'required': True},
-                            'types': {'type': 'string', 'required': True, 'allowed': ['video', 'record', 'passage', 'essay']},
+                            'types': {'type': 'string', 'required': True,
+                                      'allowed': ['video', 'record', 'passage', 'essay']},
                         }
                     }
                 }
@@ -202,46 +207,57 @@ validate_essay_template = Validator(ESSAY_TYPE_SCHEMA)
 validate_record_template = Validator(RECORD_TYPE_SCHEMA)
 
 schema_type_mapping = {
-    'essay' :validate_essay_template,
-    'record' :validate_record_template,
-    'passage' :validate_record_template,
-    'video' :validate_record_template,
+    'essay': validate_essay_template,
+    'record': validate_record_template,
+    'passage': validate_record_template,
+    'video': validate_record_template,
 }
 
-e1_start=1;e1_end=100;e2_start=101;e2_end=200;e3_start=201;e3_end=300;
-e4_start=301;e4_end=400;
+e1_start = 1
+e1_end = 100
+e2_start = 101
+e2_end = 200
+e3_start = 201
+e3_end = 300
+e4_start = 301
+e4_end = 400
 
-#create a local timezone (Indian Standard Time)
+# create a local timezone (Indian Standard Time)
 IST = pytz.timezone('Asia/Kolkata')
 
 global status
 global errortype
+
 
 @app.errorhandler
 def default_error_handler(error):
     '''Default error handler'''
     return {'message': str(error)}, getattr(error, 'code', 500)
 
+
 def to_pretty_json(value):
     return json.dumps(value, sort_keys=True, indent=4, separators=(',', ': '))
 
+
 app.jinja_env.filters['tojson_pretty'] = to_pretty_json
 
-#A list of uri for each role
+# A list of uri for each role
 permissions_object = {
-    'student':[
+    'student': [
         '/',
         '/student'
     ],
-    'admin':[
+    'admin': [
         '/',
         '/student',
         '/admin'
     ]}
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 class LoginLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -253,17 +269,20 @@ class LoginLog(db.Model):
         self.ip = ip
         self.emailid = emailid
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     emailid = db.Column(db.String(180), unique=True)
     pin = db.Column(db.String(80))
-    testctime = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    testctime = db.Column(
+        db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __init__(self, name, pin, emailid):
         self.name = name
         self.pin = pin
         self.emailid = emailid
+
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -272,7 +291,8 @@ class Users(db.Model):
     user_type = db.Column(db.String(10), default="student")
     verified = db.Column(db.String(80), default=False)
     registered_time = db.Column(db.DateTime(), default=datetime.utcnow)
-    password_last_time = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    password_last_time = db.Column(
+        db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __init__(self, emailid, password, user_type, verified):
         self.emailid = emailid
@@ -282,6 +302,7 @@ class Users(db.Model):
 
     def __repr__(self):
         return str(self.emailid)
+
 
 class AdminDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -295,6 +316,7 @@ class AdminDetails(db.Model):
     def __repr__(self):
         return str(self.password)
 
+
 class Students(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -307,7 +329,9 @@ class Students(db.Model):
         self.rollno = rollno
 
     def __repr__(self):
-        return str(self.name)+"::"+str(self.emailid)+"::"+str(self.rollno)
+        return str(self.name) + "::" + str(self.emailid) + \
+            "::" + str(self.rollno)
+
 
 class Tests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -317,7 +341,8 @@ class Tests(db.Model):
     test_mode = db.Column(db.String(80), default="TOEFL")
     # json = db.Column(db.String(1000))
     creator = db.Column(db.String(180))
-    time = db.Column(db.DateTime(), default=pytz.utc.localize(datetime.utcnow()), onupdate=pytz.utc.localize(datetime.utcnow()))
+    time = db.Column(db.DateTime(), default=pytz.utc.localize(
+        datetime.utcnow()), onupdate=pytz.utc.localize(datetime.utcnow()))
 
     def __init__(self, name, creator, start_date, end_date, test_mode):
         self.name = name
@@ -327,6 +352,7 @@ class Tests(db.Model):
         self.test_mode = test_mode
         self.time = pytz.utc.localize(datetime.utcnow())
         # self.json = json
+
     def isHosted(self):
         today = datetime.now(IST)
         start_date = datetime.strptime(self.start_date, '%d-%m-%Y %H:%M')
@@ -335,7 +361,9 @@ class Tests(db.Model):
         return IST.localize(start_date) < today < IST.localize(end_date)
 
     def __repr__(self):
-        return str(self.name)+"::"+str(self.start_date)+"::"+str(self.end_date)
+        return str(self.name) + "::" + str(self.start_date) + \
+            "::" + str(self.end_date)
+
 
 class StudentTests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -354,12 +382,14 @@ class StudentTests(db.Model):
     def getTests(self):
         return self.test_name
 
+
 class UserAudio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String(80))
     test_name = db.Column(db.String(180))
     blob1 = db.Column(db.LargeBinary)
-    time = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    time = db.Column(db.DateTime(), default=datetime.utcnow,
+                     onupdate=datetime.utcnow)
     qid = db.Column(db.String(80))
 
     def __init__(self, user, blob1, test_name, qid):
@@ -368,12 +398,14 @@ class UserAudio(db.Model):
         self.blob1 = blob1
         self.qid = qid
 
+
 class TestAudio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     blob1 = db.Column(db.LargeBinary)
 
     def __init__(self, blob1):
         self.blob1 = blob1
+
 
 class DataModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -384,10 +416,11 @@ class DataModel(db.Model):
         self.url = url
         self.blob = blob
 
+
 class userDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
-    email=db.Column(db.String(120), unique=True)
+    email = db.Column(db.String(120), unique=True)
     phno = db.Column(db.String(120))
     rollno = db.Column(db.String(120))
     learningcenter = db.Column(db.String(120))
@@ -399,20 +432,23 @@ class userDetails(db.Model):
         self.rollno = rollno
         self.learningcenter = learningcenter
 
+
 class TestDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email=db.Column(db.String(120))
+    email = db.Column(db.String(120))
     test_name = db.Column(db.String(180))
-    test= db.Column(db.Boolean())
-    teststime=db.Column(db.DateTime(), default=datetime.utcnow)
-    delays=db.Column(db.Float())
-    testend= db.Column(db.Boolean())
-    lastPing = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    test = db.Column(db.Boolean())
+    teststime = db.Column(db.DateTime(), default=datetime.utcnow)
+    delays = db.Column(db.Float())
+    testend = db.Column(db.Boolean())
+    lastPing = db.Column(
+        db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     score = db.Column(db.Integer())
     learningcenter = db.Column(db.String(120))
 
     def __init__(self, **kwargs):
         super(TestDetails, self).__init__(**kwargs)
+
 
 class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -425,9 +461,10 @@ class Response(db.Model):
     responsetime = db.Column(db.Float)
     q_score = db.Column(db.Integer)
     q_status = db.Column(db.String(120))
-    time = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow )
-    currentQuestion=db.Column(db.String(120))
-    serialno=db.Column(db.Integer)
+    time = db.Column(db.DateTime(), default=datetime.utcnow,
+                     onupdate=datetime.utcnow)
+    currentQuestion = db.Column(db.String(120))
+    serialno = db.Column(db.Integer)
     q_section = db.Column(db.String(120))
     ip = db.Column(db.String(20), default="127.0.0.1")
 
@@ -437,16 +474,17 @@ class Response(db.Model):
 
 class Randomize(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user1=db.Column(db.String(120))
+    user1 = db.Column(db.String(120))
     test_name = db.Column(db.String(180))
-    serialno=db.Column(db.Integer)
-    qno=db.Column(db.String(120))
+    serialno = db.Column(db.Integer)
+    qno = db.Column(db.String(120))
 
     def __init__(self, user1, serialno, qno, test_name):
         self.user1 = user1
         self.serialno = serialno
         self.qno = qno
         self.test_name = test_name
+
 
 class EssayTypeResponse(db.Model):
     """Sub model for storing user response for essay type questions"""
@@ -458,13 +496,21 @@ class EssayTypeResponse(db.Model):
     test_name = db.Column(db.String(180))
     analytics = db.Column(JSON)
 
-    def __init__(self, useremailid, qid, ansText, qattemptedtime, test_name, analytics):
+    def __init__(
+            self,
+            useremailid,
+            qid,
+            ansText,
+            qattemptedtime,
+            test_name,
+            analytics):
         self.useremailid = useremailid
         self.qid = qid
         self.ansText = ansText
         self.qattemptedtime = qattemptedtime
         self.test_name = test_name
         self.analytics = analytics
+
 
 class Content(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -476,6 +522,7 @@ class Content(db.Model):
 
     def __init__(self, **kwargs):
         super(Content, self).__init__(**kwargs)
+
 
 class ContentActivity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -489,164 +536,257 @@ class ContentActivity(db.Model):
     def __init__(self, **kwargs):
         super(ContentActivity, self).__init__(**kwargs)
 
-def getQuestionPaper(qid_list,path):
-    json_temp=json.loads(open(os.path.join(path,'QP_template.json')).read())
-    app.logger.info("getQuestionPaper function %s %s qid_list %s"%(json_temp, path, qid_list))
-    #print qid_list
-    i=0;j=0;k=0;l=0;m=0;n=0;p=0;q=0;r=0;s=0;t=0
+
+def getQuestionPaper(qid_list, path):
+    json_temp = json.loads(open(os.path.join(path, 'QP_template.json')).read())
+    app.logger.info("getQuestionPaper function %s %s qid_list %s" %
+                    (json_temp, path, qid_list))
+    # print qid_list
+    i = 0
+    j = 0
+    k = 0
+    l = 0
+    m = 0
+    n = 0
+    p = 0
+    q = 0
+    r = 0
+    s = 0
+    t = 0
     for qid in qid_list:
-        qid=int(qid)
-        if qid in list(range(e1_start,e1_end)):
-              e1_readjson=json.loads(open(os.path.join(path,'E1-Reading.json'), encoding='utf-8').read())
-              for key in e1_readjson["passageArray"]:
-                    for qn in key["questions"]:
-                          pid=qn["id"]
-                          if int(pid) == qid:
-                            json_temp["section"][2]["subsection"][0]["passage"]=key["passage"]
-                            json_temp["section"][2]["subsection"][0]["questions"].append(qn)
-                            json_temp["section"][2]["subsection"][0]["questions"][m]["serialno"] = qid_list[qid]
-                            m +=1
-        if qid in list(range(e2_start,e2_end)):
-              e2_lsnjson=json.loads(open(os.path.join(path,'E2-Listening.json'), encoding='utf-8').read())
-              app.logger.info("E2-listening.json %s"%e2_lsnjson)
-              for key in e2_lsnjson["videoArray"]:
-                    for qn in key["questions"]:
-                          pid=qn["id"]
-                          if int(pid) == qid:
-                                json_temp["section"][0]["subsection"][0]["link"]=key["link"]
-                                json_temp["section"][0]["subsection"][0]["questions"].append(qn)
-                                json_temp["section"][0]["subsection"][0]["questions"][n]["serialno"] = qid_list[qid]
-                                n +=1
-        if qid in list(range(e3_start,e3_end)):
-              e3_spkjson=json.loads(open(os.path.join(path,'E3-Speaking.json'), encoding='utf-8').read())
-              for key in e3_spkjson["questions"]:
-                    if int(key["id"]) == qid:
-                          json_temp["section"][1]["subsection"][0]["questions"].append(key)
-                          json_temp["section"][1]["subsection"][0]["questions"][p]["serialno"] = qid_list[qid]
-                          p += 1
-        if qid in list(range(e4_start,e4_end)):
-              e4_wrtjson=json.loads(open(os.path.join(path,'E4-Writing.json'), encoding='utf-8').read())
-              for key in e4_wrtjson["questions"]:
-                    if int(key["id"]) == qid:
-                          json_temp["section"][3]["subsection"][0]["questions"].append(key)
-                          json_temp["section"][3]["subsection"][0]["questions"][q]["serialno"] = qid_list[qid]
-                          q += 1
+        qid = int(qid)
+        if qid in list(range(e1_start, e1_end)):
+            e1_readjson = json.loads(
+                open(
+                    os.path.join(
+                        path,
+                        'E1-Reading.json'),
+                    encoding='utf-8').read())
+            for key in e1_readjson["passageArray"]:
+                for qn in key["questions"]:
+                    pid = qn["id"]
+                    if int(pid) == qid:
+                        json_temp["section"][2]["subsection"][0]["passage"] = key["passage"]
+                        json_temp["section"][2]["subsection"][0]["questions"].append(
+                            qn)
+                        json_temp["section"][2]["subsection"][0]["questions"][m]["serialno"] = qid_list[qid]
+                        m += 1
+        if qid in list(range(e2_start, e2_end)):
+            e2_lsnjson = json.loads(
+                open(
+                    os.path.join(
+                        path,
+                        'E2-Listening.json'),
+                    encoding='utf-8').read())
+            app.logger.info("E2-listening.json %s" % e2_lsnjson)
+            for key in e2_lsnjson["videoArray"]:
+                for qn in key["questions"]:
+                    pid = qn["id"]
+                    if int(pid) == qid:
+                        json_temp["section"][0]["subsection"][0]["link"] = key["link"]
+                        json_temp["section"][0]["subsection"][0]["questions"].append(
+                            qn)
+                        json_temp["section"][0]["subsection"][0]["questions"][n]["serialno"] = qid_list[qid]
+                        n += 1
+        if qid in list(range(e3_start, e3_end)):
+            e3_spkjson = json.loads(
+                open(
+                    os.path.join(
+                        path,
+                        'E3-Speaking.json'),
+                    encoding='utf-8').read())
+            for key in e3_spkjson["questions"]:
+                if int(key["id"]) == qid:
+                    json_temp["section"][1]["subsection"][0]["questions"].append(
+                        key)
+                    json_temp["section"][1]["subsection"][0]["questions"][p]["serialno"] = qid_list[qid]
+                    p += 1
+        if qid in list(range(e4_start, e4_end)):
+            e4_wrtjson = json.loads(
+                open(
+                    os.path.join(
+                        path,
+                        'E4-Writing.json'),
+                    encoding='utf-8').read())
+            for key in e4_wrtjson["questions"]:
+                if int(key["id"]) == qid:
+                    json_temp["section"][3]["subsection"][0]["questions"].append(
+                        key)
+                    json_temp["section"][3]["subsection"][0]["questions"][q]["serialno"] = qid_list[qid]
+                    q += 1
     # app.logger.info("json template %s %s"%(json_temp, path))
-    app.logger.info("Get QP %s",json_temp)
+    app.logger.info("Get QP %s", json_temp)
     return json_temp
 
+
 def generateQuestionPaper(path):
-    json_temp=json.loads(open(os.path.join(path,'QP_template.json'), encoding='utf-8').read())
-    app.logger.info("Loaded question paper template is %s"%json_temp)
+    json_temp = json.loads(
+        open(os.path.join(path, 'QP_template.json'), encoding='utf-8').read())
+    app.logger.info("Loaded question paper template is %s" % json_temp)
     for key in json_temp:
-        if  key == "section":
-            section=json_temp[key]
+        if key == "section":
+            section = json_temp[key]
             for s in section:
                 for key in s:
                     if key == "subsection":
                         for subs in s[key]:
-                            cnt=int(subs["count"])
-                            name=subs["name"]
-                            types=subs["types"]
-                            app.logger.info("Current Section name %s question count is %s"%(name, cnt))
-                            #print name
+                            cnt = int(subs["count"])
+                            name = subs["name"]
+                            types = subs["types"]
+                            app.logger.info(
+                                "Current Section name %s question count is %s" %
+                                (name, cnt))
+                            # print name
                             if name == "E2-Listening":
-                                #print name
-                                app.logger.info("Loaded question paper is %s"%os.path.join(path,name+".json"))
-                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                app.logger.info("Loaded question paper data is %s"%json_subs)
-                                video_list=json_subs["videoArray"]
-                                serialno=list(range(0,len(video_list)))
+                                # print name
+                                app.logger.info(
+                                    "Loaded question paper is %s" %
+                                    os.path.join(
+                                        path, name + ".json"))
+                                json_subs = json.loads(
+                                    open(
+                                        os.path.join(
+                                            path,
+                                            name +
+                                            ".json"),
+                                        encoding='utf-8').read())
+                                app.logger.info(
+                                    "Loaded question paper data is %s" % json_subs)
+                                video_list = json_subs["videoArray"]
+                                serialno = list(range(0, len(video_list)))
                                 shuffle(serialno)
-                                subs["link"]=video_list[serialno[0]]["link"]
-                                subs["questions"]=video_list[serialno[0]]["questions"]
+                                subs["link"] = video_list[serialno[0]]["link"]
+                                subs["questions"] = video_list[serialno[0]
+                                                               ]["questions"]
                                 # i=0
                                 # for qn in subs["questions"]:
                                 #     subs["questions"][i]["serialno"]=i+1
                                 #     i +=1
                                 for i in range(0, cnt):
-                                    subs["questions"][i]["serialno"]=i+1
-                            if types =="question" or types =="record":
-                                #print name
-                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
+                                    subs["questions"][i]["serialno"] = i + 1
+                            if types == "question" or types == "record":
+                                # print name
+                                json_subs = json.loads(
+                                    open(
+                                        os.path.join(
+                                            path,
+                                            name +
+                                            ".json"),
+                                        encoding='utf-8').read())
                                 #app.logger.info("Loaded speaking question paper is %s"%json_subs)
-                                qns_list=json_subs["questions"];
-                                serialno=list(range(0,len(qns_list)))
+                                qns_list = json_subs["questions"]
+                                serialno = list(range(0, len(qns_list)))
                                 shuffle(serialno)
-                                for no in list(range(0,cnt)):
+                                for no in list(range(0, cnt)):
                                     try:
-                                        subs["questions"].append(qns_list[serialno[no]])
-                                        subs["questions"][no]["serialno"]=no+1
+                                        subs["questions"].append(
+                                            qns_list[serialno[no]])
+                                        subs["questions"][no]["serialno"] = no + 1
                                     except Exception as e:
-                                        app.logger.info("error occurred while accessgin question/record type %s"%e)
+                                        app.logger.info(
+                                            "error occurred while accessgin " +
+                                            "question/record type %s" % e)
                             if types == "passage":
-                                #print name
-                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                psglist=json_subs["passageArray"]
-                                serialno=list(range(0,len(psglist)))
+                                # print name
+                                json_subs = json.loads(
+                                    open(
+                                        os.path.join(
+                                            path,
+                                            name +
+                                            ".json"),
+                                        encoding='utf-8').read())
+                                psglist = json_subs["passageArray"]
+                                serialno = list(range(0, len(psglist)))
                                 shuffle(serialno)
-                                subs["questions"]=psglist[serialno[0]]["questions"]
-                                j=0
+                                subs["questions"] = psglist[serialno[0]
+                                                            ]["questions"]
+                                j = 0
                                 for qn in subs["questions"]:
-                                    subs["questions"][j]["serialno"]=j+1
-                                    j +=1
-                                subs["passage"]=psglist[serialno[0]]["passage"]
+                                    subs["questions"][j]["serialno"] = j + 1
+                                    j += 1
+                                subs["passage"] = psglist[serialno[0]]["passage"]
 
-                            if types =="essay":
-                                #print name
+                            if types == "essay":
+                                # print name
                                 app.logger.info("essay came")
-                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                qns_list=json_subs["questions"];
+                                json_subs = json.loads(
+                                    open(
+                                        os.path.join(
+                                            path,
+                                            name +
+                                            ".json"),
+                                        encoding='utf-8').read())
+                                qns_list = json_subs["questions"]
                                 app.logger.info(qns_list)
-                                serialno=list(range(0,len(qns_list)))
+                                serialno = list(range(0, len(qns_list)))
                                 shuffle(serialno)
-                                for no in list(range(0,cnt)):
-                                    subs["questions"].append(qns_list[serialno[no]])
-                                    subs["questions"][no]["serialno"]=no+1
+                                for no in list(range(0, cnt)):
+                                    subs["questions"].append(
+                                        qns_list[serialno[no]])
+                                    subs["questions"][no]["serialno"] = no + 1
                                 app.logger.info(subs["questions"])
                             if name == "T2-Listening":
-                                #print name
-                                json_subs=json.loads(open(os.path.join(path,name+".json"), encoding='utf-8').read())
-                                video_list=json_subs["videoArray"]
-                                serialno=list(range(0,len(video_list)))
+                                # print name
+                                json_subs = json.loads(
+                                    open(
+                                        os.path.join(
+                                            path,
+                                            name +
+                                            ".json"),
+                                        encoding='utf-8').read())
+                                video_list = json_subs["videoArray"]
+                                serialno = list(range(0, len(video_list)))
                                 shuffle(serialno)
-                                subs["link"]=video_list[serialno[0]]["link"]
-                                subs["questions"]=video_list[serialno[0]]["questions"]
-                                k=0
+                                subs["link"] = video_list[serialno[0]]["link"]
+                                subs["questions"] = video_list[serialno[0]
+                                                               ]["questions"]
+                                k = 0
                                 for qn in subs["questions"]:
-                                  subs["questions"][k]["serialno"]=k+1
-                                  k +=1
-    #ss=json.dumps(json_temp)
+                                    subs["questions"][k]["serialno"] = k + 1
+                                    k += 1
+    # ss=json.dumps(json_temp)
     #app.logger.info("Generate QP %s",json_temp)
     return json_temp
 
-def getAnswer(qid,path):
-    qid=int(qid)
 
-    if qid in list(range(e1_start,e1_end)):
-        e1_readjson=json.loads(open(os.path.join(path, 'E1-Reading.json'), encoding='utf-8').read())
+def getAnswer(qid, path):
+    qid = int(qid)
+
+    if qid in list(range(e1_start, e1_end)):
+        e1_readjson = json.loads(
+            open(
+                os.path.join(
+                    path,
+                    'E1-Reading.json'),
+                encoding='utf-8').read())
         answer = []
         for psg in e1_readjson["passageArray"]:
             for key in psg["questions"]:
                 if int(key["id"]) == qid:
                     for op in key["options"]:
                         if op[0] == "=":
-                            #return op[1:len(op)]
+                            # return op[1:len(op)]
                             answer.append(op[1:len(op)])
         return answer
 
-                            
-    if qid in list(range(e2_start,e2_end)):
-        e2_lsnjson=json.loads(open(os.path.join(path, 'E2-Listening.json'), encoding='utf-8').read())
+    if qid in list(range(e2_start, e2_end)):
+        e2_lsnjson = json.loads(
+            open(
+                os.path.join(
+                    path,
+                    'E2-Listening.json'),
+                encoding='utf-8').read())
         answer = []
         for key in e2_lsnjson["videoArray"]:
             for qn in key["questions"]:
                 if int(qn["id"]) == qid:
                     for op in qn["options"]:
                         if op[0] == "=":
-                            #return op[1:len(op)]
+                            # return op[1:len(op)]
                             answer.append(op[1:len(op)])
         return answer
+
+
 def admin_login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -662,6 +802,7 @@ def admin_login_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+
 def login_required(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
@@ -674,6 +815,7 @@ def login_required(func):
         return func(*args, **kwargs)
     return decorated_function
 
+
 def list_files(startpath):
     for root, dirs, files in os.walk(startpath):
         level = root.replace(startpath, '').count(os.sep)
@@ -683,16 +825,20 @@ def list_files(startpath):
         for f in files:
             app.logger.info('{}{}'.format(subindent, f))
 
+
 @app.before_request
 def before_request():
     db.session.permanent = True
     app.permanent_session_lifetime = timedelta(minutes=15)
     db.session.modified = True
-    #app.logger.info(["Session expire time extentended to ", datetime.now(IST) + app.permanent_session_lifetime])
+    # app.logger.info(["Session expire time extentended to ",
+    # datetime.now(IST) + app.permanent_session_lifetime])
+
 
 @app.route('/error/<error>')
 def error(error):
     return render_template('error.html', error=error)
+
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
@@ -708,7 +854,8 @@ def test():
     # db.session.add(user)
     # db.session.commit()
     # # response = sendNotifyMail()
-    # # res = Response(serialno="123",emailid="email",name="email",currentQuestion=str("123"),submittedans="submittedans",responsetime=1.2,q_status="tre",q_score=1)
+    # # res = Response(serialno="123",emailid="email",name="email",currentQuestion=str("123")
+    # ,submittedans="submittedans",responsetime=1.2,q_status="tre",q_score=1)
     # # db.session.add(res)
     # # app.logger.info(["result object", res, res.get_q_section])
     # # res = db.session.query(Response).filter_by(get_q_section="Reading")
@@ -724,10 +871,15 @@ def test():
     responses = Response.query.filter_by(test_name='TOEFL 09-09-2017').all()
     app.logger.info(['ip responses', responses])
     return render_template('error.html', responses=responses)
+
+
 def store_audio(user, blob, test_name, qid):
     try:
-        app.logger.info("Result of store_audio. User: %s Test_name: %s Qid: %s"%(user, test_name, qid))
-        useraudio = UserAudio(user=user, blob1=blob, test_name=test_name, qid=qid)
+        app.logger.info(
+            "Result of store_audio. User: %s Test_name: %s Qid: %s" %
+            (user, test_name, qid))
+        useraudio = UserAudio(user=user, blob1=blob,
+                              test_name=test_name, qid=qid)
         db.session.add(useraudio)
         db.session.commit()
         return useraudio.blob1
@@ -735,20 +887,23 @@ def store_audio(user, blob, test_name, qid):
         app.logger.error(e)
         return None
 
+
 @app.route('/audio_upload', methods=["POST"])
 @login_required
 def audio_upload():
     file = request.files['file']
     test_name = request.form['test_name']
     qid = request.form['qid']
-    app.logger.info("test name in audio upload %s"%(test_name))
-    user=session['user']['email']
+    app.logger.info("test name in audio upload %s" % (test_name))
+    user = session['user']['email']
     if file:
         useraudio = store_audio(user, file.read(), test_name, qid)
         if useraudio:
-            return app.response_class(base64.b64encode(useraudio), mimetype="audio/webm")
+            return app.response_class(
+                base64.b64encode(useraudio),
+                mimetype="audio/webm")
         else:
-            return "Record Not Saved.\n\n"+str(useraudio)
+            return "Record Not Saved.\n\n" + str(useraudio)
     else:
         return "Audio not recieved from user."
 
@@ -758,155 +913,188 @@ def audio_upload():
 def get_audio(test_name, user=None):
     #app.logger.info("get audio called")
     user = user if user else session['user']['email']
-    event = UserAudio.query.filter_by(user=user, test_name=test_name).order_by(UserAudio.time.desc()).first()
+    event = UserAudio.query.filter_by(
+        user=user, test_name=test_name).order_by(UserAudio.time.desc()).first()
     if not event:
         return "Audio not found"
     # app.logger.info(event.blob1)
-    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
-    return '<audio src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" controls></audio>'
+    # return app.response_class(base64.b64encode(event.blob1),
+    # mimetype="audio/webm")
+    return '<audio src="data:audio/webm;base64,' + \
+        base64.b64encode(event.blob1).decode('utf-8') + '" controls></audio>'
+
 
 @app.route('/get_audio_by_qid/<test_name>/<qid>', methods=["GET"])
 @login_required
 def get_audio_by_qid(test_name, qid, user=None):
     app.logger.info("get audio called /get_audio_by_qid/<test_name>/<qid>")
     user = user if user else session['user']['email']
-    print("user is %s"%user)
-    event = UserAudio.query.filter_by(user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
+    print("user is %s" % user)
+    event = UserAudio.query.filter_by(
+        user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
     if not event:
         return "Audio not found"
     # app.logger.info(event.blob1)
-    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
-    return '<audio controls><source src="data:audio/webm;base64,'+base64.b64encode(event.blob1).decode('utf-8')+'" type="audio/webm"></audio>'
+    # return app.response_class(base64.b64encode(event.blob1),
+    # mimetype="audio/webm")
+    return '<audio controls><source src="data:audio/webm;base64,' + \
+        base64.b64encode(event.blob1).decode('utf-8') + \
+        '" type="audio/webm"></audio>'
+
 
 def get_audio_by_qid1(test_name, qid, user=None):
     # app.logger.info("get audio called")
     user = user if user else session['user']['email']
-    event = UserAudio.query.filter_by(user=user, test_name=test_name, qid=qid).order_by(UserAudio.time.desc()).first()
+    event = UserAudio.query.filter_by(
+        user=user, test_name=test_name, qid=qid).order_by(
+            UserAudio.time.desc()).first()
     if not event:
         return False
     # app.logger.info(event.blob1)
-    # return app.response_class(base64.b64encode(event.blob1), mimetype="audio/webm")
+    # return app.response_class(base64.b64encode(event.blob1),
+    # mimetype="audio/webm")
     return True
+
 
 def get_sorted_test_responses_as_dict1(testid=None):
 
-        result = Response.query.filter_by(test_name=testid).all()
+    result = Response.query.filter_by(test_name=testid).all()
 
-        students = json.loads(get_all_student_details(testid))
-        questions = ""
-        # app.logger.info(students)
-        table = {}
-        for entry in result:
-            id = entry.id
-            name = entry.name
-            rollno = ""
-            emailid = entry.emailid
-            pin = entry.pin
-            testctime = entry.testctime
-            submittedans = entry.submittedans
-            responsetime = entry.responsetime
-            q_score = entry.q_score
-            q_status = entry.q_status
-            time = entry.time
-            currentQuestion = entry.currentQuestion
-            serialno = entry.serialno
-            audio_found = get_audio_by_qid1(testid, currentQuestion, emailid)
-            if emailid in students:
-                student = students[emailid]
-                name = student['name']
-                rollno = student['rollno']
+    students = json.loads(get_all_student_details(testid))
+    questions = ""
+    # app.logger.info(students)
+    table = {}
+    for entry in result:
+        id = entry.id
+        name = entry.name
+        rollno = ""
+        emailid = entry.emailid
+        pin = entry.pin
+        testctime = entry.testctime
+        submittedans = entry.submittedans
+        responsetime = entry.responsetime
+        q_score = entry.q_score
+        q_status = entry.q_status
+        time = entry.time
+        currentQuestion = entry.currentQuestion
+        serialno = entry.serialno
+        audio_found = get_audio_by_qid1(testid, currentQuestion, emailid)
+        if emailid in students:
+            student = students[emailid]
+            name = student['name']
+            rollno = student['rollno']
 
+        if rollno not in table:
+            table[rollno] = {
+                "rollno": rollno,
+                "name": name,
+                "emailid": emailid,
+                "testctime": testctime,
+                "count": 1
+            }
 
-            if rollno not in table:
-                table[rollno] = {
-                    "rollno":rollno,
-                    "name":name,
-                    "emailid":emailid,
-                    "testctime":testctime,
-                    "count": 1
-                }
+        if currentQuestion is None:
+            continue
 
-            if currentQuestion is None:
-                continue
+        table[rollno].update({
+            "Question_" + str(currentQuestion) + "_Submittedans": submittedans,
+            "Question_" + str(currentQuestion) + "_Responsetime": convert_to_minutes(responsetime),
+            "Question_" + str(currentQuestion) + "_Score": q_score,
+            "Question_" + str(currentQuestion) + "_Status": q_status,
+            "Question_" + str(currentQuestion) + "_Time": time,
+            "Question_" + str(currentQuestion) + "_Audio_Found": audio_found,
+            "Question_" + str(currentQuestion) + "": currentQuestion,
+        })
+        table[rollno]['count'] += 1
+    # app.logger.info(table)
+    return table
 
-            table[rollno].update({
-                            "Question_"+str(currentQuestion)+"_Submittedans":submittedans,
-                            "Question_"+str(currentQuestion)+"_Responsetime":convert_to_minutes(responsetime),
-                            "Question_"+str(currentQuestion)+"_Score":q_score,
-                            "Question_"+str(currentQuestion)+"_Status":q_status,
-                            "Question_"+str(currentQuestion)+"_Time":time,
-                            "Question_"+str(currentQuestion)+"_Audio_Found":audio_found,
-                            "Question_"+str(currentQuestion)+"":currentQuestion,
-                        })
-            table[rollno]['count'] += 1
-        # app.logger.info(table)
-        return table
 
 def render_sorted_csv_from_test_responses1(data, test_name):
-        csvList = []
-        header = [
-                    "name",
-                    "rollno",
-                    "emailid",
-                    "testctime",
+    """ From the given data and test_name render the csv file from testResponses. """
+    csvList = []
+    header = [
+        "name",
+        "rollno",
+        "emailid",
+        "testctime",
+    ]
+    # app.logger.info(list(data)[0])
+
+    user = Randomize.query.filter_by(test_name=test_name).first()
+    if user:
+        Questions_count = Randomize.query.filter_by(
+            test_name=test_name,
+            user1=user.user1).order_by(
+            cast(
+                Randomize.qno,
+                Integer).asc()).all()
+        # app.logger.info(["number is ", Questions_count])
+        # return ""
+        count = 1
+        for i in Questions_count:
+            # app.logger.info("hi ra --> Question"+ str(i))
+            header.extend(
+                [
+                    "Question_" + str(count) + "",
+                    "Question_" + str(count) + "_Score",
+                    "Question_" + str(count) + "_Submittedans",
+                    "Question_" + str(count) + "_Responsetime",
+                    "Question_" + str(count) + "_Status",
+                    "Question_" + str(count) + "_Time",
+                    "Question_" + str(count) + "_Audio_Found"
                 ]
-        # app.logger.info(list(data)[0])
+            )
+            count += 1
+        csvList.append(header)
 
-        user = Randomize.query.filter_by(test_name=test_name).first()
-        if user:
-            Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).order_by(cast(Randomize.qno, Integer).asc()).all()
-            # app.logger.info(["number is ", Questions_count])
-            # return ""
-            count = 1
+        for csv_line in data:
+            # app.logger.info(csv_line)
+            row = [csv_line["name"],
+                   csv_line["rollno"],
+                   csv_line["emailid"],
+                   csv_line["testctime"]
+                   ]
             for i in Questions_count:
-                # app.logger.info("hi ra --> Question"+ str(i))
-                header.extend(
-                        [
-                            "Question_"+str(count)+"",
-                            "Question_"+str(count)+"_Score",
-                            "Question_"+str(count)+"_Submittedans",
-                            "Question_"+str(count)+"_Responsetime",
-                            "Question_"+str(count)+"_Status",
-                            "Question_"+str(count)+"_Time",
-                            "Question_"+str(count)+"_Audio_Found"
-                        ]
-                    )
-                count+=1;
-            csvList.append(header)
-
-            for csv_line in data:
-                #app.logger.info(csv_line)
-                row = [csv_line["name"],
-                        csv_line["rollno"],
-                        csv_line["emailid"],
-                        csv_line["testctime"]
-                        ]
-                for i in Questions_count:
-                    row.extend(
-                            [
-                                csv_line["Question_"+str(i.qno)+""] if "Question_"+str(i.qno)+"" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Score"] if "Question_"+str(i.qno)+"_Score" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Submittedans"] if "Question_"+str(i.qno)+"_Submittedans" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Responsetime"] if "Question_"+str(i.qno)+"_Responsetime" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Status"] if "Question_"+str(i.qno)+"_Status" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Time"] if "Question_"+str(i.qno)+"_Time" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Audio_Found"] if "Question_"+str(i.qno)+"_Audio_Found" in csv_line else "N/A",
-
-                            ]
-                        )
-                csvList.append(row)
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerows(csvList)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
-        output.headers["Content-type"] = "text/csv"
-        return output
+                row.extend([
+                    csv_line["Question_" + str(i.qno) + ""]
+                    if "Question_" + str(i.qno) + "" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Score"]
+                    if "Question_" + str(i.qno) + "_Score" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Submittedans"]
+                    if "Question_" + str(i.qno) + "_Submittedans" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Responsetime"]
+                    if "Question_" + str(i.qno) + "_Responsetime" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Status"]
+                    if "Question_" + str(i.qno) + "_Status" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Time"]
+                    if "Question_" + str(i.qno) + "_Time" in csv_line
+                    else "N/A",
+                    csv_line["Question_" + str(i.qno) + "_Audio_Found"]
+                    if "Question_" + str(i.qno) + "_Audio_Found" in csv_line
+                    else "N/A",
+                ])
+            csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @app.route('/', methods=['GET'])
 @login_required
 def index(role=None):
+    """
+    When the user make a request to the server address. This function gets executed first.
+    """
     # return render_template('index.html')
     if request.method == "GET":
         if not role:
@@ -914,39 +1102,52 @@ def index(role=None):
                 return "Your account still not activated, Please come here after activation of your account."
             role = session['user']['role']
         return redirect(url_for(role))
-    else:
-        return None
+    return None
 
 
 def get_role_from_session():
+    """
+    Get the role of the user from the session whether it's an user or admin.
+    """
     if 'user' in session:
         if 'role' in session['user']:
             return session["user"]['role']
     return None
 
+
 def get_email_from_session():
+    """
+    Get the email of the user from the session.
+    """
     if 'user' in session:
         return session["user"]['email']
     return None
 
 
-def delete_entries(Object, email):
+def delete_entries(newobject, email):
+    """
+    delete the entry based on the email.
+    """
     try:
-        entries = Object.query.filter_by(emailid=email).all()
+        entries = newobject.query.filter_by(emailid=email).all()
     except Exception as e:
         app.logger.error(e)
-        entries = Object.query.filter_by(email=email).all()
+        entries = newobject.query.filter_by(email=email).all()
     for entry in entries:
         db.session.delete(entry)
     db.session.commit()
 
-def allowed_to_take_test(testid=None, email=None, role=None):
 
+def allowed_to_take_test(testid=None, email=None, role=None):
+    """
+    verify if the user is allowed to take test based on 
+    the testid and email.
+    """
     if not email or not testid or not role:
         return False
 
     studenttests = getAllTestRecord(email)
-    if role=="admin":
+    if role == "admin":
         # delete_entries(Response(), email)
         # delete_entries(TestDetails(), email)
         entries = Response.query.filter_by(emailid=email).all()
@@ -964,11 +1165,13 @@ def allowed_to_take_test(testid=None, email=None, role=None):
         db.session.commit()
         return True
     if not studenttests:
-        #app.logger.info(studenttests)
+        # app.logger.info(studenttests)
         return False
-    app.logger.info("Student Tests %s for student %s"%(studenttests, email))
-    app.logger.info("testid %s in tests %s %s %s"%(testid, studenttests, type(studenttests), type(studenttests[0])))
-    app.logger.info("testid %s in tests %s"%(type(testid), testid in studenttests))
+    app.logger.info("Student Tests %s for student %s" % (studenttests, email))
+    app.logger.info("testid %s in tests %s %s %s" % (
+        testid, studenttests, type(studenttests), type(studenttests[0])))
+    app.logger.info("testid %s in tests %s" %
+                    (type(testid), testid in studenttests))
     if testid in studenttests:
 
         result = Tests.query.filter_by(name=testid).first()
@@ -976,9 +1179,13 @@ def allowed_to_take_test(testid=None, email=None, role=None):
             return result.isHosted()
     return False
 
+
 @app.route('/quiz/<test_name>')
 @login_required
 def quiz(test_name, email=None):
+    """
+    render the quiz page agter verifyiny a valid login. 
+    """
     # return render_template('index.html')
     role = get_role_from_session()
     email = email if email else get_email_from_session()
@@ -986,45 +1193,79 @@ def quiz(test_name, email=None):
         return "Your account still not activated, Please come here after activation of your account."
     if allowed_to_take_test(test_name, email, role):
         # return render_template('index.html')
-        if len(TestDetails.query \
-                .filter(TestDetails.email==email,TestDetails.test_name==test_name) \
-                .all()) != 0:
-            return redirect("/checklogin/"+test_name)
+        if len(
+            TestDetails.query .filter(
+                TestDetails.email == email,
+                TestDetails.test_name == test_name) .all()) != 0:
+            return redirect("/checklogin/" + test_name)
         else:
             return render_template('index.html', test_name=test_name)
-    app.logger.info("Allowed %s"%(allowed_to_take_test(test_name, email, role)))
+    app.logger.info("Allowed %s" %
+                    (allowed_to_take_test(test_name, email, role)))
     return redirect(url_for(role))
 
+
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
 
 @app.route('/javascripts/<path:path>')
 # @cache.cached(timeout=50)
 def send_javascripts(path):
-    app.logger.info("seeking for %s from %s at %s"%(path, request.headers.get('X-Forwarded-For', request.remote_addr), datetime.now()))
-    return send_from_directory(root+"/javascripts", path)
+    """
+    send the javascripts from the path specified as argument.
+    """
+    app.logger.info(
+        "seeking for %s from %s at %s" %
+        (path,
+         request.headers.get(
+             'X-Forwarded-For',
+             request.remote_addr),
+            datetime.now()))
+    return send_from_directory(root + "/javascripts", path)
+
 
 @app.route('/src/<path:path>')
 def send_src(path):
+    """
+    send files from src to the path specified in the argument with route src.
+    """
     #app.logger.info("seeking for "+path)
-    return send_from_directory(root+'/src', path)
+    return send_from_directory(root + '/src', path)
+
 
 @app.route('/js/<path:path>')
 def send_js(path):
+    """
+    send files from src to the path specified in the argument with route js.
+    """
     #app.logger.info("seeking for "+path)
-    return send_from_directory(root+'/js', path)
+    return send_from_directory(root + '/js', path)
+
 
 @app.route('/video/<path:path>')
 def send_video(path):
-    return send_from_directory(root+'/video', path)
+    """
+    send video from root to the path specified in the argument.
+    """
+    return send_from_directory(root + '/video', path)
+
 
 @app.route('/stylesheets/<path:path>')
 def send_stylesheets(path):
-    return send_from_directory(root+'/stylesheets', path)
+    """
+    store the file is in style sheet.
+    """
+    return send_from_directory(root + '/stylesheets', path)
+
 
 def add_first_response(test_name, email=None):
+    """
+    add the first reponse from the email with the corresponding test name.
+    """
     if not email or email == "":
         return False
-    response = Response.query.filter_by(emailid=email, test_name=test_name).first()
+    response = Response.query.filter_by(
+        emailid=email, test_name=test_name).first()
     if response is None:
         try:
             response = Response(emailid=email, name=email, test_name=test_name)
@@ -1037,74 +1278,125 @@ def add_first_response(test_name, email=None):
             return False
     return True
 
+
 def get_user_details(email):
+    """
+    get the user details based on the email.
+    """
     user = userDetails.query.filter_by(email=email).first()
-    #app.logger.info(user)
+    # app.logger.info(user)
     return user
+
 
 @app.route('/checklogin/<test_name>')
 @login_required
 def checklogin(test_name, email=None):
+    """
+    check the login based on the testname and email specified.
+    """
     email = email if email else get_email_from_session()
     if test_name:
-        first_response = add_first_response(test_name,email)
+        first_response = add_first_response(test_name, email)
         if not first_response:
-            return redirect(url_for("error", error="checklogin: Something is wrong with checking your session. Please contact test admin."))
+            return redirect(
+                url_for(
+                    "error",
+                    error="checklogin: Something is wrong with checking your session. Please contact test admin."))
 
         userdetails = get_user_details(email)
         if userdetails:
-            return redirect("/startquiz/"+test_name)
+            return redirect("/startquiz/" + test_name)
         else:
             return render_template('register.html')
     return redirect("/")
 
-def add_user_profile(name=None,email=None,phno=None,rollno=None,learningcenter=None):
-    if name == None or name == "" or email == None or email == "" or phno == None or phno == "" or rollno == None or rollno == "":
+
+def add_user_profile(
+        name=None,
+        email=None,
+        phno=None,
+        rollno=None,
+        learningcenter=None):
+    """
+    add the user profile based on the details obtained.
+    """
+    if name is None or name == "" or email is None or email == "" or phno is None or phno == "" or rollno is None or rollno == "":
         return False
     userdetails = userDetails.query.filter_by(email=email).first()
     if not userdetails:
         try:
-            userdetails = userDetails(name=name,email=email,phno=phno,rollno=rollno,learningcenter=learningcenter)
+            userdetails = userDetails(
+                name=name,
+                email=email,
+                phno=phno,
+                rollno=rollno,
+                learningcenter=learningcenter)
             db.session.add(userdetails)
             db.session.commit()
             return True
         except Exception as e:
-            #app.logger.error(e)
+            # app.logger.error(e)
             return False
     return False
+
 
 @app.route('/savepersonaldata', methods=['POST'])
 @login_required
 def savepersonaldata(email=None):
+    """
+    save the personal data with email.
+    """
     name = request.form['name']
     email = email if email else get_email_from_session()
-    phno=request.form['phone']
-    rollno=request.form['rollno']
+    phno = request.form['phone']
+    rollno = request.form['rollno']
     # learningcenter=request.form['learningcenter']
-    learningcenter=""
+    learningcenter = ""
 
-    addprofile = add_user_profile(name,email,phno,rollno,learningcenter)
+    addprofile = add_user_profile(name, email, phno, rollno, learningcenter)
     if not addprofile:
-        return redirect(url_for("error", error="savepersonaldata: Error updating your profile."))
+        return redirect(
+            url_for(
+                "error",
+                error="savepersonaldata: Error updating your profile."))
     return redirect("/")
 
-def checkrandomizetable(email,test_name):
-    return Randomize.query.filter_by(user1=email,test_name=test_name).all()
+
+def checkrandomizetable(email, test_name):
+    """
+    verify the randomized table based on the email and test name.
+    """
+    return Randomize.query.filter_by(user1=email, test_name=test_name).all()
+
 
 def qidlisttodict(question_ids=None):
-    if question_ids == None:
+    """
+    conver the qid list to dict.
+    """
+    if question_ids is None:
         return False
-    qid_list={}
+    qid_list = {}
     for data in question_ids:
         qid_list[int(data.qno)] = data.serialno
     return qid_list
 
-def add_to_randomize(email=None,serialno=None,qno=None,test_name=None):
-    if email == None or email == "" or serialno == None or serialno == "" or qno == None or qno == "" or test_name == None:
+
+def add_to_randomize(email=None, serialno=None, qno=None, test_name=None):
+    """
+    this function uses randomize function.
+    """
+    if (email is None
+        or email == ""
+            or serialno is None
+        or serialno == ""
+                    or qno is None
+        or qno == ""
+            or test_name is None):
         return False
     userdetails = userDetails.query.filter_by(email=email).first()
     try:
-        r = Randomize(user1 = email, serialno = serialno, qno=qno, test_name=test_name)
+        r = Randomize(user1=email, serialno=serialno,
+                      qno=qno, test_name=test_name)
         db.session.add(r)
         db.session.commit()
         return True
@@ -1112,8 +1404,12 @@ def add_to_randomize(email=None,serialno=None,qno=None,test_name=None):
         app.logger.error(e)
         return False
 
+
 def setquizstatus(email=None, test_name=None):
-    if email == None or test_name==None:
+    """
+    set the quiz status based on the testname and email.
+    """
+    if email is None or test_name is None:
         return False
     td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
     if td:
@@ -1124,10 +1420,15 @@ def setquizstatus(email=None, test_name=None):
     else:
         return 'START'
 
+
 def quizstatus(test_name, email=None):
-    if email == None or not test_name:
+    """
+    get the quiz status based on the testname and email.
+    """
+    if email is None or not test_name:
         return False
-    td = TestDetails.query.filter(TestDetails.email==email, TestDetails.test_name==test_name).first()
+    td = TestDetails.query.filter(
+        TestDetails.email == email, TestDetails.test_name == test_name).first()
     # app.logger.info(td, test_name)
     if td:
         if td.testend:
@@ -1137,13 +1438,18 @@ def quizstatus(test_name, email=None):
     else:
         return 'START'
 
-#pending
-def buildquizobject(email,isRandomized,json_data,test_name):
+# pending
+
+
+def buildquizobject(email, isRandomized, json_data, test_name):
+    """
+    build quiz object based on the parameters sent.
+    """
     #app.logger.info("buildquizobject json_data %s"%json_data)
     for key in json_data:
-        if  key == "section":
+        if key == "section":
             section = json_data[key]
-            for s in  section:
+            for s in section:
                 for key in s:
                     if key == "subsection":
                         for subs in s[key]:
@@ -1152,72 +1458,93 @@ def buildquizobject(email,isRandomized,json_data,test_name):
                                     for q in subs[key]:
                                         if not isRandomized:
                                             # app.logger.info("%s %s %s %s"%(email,q['serialno'], q["id"],test_name))
-                                            add_to_randomize(email,q['serialno'] if 'serialno' in q else None, q["id"],test_name)
+                                            add_to_randomize(
+                                                email, q['serialno'] if 'serialno' in q else None, q["id"], test_name)
                                         #     r = Randomize.query.filter_by(user1 = session['user']['email'], qno = q["id"]).all()
-                                        q1 = Response.query.filter_by(emailid=email, currentQuestion=q["id"], test_name=test_name).order_by(Response.time.desc()).first()
+                                        q1 = Response.query.filter_by(
+                                            emailid=email, currentQuestion=q["id"], test_name=test_name).order_by(
+                                            Response.time.desc()).first()
                                         # app.logger.info("respponse is %s "%q1)
                                         if q1:
-                                            q["responseAnswer"]=q1.submittedans
-                                            q["responseTime"]=q1.responsetime
-                                            q["status"]=q1.q_status
+                                            q["responseAnswer"] = q1.submittedans
+                                            q["responseTime"] = q1.responsetime
+                                            q["status"] = q1.q_status
                                             q["test_name"] = q1.test_name
     json_data['quizStatus'] = quizstatus(test_name, email)
     app.logger.info("-----------------------------------")
-    #app.logger.info(json_data)
+    # app.logger.info(json_data)
     app.logger.info("-----------------------------------")
     return json_data
+
 
 @app.route('/getquizstatus', methods=['POST'])
 @login_required
 def getquizstatus(email=None):
+    """
+    get the status of the quiz based on the email address.
+    """
     email = email if email else get_email_from_session()
     role = get_role_from_session()
-    test_name = str(request.get_data(),'utf-8')
+    test_name = str(request.get_data(), 'utf-8')
     app.logger.info(["getquizstatus for quz", test_name])
     isAllowed = allowed_to_take_test(test_name, email, role)
-    question_ids = checkrandomizetable(email,test_name)
+    question_ids = checkrandomizetable(email, test_name)
     if not isAllowed:
-        app.logger.info("is not allowed %s"%isAllowed)
+        app.logger.info("is not allowed %s" % isAllowed)
         return redirect(request.referrer)
     # check if user resumes the test and get/generate accordingly
     test = Tests.query.filter_by(name=test_name).first()
     path = ""
     if test:
-        path = root+"/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
-        app.logger.info("constructed path for getquesiton paper %s"%path)
+        path = root + \
+            "/content/%s/%s/" % (test.test_mode,
+                                 str_date_filepath(test.start_date))
+        app.logger.info("constructed path for getquesiton paper %s" % path)
 
     if question_ids:
         app.logger.info("user is resuming the test")
         isRandomized = True
         qid_dict = qidlisttodict(question_ids)
-        json_data=getQuestionPaper(qid_dict, path)
-        app.logger.info("User is Resuming Test %s"%json_data)
+        json_data = getQuestionPaper(qid_dict, path)
+        app.logger.info("User is Resuming Test %s" % json_data)
     else:
         app.logger.info("user is starting the test")
         isRandomized = False
-        json_data=generateQuestionPaper(path)
+        json_data = generateQuestionPaper(path)
         #print("User is Starting Test %s"%json_data)
 
     # build quiz object based on get/generated question paper and set
-    quiz_status_object = buildquizobject(email,isRandomized,json_data,test_name)
+    quiz_status_object = buildquizobject(
+        email, isRandomized, json_data, test_name)
     #print("quiz_status_object %s"%quiz_status_object)
     return json.dumps(quiz_status_object)
 
-def addtestdetails(email=None,test=None,delays=None,test_name=None):
-    if email == None or email == "" or test == None or test == "" or test_name==None:
+
+def addtestdetails(email=None, test=None, delays=None, test_name=None):
+    """
+    add Test details basde on the parameters passed.
+    """
+    if email is None or email == "" or test is None or test == "" or test_name is None:
         return False
     try:
-        testdetails = TestDetails(email=email,test=test,delays=delays,test_name=test_name)
+        testdetails = TestDetails(
+            email=email, test=test, delays=delays, test_name=test_name)
         db.session.add(testdetails)
         db.session.commit()
         return True
     except Exception as e:
-        #app.logger.error(e)
+        # app.logger.error(e)
         return False
 
-#pending
+# pending
+
+
 def updatetimeobj(td):
-    duration = 60*60
+    """
+    Update the time object
+    """
+
+    duration = 60 * 60
     if not td.testend:
         currTime = datetime.now()
         deltaTime = (currTime - td.lastPing).total_seconds()
@@ -1232,26 +1559,32 @@ def updatetimeobj(td):
         else:
             quizStatus = u"INPROGRESS"
 
-        obj = {u"timeSpent" : timeSpent, u"quizStatus": quizStatus, u"timeRemaining" : duration - timeSpent}
+        obj = {u"timeSpent": timeSpent, u"quizStatus": quizStatus,
+               u"timeRemaining": duration - timeSpent}
         td.lastPing = currTime
     else:
-        obj = {u"quizStatus":u"END"}
+        obj = {u"quizStatus": u"END"}
 
     return td, obj
+
 
 @app.route('/testtime', methods=['POST'])
 @login_required
 def testtime(email=None):
+    """
+    display the test duration when this route is called.
+    """
     email = email if email else get_email_from_session()
-    #app.logger.info(email)
-    test_name = str(request.get_data(),'utf-8')
+    # app.logger.info(email)
+    test_name = str(request.get_data(), 'utf-8')
     duration = 60 * 60
 
     td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
-    #app.logger.info(td)
+    # app.logger.info(td)
     if td is None:
-        addtestdetails(email,True,0.0,test_name)
-        time_obj = {u"timeSpent":0, u"timeRemaining":duration, u"quizStatus": u"INPROGRESS"}
+        addtestdetails(email, True, 0.0, test_name)
+        time_obj = {u"timeSpent": 0, u"timeRemaining": duration,
+                    u"quizStatus": u"INPROGRESS"}
     else:
         td, time_obj = updatetimeobj(td)
         db.session.add(td)
@@ -1259,150 +1592,228 @@ def testtime(email=None):
 
     return json.dumps(time_obj)
 
+
 def convert_to_minutes(responsetime):
+    """
+    convert time into minutes from the response time.
+    """
     number_of_seconds = responsetime
     minutes = time.strftime("%M:%S", time.gmtime(number_of_seconds))
-    #app.logger.info(minutes)
+    # app.logger.info(minutes)
     return minutes
 
-#pending
-def getsubmittedresponse(email,request_data):
+# pending
+
+
+def getsubmittedresponse(email, request_data):
+    """
+    return the questions with tesname, submitted answers from the user.
+    """
     vals = json.loads(cgi.escape(request_data))
     vals = vals['jsonData']
 
-    currentQuestion =int(vals['id'])
+    currentQuestion = int(vals['id'])
     submittedans = vals['responseAnswer']
     responsetime = vals['responseTime']
     test_name = vals["test_name"]
 
-    return email,currentQuestion,submittedans,responsetime,test_name
+    return email, currentQuestion, submittedans, responsetime, test_name
+
 
 def get_q_section(currentQuestion):
-    if currentQuestion in range(e1_start,e1_end):
+    """
+    Based on the current question display the section.
+    """
+    if currentQuestion in range(e1_start, e1_end):
         return "Reading"
-    elif currentQuestion in range(e2_start,e2_end):
+    elif currentQuestion in range(e2_start, e2_end):
         return "Listening"
-    elif currentQuestion in range(e3_start,e3_end):
+    elif currentQuestion in range(e3_start, e3_end):
         return "Speaking"
-    elif currentQuestion in range(e4_start,e4_end):
+    elif currentQuestion in range(e4_start, e4_end):
         return "Writing"
     else:
         return None
 
-def storeresponse(test_name,email=None,currentQuestion=None,submittedans=None,responsetime=None,score=0):
+
+def storeresponse(
+        test_name,
+        email=None,
+        currentQuestion=None,
+        submittedans=None,
+        responsetime=None,
+        score=0):
+    """
+    store the response of the email and test_name.
+    """
     app.logger.info([email, test_name])
-    if email == None or email == "" or test_name==None:
-        return {u"status":"error" , u"q_status":None, u"validresponse":"false", u"qid":None, u"test_name":None}
+    if email is None or email == "" or test_name is None:
+        return {
+            u"status": "error",
+            u"q_status": None,
+            u"validresponse": "false",
+            u"qid": None,
+            u"test_name": None}
     try:
-        
-        if currentQuestion in range(e3_start,e3_end):
-            r=UserAudio.query.filter_by(user=email).first()
-            if r :
-                q_status="submitted"
-                status="success"
-                validresponse="true"
-            else :
-                q_status="submitted"
-                status="success"
-                validresponse="true"
-        elif currentQuestion in range(e4_start,e4_end):
-            q_status="submitted"
-            status="success"
-            validresponse="true"
+
+        if currentQuestion in range(e3_start, e3_end):
+            r = UserAudio.query.filter_by(user=email).first()
+            if r:
+                q_status = "submitted"
+                status = "success"
+                validresponse = "true"
+            else:
+                q_status = "submitted"
+                status = "success"
+                validresponse = "true"
+        elif currentQuestion in range(e4_start, e4_end):
+            q_status = "submitted"
+            status = "success"
+            validresponse = "true"
         else:
             if submittedans == "skip" or submittedans == ["skip"]:
-                validresponse="true"
-                status="success"
-                q_status="skip"
+                validresponse = "true"
+                status = "success"
+                q_status = "skip"
             else:
-                q_status="submitted"
-                status="success"
-                validresponse="true"
+                q_status = "submitted"
+                status = "success"
+                validresponse = "true"
             test = Tests.query.filter_by(name=test_name).first()
-            path = root+"/content/%s/%s/"%(test.test_mode, str_date_filepath(test.start_date))
-            cans=getAnswer(currentQuestion,path)
+            path = root + \
+                "/content/%s/%s/" % (test.test_mode,
+                                     str_date_filepath(test.start_date))
+            cans = getAnswer(currentQuestion, path)
             app.logger.info([sorted(cans), sorted(submittedans)])
             if sorted(cans) == sorted(submittedans):
                 score = 1
-        app.logger.info([test_name,email,currentQuestion,submittedans,responsetime,score])
-        if validresponse=="true":
-            status="success"
-            if q_status!="skip":
-                q_status="submitted"
+        app.logger.info([test_name, email, currentQuestion,
+                         submittedans, responsetime, score])
+        if validresponse == "true":
+            status = "success"
+            if q_status != "skip":
+                q_status = "submitted"
         else:
-            status="error"
+            status = "error"
         q_section = get_q_section(currentQuestion)
-        data=Response(ip=request.headers.get('X-Forwarded-For', request.remote_addr), q_section=q_section, serialno=currentQuestion,emailid=email,name=email,currentQuestion=str(currentQuestion),submittedans=submittedans,responsetime=responsetime,q_status=q_status,q_score=score, test_name=test_name)
+        data = Response(
+            ip=request.headers.get(
+                'X-Forwarded-For',
+                request.remote_addr),
+            q_section=q_section,
+            serialno=currentQuestion,
+            emailid=email,
+            name=email,
+            currentQuestion=str(currentQuestion),
+            submittedans=submittedans,
+            responsetime=responsetime,
+            q_status=q_status,
+            q_score=score,
+            test_name=test_name)
         db.session.add(data)
         db.session.commit()
-        status="success"
+        status = "success"
     except Exception as e:
         traceback.print_exc()
         app.logger.info(e)
-        status="error"
+        status = "error"
 
-    responseobj = {u"status":status , u"q_status":q_status, u"validresponse":"true", u"qid":currentQuestion, u"test_name":test_name}
+    responseobj = {
+        u"status": status,
+        u"q_status": q_status,
+        u"validresponse": "true",
+        u"qid": currentQuestion,
+        u"test_name": test_name}
     app.logger.info(responseobj)
     #app.logger.info([data.q_section, data.emailid, data.submittedans, data.q_status])
     return responseobj
 
+
 @app.route('/submitanswer', methods=["POST"])
 @login_required
 def submitanswer(email=None):
+    """
+    upload the audion into the database by mapping it to the users email.
+    """
     email = email if email else get_email_from_session()
     app.logger.info([email, "im submitanswer"])
-    request_data = str(request.get_data(),'utf-8')
-    email, currentQuestion, submittedans, responsetime, test_name = getsubmittedresponse(email,request_data)
+    request_data = str(request.get_data(), 'utf-8')
+    email, currentQuestion, submittedans, responsetime, test_name = getsubmittedresponse(
+        email, request_data)
 
-    td=TestDetails.query.filter_by(email=email,test_name=test_name).first()
+    td = TestDetails.query.filter_by(email=email, test_name=test_name).first()
     #app.logger.info([td, "im submitanswer"])
     if td and not td.testend:
         #app.logger.info([td, "im submitanswer, in loop"])
 
         #app.logger.info([email, currentQuestion, "im submitanswer, in loop1"])
         app.logger.info(test_name)
-        responseobj = storeresponse(test_name, email, currentQuestion, submittedans, responsetime)
+        responseobj = storeresponse(
+            test_name, email, currentQuestion, submittedans, responsetime)
         #app.logger.info([responseobj, "im submitanswer, in loop2"])
     else:
-        responseobj = {u"testEnd" : True}
+        responseobj = {u"testEnd": True}
 
     return json.dumps(responseobj)
 
+
 def getResultOfStudent(email=None, test_name=None):
-    if email == None or email == "" or test_name == None or test_name == "":
+    """
+    upload the audion into the database by mapping it to the users email.
+    """
+    if email is None or email == "" or test_name is None or test_name == "":
         return json.dumps({"totalscore": 0, "question": []})
     totalscore = 0
-    q1= Response.query.filter(Response.emailid==email, Response.test_name==test_name) \
-        .order_by(Response.serialno, Response.time.desc()).all()
+    q1 = Response.query.filter(
+        Response.emailid == email,
+        Response.test_name == test_name) .order_by(
+        Response.serialno,
+        Response.time.desc()).all()
     questionresponses_dict = {}
-    question_records=[]
-    totalscore=0
-    s1="0"
+    question_records = []
+    totalscore = 0
+    s1 = "0"
     for q in q1:
-        print("current qu is %s"%q.currentQuestion)
+        print("current qu is %s" % q.currentQuestion)
         if q.responsetime is not None:
-            if 200 < int(q.currentQuestion) < 300 and q.currentQuestion!=s1:
-                print("found audion %s"%q.currentQuestion)
-                s1=q.currentQuestion
-                data = get_audio_by_qid(test_name,q.currentQuestion,email)
+            if 200 < int(q.currentQuestion) < 300 and q.currentQuestion != s1:
+                print("found audion %s" % q.currentQuestion)
+                s1 = q.currentQuestion
+                data = get_audio_by_qid(test_name, q.currentQuestion, email)
                 submittedans = data
-                question = {"user":email,"submittedans":submittedans, "q_score":q.q_score,"currentQuestion":s1,"responsetime":q.responsetime, "ip":q.ip}
+                question = {
+                    "user": email,
+                    "submittedans": submittedans,
+                    "q_score": q.q_score,
+                    "currentQuestion": s1,
+                    "responsetime": q.responsetime,
+                    "ip": q.ip}
                 question_records.append(question)
-            if q.currentQuestion != s1 :
-                s1=q.currentQuestion
-                #totalscore=q.responsetime+q.q_score
-                question = {"user":email,"submittedans":q.submittedans, "q_score":q.q_score,"currentQuestion":s1,"responsetime":q.responsetime, "ip":q.ip}
+            if q.currentQuestion != s1:
+                s1 = q.currentQuestion
+                # totalscore=q.responsetime+q.q_score
+                question = {
+                    "user": email,
+                    "submittedans": q.submittedans,
+                    "q_score": q.q_score,
+                    "currentQuestion": s1,
+                    "responsetime": q.responsetime,
+                    "ip": q.ip}
                 question_records.append(question)
-    questionresponses_dict["question"]=question_records
-    questionresponses_dict["totalscore"]=totalscore
-    ss=json.dumps(questionresponses_dict)
+    questionresponses_dict["question"] = question_records
+    questionresponses_dict["totalscore"] = totalscore
+    ss = json.dumps(questionresponses_dict)
     return ss
+
 
 @app.route('/getResult/<test_name>', methods=["GET", "POST"])
 @login_required
 def getResult(test_name):
-    app.logger.info("Im in get result for %s"%test_name)
-    if request.method=="POST":
+    """
+    Based on the type of the method get the email from the argument or sessiona and display the results. 
+    """
+    app.logger.info("Im in get result for %s" % test_name)
+    if request.method == "POST":
         email = request.form['emailid']
         return getResultOfStudent(email, test_name)
         #app.logger.info(["post", email])
@@ -1415,42 +1826,66 @@ def getResult(test_name):
 @app.route('/getstudentscore/<test_name>/<email>', methods=["GET"])
 @admin_login_required
 def getstudentscore(test_name, email):
-    return render_template('studentscore.html', test_name=test_name, email=email)
+    """
+    get the student score based on the test_name and email.
+    """
+    return render_template(
+        'studentscore.html',
+        test_name=test_name,
+        email=email)
+
 
 @app.route('/testresult/<test_name>', methods=["GET"])
 @admin_login_required
 def testresult(test_name):
+    """
+    render the testresult.html with testname passed as argument.
+    """
     return render_template("testresult.html", test_name=test_name)
+
 
 @app.route('/releaseResults/<test_name>', methods=["GET"])
 @admin_login_required
 def releaseResults(test_name):
-    app.logger.info("In releaseResults for test %s"%test_name)
+    """
+    display the results based on the testname on the get request.
+    """
+    app.logger.info("In releaseResults for test %s" % test_name)
 
     return ""
+
 
 @app.route('/viewresults', methods=["GET"])
 @admin_login_required
 def viewresults():
+    """
+    upload the audion into the database by mapping it to the users email.
+    """
     result = Tests.query.filter_by(creator=get_email_from_session()).all()
     return render_template("viewresults.html", tests=result)
+
 
 @app.route('/getScore', methods=["GET"])
 @admin_login_required
 def getScore(email=None):
+    """
+    get the score of the user based on the email.
+    """
     if not email:
         email = session["user"]['email']
-    score=0
-    q1= Response.query.filter_by(emailid=email).all()
+    score = 0
+    q1 = Response.query.filter_by(emailid=email).all()
     for q in q1:
-        score=score+1
+        score = score + 1
     template_values = {
         'p': q1,
-        'score1':score,
-        }
+        'score1': score,
+    }
     return render_template("testresult.html")
 
-#pending
+# pending
+
+
 def getessayresponse(data):
     vals = json.loads(data.decode("utf-8"))
     vals = vals['jsonData']
@@ -1461,19 +1896,36 @@ def getessayresponse(data):
     analytics = vals['analytics']
     return vals, qid, ans, qattemptedtime, test_name, analytics
 
-def saveessay(test_name,row=None,email=None,qid=None,ansText=None,qattemptedtime=None,analytics=None):
-    if email == None or email == "":
+
+def saveessay(
+        test_name,
+        row=None,
+        email=None,
+        qid=None,
+        ansText=None,
+        qattemptedtime=None,
+        analytics=None):
+    """
+    function is called with various arguments to verify and return if the save is done or not.
+    """
+    if email is None or email == "":
         return False
     try:
         if row:
-            row.qattemptedtime=qattemptedtime
+            row.qattemptedtime = qattemptedtime
             row.ansText = ansText
             row.analytics = analytics
             db.session.add(row)
             db.session.commit()
             app.logger.info(analytics)
         else:
-            data = EssayTypeResponse(useremailid=email, qid=qid, qattemptedtime=qattemptedtime, ansText = ansText, test_name=test_name, analytics=analytics)
+            data = EssayTypeResponse(
+                useremailid=email,
+                qid=qid,
+                qattemptedtime=qattemptedtime,
+                ansText=ansText,
+                test_name=test_name,
+                analytics=analytics)
             db.session.add(data)
             db.session.commit()
             app.logger.info(analytics)
@@ -1482,46 +1934,70 @@ def saveessay(test_name,row=None,email=None,qid=None,ansText=None,qattemptedtime
         app.logger.info(e)
         return False
 
+
 @app.route('/autosaveEssay', methods=["POST"])
 @login_required
 def autosaveEssay(email=None):
+    """
+    Save the essay and send it to the user once a post request is sent to this route.
+    """
     email = email if email else get_email_from_session()
 
     data = request.get_data()
     app.logger.info(data)
-    essay_response, qid, ans, qattemptedtime, test_name, analytics = getessayresponse(data)
+    essay_response, qid, ans, qattemptedtime, test_name, analytics = getessayresponse(
+        data)
 
-    data = EssayTypeResponse.query.filter_by(useremailid = email, qid = qid, test_name=test_name).first()
-    saveessay(test_name,data,email,qid,ans,qattemptedtime, analytics)
+    data = EssayTypeResponse.query.filter_by(
+        useremailid=email, qid=qid, test_name=test_name).first()
+    saveessay(test_name, data, email, qid, ans, qattemptedtime, analytics)
 
     return json.dumps(essay_response)
 
+
 @app.route('/uploadredirect', methods=["POST"])
 def uploadredirect():
+    """
+    redirect to upload audio rute if this route is called.
+    """
     return redirect(url_for("/upload_audio"))
+
 
 @app.route('/upload_audio', methods=["POST"])
 @login_required
 def upload_audio():
+    """
+    upload the audio into the database by mapping it to the users email.
+    """
     try:
         files = request.files.getlist('file')
         if files:
-            useraudio = UserAudio(user=session['user']['email'], blob1=files[0].file.read())
+            useraudio = UserAudio(
+                user=session['user']['email'], blob1=files[0].file.read())
             db.session.add(useraudio)
             db.session.commit()
     except Exception as e:
-        return "Record Not Saved.\n\n"+str(e)
+        return "Record Not Saved.\n\n" + str(e)
+
 
 @app.route('/view_audio/<link>', methods=["GET"])
 @login_required
 def view_audio(link):
+    """
+    display the audio for the link that is passed as argument.
+    """
     event = UserAudio.query.get_or_404(link)
     return app.response_class(event.blob1, mimetype='application/octet-stream')
 
 # @app.route('/audio')
 # def audio():
-#pending
+# pending
+
+
 def getendtestdata(request_data):
+    """
+    Based on the request data generate the score other things.
+    """
     try:
         val = request_data['jsonData']
         testend = val['testend']
@@ -1534,20 +2010,33 @@ def getendtestdata(request_data):
         return False
     return val, testend, score, spklink, test_name
 
+
 def getlearningcentre(email=None):
-    if email == None or email == "":
+    """
+    Get the learning center based on the email.
+    """
+    if email is None or email == "":
         return False
     try:
-        userdata=userDetails.query.filter_by(email = email).first()
-        learningcenter=userdata.learningcenter
+        userdata = userDetails.query.filter_by(email=email).first()
+        learningcenter = userdata.learningcenter
         return learningcenter
     except Exception as e:
         app.logger.info(e)
         return False
 
-#pending
-def updatetestdetails(data=None,testend=None,score=None,learningcenter=None):
-    if data == None:
+# pending
+
+
+def updatetestdetails(
+        data=None,
+        testend=None,
+        score=None,
+        learningcenter=None):
+    """
+    Update the test details based on the data, testend, score and learning center.
+    """
+    if data is None:
         return False
     try:
         data.testend = testend
@@ -1560,33 +2049,46 @@ def updatetestdetails(data=None,testend=None,score=None,learningcenter=None):
         app.logger.info(e)
         return False
 
+
 @app.route('/endtest', methods=["POST"])
 @login_required
 def endtest(email=None):
+    """
+    End the test for the given email address.
+    """
     email = email if email else get_email_from_session()
 
     data = json.loads(cgi.escape(str(request.get_data(), 'utf-8')))
     app.logger.info(data)
     end_test_data, testend, score, spkling, test_name = getendtestdata(data)
 
-    data1 = TestDetails.query.filter_by(email = email, test_name=test_name).first()
+    data1 = TestDetails.query.filter_by(
+        email=email, test_name=test_name).first()
     if data1:
         learningcenter = getlearningcentre(email)
         if not learningcenter:
             learningcenter = ""
-        updatetestdetails(data1,testend,score,learningcenter)
+        updatetestdetails(data1, testend, score, learningcenter)
     return ""
 
+
 def get_rollno(email=None):
+    """
+    Get the roll number of the user based on the email.
+    """
     if email:
         student = Students.query.filter_by(emailid=email).first()
         if student:
             return student.rollno
     return None
 
+
 @app.route('/startquiz/<test_name>')
 @login_required
 def startquiz(test_name):
+    """
+    start the quiz based on the name of the test.
+    """
     if test_name:
         email = session['user']['email']
         rollno = get_rollno(email)
@@ -1594,62 +2096,95 @@ def startquiz(test_name):
         test = Tests.query.filter_by(name=test_name).first()
         mode = test.test_mode
         show_result = False
-        studentTest = StudentTests.query.filter_by(emailid=email, test_name=test_name, result_email_sent=True).first()
+        studentTest = StudentTests.query.filter_by(
+            emailid=email, test_name=test_name, result_email_sent=True).first()
         if studentTest:
             show_result = studentTest.result_email_sent
-        if session['user']['role']=="admin":
+        if session['user']['role'] == "admin":
             show_result = True
 
-        app.logger.info("startquiz for %s with mode %s and show result %s"%(test_name, mode, show_result))
-        return render_template('quiz.html', rollno=rollno, test_name=test_name, mode=mode, show_result=show_result)
+        app.logger.info("startquiz for %s with mode %s and show result %s" % (
+            test_name, mode, show_result))
+        return render_template(
+            'quiz.html',
+            rollno=rollno,
+            test_name=test_name,
+            mode=mode,
+            show_result=show_result)
     return redirect("/")
 
+
 def generate_unique_code():
+    """
+    Generate a unique string to the users to login in the exam.
+    """
     return str(uuid.uuid1()).replace("-", "")
 
+
 def valid_user_login(email, password):
+    """
+    verify if the login credentials are valid or not.
+    """
     #app.logger.info("Im in valid user login method")
-    user = Users.query.filter_by(emailid=email, password=hashlib.md5(password.encode('utf-8')).hexdigest()).first()
-    #app.logger.info([user,email,password])
+    user = Users.query.filter_by(emailid=email, password=hashlib.md5(
+        password.encode('utf-8')).hexdigest()).first()
+    # app.logger.info([user,email,password])
     if user:
         return user
     return None
 
+
 @app.route('/student', methods=['GET'])
 @login_required
 def student():
+    """
+    render the student.html when this route is called.
+    """
     if request.method == "GET":
         return render_template('student.html')
 
-def makestatusbutton(email,hosted, testid):
+
+def makestatusbutton(email, hosted, testid):
+    """
+    Based on the status change the color of the button.
+    """
     if hosted:
-        td = TestDetails.query.filter(TestDetails.email==email, TestDetails.test_name==testid).first()
+        td = TestDetails.query.filter(
+            TestDetails.email == email,
+            TestDetails.test_name == testid).first()
         if td:
             if td.testend:
-                button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-default'>View Result</a>"
+                button = "<a href='/quiz/" + \
+                    str(testid) + "' class='btn btn-sm btn-default'>View Result</a>"
             else:
-                button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-warning'>Resume Test</a>"
+                button = "<a href='/quiz/" + \
+                    str(testid) + "' class='btn btn-sm btn-warning'>Resume Test</a>"
         else:
-            button = "<a href='/quiz/"+str(testid)+"' class='btn btn-sm btn-primary'>Attempt Test</a>"
+            button = "<a href='/quiz/" + \
+                str(testid) + "' class='btn btn-sm btn-primary'>Attempt Test</a>"
 
     else:
         button = "<a href='#' class='btn btn-sm btn-warning' disabled>Locked</a>"
     return button
 
+
 def gettestdetails(test_name, email=None):
-    if email==None or email=="" or test_name == None or test_name == "":
+    if email is None or email == "" or test_name is None or test_name == "":
         return []
     test_details = []
-    app.logger.info("tests for testid is %s"%test_name)
+    app.logger.info("tests for testid is %s" % test_name)
     result = Tests.query.filter_by(name=str(test_name)).first()
-    app.logger.info("tests %s"%result)
+    app.logger.info("tests %s" % result)
     if result:
         test_details = str(result).split("::")
         button = makestatusbutton(email, result.isHosted(), test_name)
         test_details.append(button)
         # tests.append(test_details)
-        app.logger.info("gettestdetails function output %s for test name %s"%(test_details, test_name))
+        app.logger.info(
+            "gettestdetails function output %s for test name %s" %
+            (test_details, test_name))
     return test_details
+
 
 @app.route('/studenttests', methods=['GET'])
 @login_required
@@ -1658,24 +2193,27 @@ def studenttests(emailid=None):
         emailid = get_email_from_session()
     result = getAllTestRecord(emailid)
     final = {"data": []}
-    app.logger.info("All tests student with email %s invited for %s"%(emailid, result))
-    if result != None:
+    app.logger.info(
+        "All tests student with email %s invited for %s" % (emailid, result))
+    if result is not None:
         tests = result
         # app.logger.info([tests, type(getavailabletests(tests[0]))])
         for test in tests:
             app.logger.info(test)
-            test_details = gettestdetails(test,emailid)
+            test_details = gettestdetails(test, emailid)
             if test_details:
                 final["data"].append(test_details)
 
-    app.logger.info("studenttests output %s for email %s"%(final, emailid))
+    app.logger.info("studenttests output %s for email %s" % (final, emailid))
     return json.dumps(final)
+
 
 def set_session(email=None, role=None):
     session['user'] = {}
     session['user']['email'] = email
     session['user']['role'] = role
     session['user']['allow_to_set_password'] = True
+
 
 @app.route('/verify/<email>/<code>', methods=['GET'])
 def verify_unique_code(email, code):
@@ -1690,20 +2228,29 @@ def verify_unique_code(email, code):
                 db.session.add(user)
                 db.session.commit()
                 set_session(user.emailid)
-                return render_template("set_password.html",
+                return render_template(
+                    "set_password.html",
                     success="You are successfully activated your account.\n Please login")
             except Exception as e:
                 return render_template("error.html", error=e)
-        return render_template("unauthorized.html", error="Your verification code is invalid, contact admin")
+        return render_template(
+            "unauthorized.html",
+            error="Your verification code is invalid, contact admin")
+
 
 def add_default_user_admin_if_not_exist():
     admin = Users.query.filter_by(user_type="admin").first()
     if admin is None:
-        if add_user_if_not_exist("admin@quiz.in","admin","admin",True):
+        if add_user_if_not_exist("admin@quiz.in", "admin", "admin", True):
             return True
     return False
 
-def add_user_if_not_exist(email=None, password=generate_unique_code(), user_type="student", verified=False):
+
+def add_user_if_not_exist(
+        email=None,
+        password=generate_unique_code(),
+        user_type="student",
+        verified=False):
     user = Users.query.filter_by(emailid=email).first()
     if user is None:
         try:
@@ -1716,18 +2263,20 @@ def add_user_if_not_exist(email=None, password=generate_unique_code(), user_type
             app.logger.error(e)
     return False
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Create default admin credentials if not already exists
     add_default_user_admin_if_not_exist()
     role = get_role_from_session()
     if role:
-            return redirect(url_for(role))
+        return redirect(url_for(role))
     if request.method == "GET":
         return render_template('login.html')
     if request.method == "POST":
         #app.logger.info('Login page post request')
-        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        ip_address = request.headers.get(
+            'X-Forwarded-For', request.remote_addr)
         email = request.form['email']
         password = request.form['password']
         #app.logger.info([email, password])
@@ -1747,30 +2296,42 @@ def login():
                 return redirect(url_for(role))
             else:
                 error = "Please activate your account, using the link we sent to your registered email"
-                app.logger.info("Tried to login in as %s from IP %s, but Account not activated." % (email, ip_address))
+                app.logger.info(
+                    "Tried to login in as %s from IP %s, but Account not activated." %
+                    (email, ip_address))
         else:
             error = "Invalid Credentials"
-            app.logger.info("Tried to login in as %s from IP %s, but Invalid Credentials." % (email, ip_address))
+            app.logger.info(
+                "Tried to login in as %s from IP %s, but Invalid Credentials." %
+                (email, ip_address))
         return render_template('login.html', error=error)
+
 
 @app.route('/logout')
 @login_required
 def logout():
     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-    login_log.debug("%s logged out with IP %s." % (session['user']["email"], ip_address))
+    login_log.debug("%s logged out with IP %s." %
+                    (session['user']["email"], ip_address))
     session.clear()
     # session.pop('user', None)
     # session.pop('TestID', None)
     return redirect(url_for('login'))
 
-def sendMail(encode='Testing', code='Testing', email='rguktemailtest@gmail.com', body='body'):
+
+def sendMail(
+        encode='Testing',
+        code='Testing',
+        email='rguktemailtest@gmail.com',
+        body='body'):
     try:
         print("send mail function")
-        #app.logger.info(body)
+        # app.logger.info(body)
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
+            "https://api.mailgun.net/v3/" +
+            app.config['MAIL_GUN_DOMAIN'] + "/messages",
             auth=("api", app.config['MAIL_GUN_KEY']),
-            data={"from": "QUIZ <lms@"+app.config['MAIL_GUN_DOMAIN']+">",
+            data={"from": "QUIZ <lms@" + app.config['MAIL_GUN_DOMAIN'] + ">",
                   "to": [email],
                   "subject": 'Account Verification for RGUKT QUIZ',
                   "text": '',
@@ -1779,8 +2340,11 @@ def sendMail(encode='Testing', code='Testing', email='rguktemailtest@gmail.com',
         if response.status_code == 200:
             return True
     except Exception as e:
-        app.logger.debug("Something went wrong in sending verification mail, please try again "+str(e))
+        app.logger.debug(
+            "Something went wrong in sending verification mail, please try again " +
+            str(e))
     return False
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
@@ -1797,14 +2361,15 @@ def registration():
         login_log.debug("post registration Form")
 
         email = request.form["email"]
-        exists = db.session.query(Users).filter_by(emailid=email).scalar() is not None
+        exists = db.session.query(Users).filter_by(
+            emailid=email).scalar() is not None
         # if email[-9:] != ".rgukt.in":
         #     message = "Email ID must be from RGUKT"
         #     message_staus = "danger"
 
         if not exists:
             code = generate_unique_code()
-            user = add_user_if_not_exist(email, code,"student",False)
+            user = add_user_if_not_exist(email, code, "student", False)
             if user:
                 encode = base64.b64encode(email.encode()).decode()
                 code = hashlib.md5(code.encode('utf-8')).hexdigest()
@@ -1817,7 +2382,8 @@ def registration():
                 sent = sendMail(encode, code, email, body)
                 if sent:
                     #app.logger.debug("an email has been sent to your email address "+email+". Please go to your inbox and click on the link to verify and activate your account")
-                    message = "An email has been sent to your email address "+email+". Please go to your inbox and click on the link to verify and activate your account"
+                    message = "An email has been sent to your email address " + email + \
+                        ". Please go to your inbox and click on the link to verify and activate your account"
                     message_staus = "success"
                 else:
                     db.session.delete(user)
@@ -1830,16 +2396,21 @@ def registration():
                 message = "Something went wrong in creating user, please try again"
                 message_staus = "danger"
         else:
-            message = str(email) + " already exists, Please check your inbox for verification mail or contact admin"
+            message = str(
+                email) + " already exists, Please check your inbox for verification mail or contact admin"
             message_staus = "danger"
 
-        return render_template('registration.html', message=message, status=message_staus)
+        return render_template(
+            'registration.html',
+            message=message,
+            status=message_staus)
+
 
 @app.route('/forgot_password', methods=["GET", "POST"])
 def forgot_password():
-    if request.method=="GET":
+    if request.method == "GET":
         return render_template('forgot_password.html')
-    elif request.method=="POST":
+    elif request.method == "POST":
         app.logger.info('in post forgot_password')
 
         message = ""
@@ -1854,25 +2425,30 @@ def forgot_password():
 
         if user:
 
-                encode = base64.b64encode(email.encode()).decode()
-                code = user.password
-                body = """Dear Student,<br> This email message is sent by the online quiz portal.
+            encode = base64.b64encode(email.encode()).decode()
+            code = user.password
+            body = """Dear Student,<br> This email message is sent by the online quiz portal.
                 Click on the link below to reset password.
 	        <h1><a href=https://%s/verify/%s/%s>Reset Password</a></h1> """ % (request.host, encode, code)
 
-                sent = sendMail(encode, code, email, body)
-                if sent:
-                    message = "An email has been sent to your email address "+email+". Please go to your inbox and click on the link to reset your password for quiz portal."
-                    message_staus = "success"
-                else:
-                    #app.logger.debug("Something went wrong in sending verification mail, please try again")
-                    message = "Something went wrong in sending verification mail, please try again"
-                    message_staus = "danger"
+            sent = sendMail(encode, code, email, body)
+            if sent:
+                message = "An email has been sent to your email address " + email + \
+                    ". Please go to your inbox and click on the link to reset your password for quiz portal."
+                message_staus = "success"
+            else:
+                #app.logger.debug("Something went wrong in sending verification mail, please try again")
+                message = "Something went wrong in sending verification mail, please try again"
+                message_staus = "danger"
         else:
-            message = str(email) + " not exists, Please provide a valid email address which you used for registration."
+            message = str(
+                email) + " not exists, Please provide a valid email address which you used for registration."
             message_staus = "danger"
 
-        return render_template('registration.html', message=message, status=message_staus)
+        return render_template(
+            'registration.html',
+            message=message,
+            status=message_staus)
 
 
 def update_password(user, password):
@@ -1885,6 +2461,7 @@ def update_password(user, password):
         app.logger.error(e)
     return False
 
+
 def send_email_with_password(email, password):
     try:
         #app.logger.debug("send mail function")
@@ -1892,21 +2469,31 @@ def send_email_with_password(email, password):
         Use below password to <h1><a href=https://%s/login>Login</a></h1>
         <br><br>Login : %s <br>Password : %s
         """ % (request.host, email, password)
-        #app.logger.info(body)
+        # app.logger.info(body)
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
-            auth=("api", app.config['MAIL_GUN_KEY']),
-            data={"from": "RGUKT QUIZ <news@"+app.config['MAIL_GUN_DOMAIN']+">",
-                  "to": [email],
-                  "subject": 'Account Verification for RGUKT QUIZ',
-                  "text": '',
-                  "html": body})
+            "https://api.mailgun.net/v3/" +
+            app.config['MAIL_GUN_DOMAIN'] +
+            "/messages",
+            auth=(
+                "api",
+                app.config['MAIL_GUN_KEY']),
+            data={
+                "from": "RGUKT QUIZ <news@" +
+                app.config['MAIL_GUN_DOMAIN'] +
+                ">",
+                "to": [email],
+                "subject": 'Account Verification for RGUKT QUIZ',
+                "text": '',
+                "html": body})
         #app.logger.info([response.status_code, response.text])
         if response.status_code == 200:
             return True
     except Exception as e:
-        app.logger.debug("Something went wrong in sending password mail, please try again "+str(e))
+        app.logger.debug(
+            "Something went wrong in sending password mail, please try again " +
+            str(e))
     return False
+
 
 @app.route('/setpassword', methods=['GET', 'POST'])
 @login_required
@@ -1925,28 +2512,40 @@ def setpassword():
                 updated = update_password(user, password)
                 if updated:
                     if not send_email_with_password(email, password):
-                        app.logger.info("An email with password sending is failed")
+                        app.logger.info(
+                            "An email with password sending is failed")
                     message = "Password successfully change, Please login"
                     return render_template('login.html', success=message)
                 else:
                     message = "Password change failed, Please try again"
                     message_staus = "error"
-                    return render_template("set_password.html", message=message, status=message_staus)
+                    return render_template(
+                        "set_password.html",
+                        message=message,
+                        status=message_staus)
             else:
                 message = "Your email address dosen't exist, Please register"
                 message_staus = "error"
-                return render_template("registration.html", message=message, status=message_staus)
+                return render_template(
+                    "registration.html",
+                    message=message,
+                    status=message_staus)
 
         else:
             message = "Password and ConfirmPassword should match"
             message_staus = "error"
 
-            return render_template("set_password.html", message=message, status=message_staus)
+            return render_template(
+                "set_password.html",
+                message=message,
+                status=message_staus)
+
 
 @app.route('/audio', methods=['GET', 'POST'])
 @login_required
 def audio():
     return render_template("audio.html")
+
 
 def get_today_ddmmyyyy():
     fmt = '%d-%m-%Y'
@@ -1954,75 +2553,95 @@ def get_today_ddmmyyyy():
     todayf = today.strftime(fmt)
     return todayf
 
+
 def today_ddmmyy():
     fmt = '%d-%m-%y'
     today = datetime.now(IST)
     todayf = today.strftime(fmt)
     return str(todayf)
 
-def is_safe_path(basedir, path, follow_symlinks=True):
-  # resolves symbolic links
-  if follow_symlinks:
-    return os.path.realpath(path).startswith(basedir)
 
-  return os.path.abspath(path).startswith(basedir)
+def is_safe_path(basedir, path, follow_symlinks=True):
+    # resolves symbolic links
+    if follow_symlinks:
+        return os.path.realpath(path).startswith(basedir)
+
+    return os.path.abspath(path).startswith(basedir)
+
 
 def convert_string_date(date):
     try:
         return datetime.strptime(date, '%d-%m-%Y').date()
     except Exception as e:
-        app.logger.info("Error while converting string_to_date funciton %s"%e)
+        app.logger.info(
+            "Error while converting string_to_date funciton %s" % e)
         return datetime.now().date()
+
 
 @app.route('/content/<test_mode>/<datetoday>/<filename>')
 @login_required
-def send_content(test_mode, datetoday,filename):
-    app.logger.info("Im in send_content with %s/%s"%(test_mode, datetoday))
+def send_content(test_mode, datetoday, filename):
+    app.logger.info("Im in send_content with %s/%s" % (test_mode, datetoday))
     email = get_email_from_session()
     role = get_role_from_session()
     # if setquizstatus(email) == "INPROGRESS":
     #     return redirect("/")
     date1 = convert_string_date(get_today_ddmmyyyy())
     date2 = convert_string_date(datetoday)
-    app.logger.info("date %s and type %s result %s"%(date1, date2, date1 >= date2))
-    safe = is_safe_path(APP_ROOT, '/content/%s/%s/%s'%(test_mode, datetoday, filename))
-    app.logger.info("safe %s"%safe)
+    app.logger.info("date %s and type %s result %s" %
+                    (date1, date2, date1 >= date2))
+    safe = is_safe_path(APP_ROOT, '/content/%s/%s/%s' %
+                        (test_mode, datetoday, filename))
+    app.logger.info("safe %s" % safe)
     app.logger.info(role)
-    app.logger.info("app root %s"%APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday))
-    #the below link is tested by putting the folder outside of the root
-    # return send_from_directory(APP_ROOT+'/../dep_content/%s/%s/'%(test_mode, datetoday), filename)
+    app.logger.info(
+        "app root %s" %
+        APP_ROOT +
+        '/../dep_content/%s/%s/' %
+        (test_mode,
+         datetoday))
+    # the below link is tested by putting the folder outside of the root
+    # return send_from_directory(APP_ROOT+'/../dep_content/%s/%s/'%(test_mode,
+    # datetoday), filename)
     if role == "admin":
-        return send_from_directory(root+'/content/%s/%s/'%(test_mode, datetoday), filename)
+        return send_from_directory(
+            root + '/content/%s/%s/' %
+            (test_mode, datetoday), filename)
 
     if date1 >= date2:
-        return send_from_directory(root+'/content/%s/%s/'%(test_mode, datetoday), filename)
+        return send_from_directory(
+            root + '/content/%s/%s/' %
+            (test_mode, datetoday), filename)
     else:
         return "<h3>Error 404 in displaying the content you requested. Please contact Exam Admin.</h3>"
+
 
 @app.route("/addviewrecord", methods=["POST"])
 @login_required
 def addviewrecord():
     try:
         app.logger.info("Im in addviewrecord method")
-        params =  eval(request.get_data())
+        params = eval(request.get_data())
         email = get_email_from_session()
         endtime = str(datetime.now(IST))
         params['endtime'] = endtime
-        app.logger.info("params %s"%params)
+        app.logger.info("params %s" % params)
 
         # ca = ContentActivity(params)
         ca = ContentActivity(email=email,
-            test_name=params['test_name'],
-            section=params['section'],
-            starttime=params['starttime'],
-            endtime=endtime,
-            ip=request.headers.get('X-Forwarded-For', request.remote_addr)
-        )
+                             test_name=params['test_name'],
+                             section=params['section'],
+                             starttime=params['starttime'],
+                             endtime=endtime,
+                             ip=request.headers.get(
+                                 'X-Forwarded-For', request.remote_addr)
+                             )
         db.session.add(ca)
         db.session.commit()
         # app.logger.info(ca)
         # app.logger.info(ContentActivity)
-        return "Storage Success. starttime: "+str(params['starttime'])+", endtime: "+endtime
+        return "Storage Success. starttime: " + \
+            str(params['starttime']) + ", endtime: " + endtime
     except Exception as e:
         app.logger.info(e)
         return render_template('error.html', error=e)
@@ -2030,17 +2649,21 @@ def addviewrecord():
 #
 # Reading Task Handlers
 #
+
+
 def build_reading_task():
     task = {}
     today = today_ddmmyy()
-    filepath = "/content/"+today+"/reading.pdf"
+    filepath = "/content/" + today + "/reading.pdf"
     task["filepath"] = filepath
     return task
+
 
 def str_date_filepath(date):
     if date:
         date = date.split()[0]
     return date
+
 
 @app.route("/readingtask/<test_name>", methods=["GET"])
 @login_required
@@ -2052,19 +2675,27 @@ def readingtask(test_name):
         test = Tests.query.filter_by(name=test_name).first()
         path = ""
         if test:
-            path = "/content/%s/%s/reading.pdf"%(test.test_mode, str_date_filepath(test.start_date))
-            app.logger.info("constructed path %s"%path)
+            path = "/content/%s/%s/reading.pdf" % (
+                test.test_mode, str_date_filepath(test.start_date))
+            app.logger.info("constructed path %s" % path)
         if setquizstatus(email, test_name) != "INPROGRESS":
             reading_task = build_reading_task()
             if path != "":
-                reading_task = {"filepath":path}
+                reading_task = {"filepath": path}
             time = datetime.now(IST)
-            return render_template('readingtask.html', task=reading_task, test_name=test_name, starttime=time)
+            return render_template(
+                'readingtask.html',
+                task=reading_task,
+                test_name=test_name,
+                starttime=time)
         else:
             return redirect("/")
     except Exception as e:
         app.logger.info(e)
-        return render_template('error.html', error="RTExec: Exception while presenting Reading Task")
+        return render_template(
+            'error.html',
+            error="RTExec: Exception while presenting Reading Task")
+
 
 def send_file_partial(path):
     # logging.info(path)
@@ -2077,16 +2708,19 @@ def send_file_partial(path):
         (if it has any)
     """
     range_header = request.headers.get('Range', None)
-    if not range_header: return send_file(path)
+    if not range_header:
+        return send_file(path)
 
     size = os.path.getsize(path)
     byte1, byte2 = 0, None
 
-    m = re.search('(\d+)-(\d*)', range_header)
+    m = re.search(r'(\d+)-(\d*)', range_header)
     g = m.groups()
 
-    if g[0]: byte1 = int(g[0])
-    if g[1]: byte2 = int(g[1])
+    if g[0]:
+        byte1 = int(g[0])
+    if g[1]:
+        byte2 = int(g[1])
 
     length = size - byte1
     if byte2 is not None:
@@ -2098,27 +2732,30 @@ def send_file_partial(path):
         data = f.read(length)
 
     rv = ress(data,
-        206,
-        mimetype=mimetypes.guess_type(path)[0],
-        direct_passthrough=True)
-    rv.headers.add('Content-Range', 'bytes {0}-{1}/{2}'.format(byte1, byte1 + length - 1, size))
+              206,
+              mimetype=mimetypes.guess_type(path)[0],
+              direct_passthrough=True)
+    rv.headers.add('Content-Range',
+                   'bytes {0}-{1}/{2}'.format(byte1, byte1 + length - 1, size))
 
     return rv
+
 
 @app.after_request
 def after_request(response):
     response.headers.add('Accept-Ranges', 'bytes')
     return response
 
+
 @app.route('/play/<path:song>')
 def play(song):
-    app.logger.info("listening video path %s"%"static/"+song)
+    app.logger.info("listening video path %s" % "static/" + song)
     role = get_role_from_session()
     date = song.split("/")[2]
     date = convert_string_date(date)
     date1 = convert_string_date(get_today_ddmmyyyy())
-    if date1 >= date or role=="admin":
-    	return send_file_partial(root+"/"+song)
+    if date1 >= date or role == "admin":
+        return send_file_partial(root + "/" + song)
     return "<h3>Error 404 in displaying the content you requested. Please contact Exam Admin.</h3>"
 
 
@@ -2128,9 +2765,10 @@ def play(song):
 def build_listening_task():
     task = {}
     today = today_ddmmyy()
-    filepath = "/content/"+today+"/listening.mp4"
+    filepath = "/content/" + today + "/listening.mp4"
     task["filepath"] = filepath
     return task
+
 
 @app.route("/listeningtask/<test_name>", methods=["GET"])
 @login_required
@@ -2142,94 +2780,113 @@ def listeningtask(test_name):
         test = Tests.query.filter_by(name=test_name).first()
         path = ""
         if test:
-            path = "/content/%s/%s/listening.mp4"%(test.test_mode, str_date_filepath(test.start_date))
-            app.logger.info("constructed path for listening %s"%path)
+            path = "/content/%s/%s/listening.mp4" % (
+                test.test_mode, str_date_filepath(test.start_date))
+            app.logger.info("constructed path for listening %s" % path)
         if setquizstatus(email, test_name) != "INPROGRESS":
             listening_task = build_listening_task()
             if path != "":
-                listening_task = {"filepath":path}
+                listening_task = {"filepath": path}
             time = datetime.now(IST)
-            return render_template('listeningtask.html', task=listening_task, test_name=test_name, starttime=time)
+            return render_template(
+                'listeningtask.html',
+                task=listening_task,
+                test_name=test_name,
+                starttime=time)
         else:
             return redirect("/")
     except Exception as e:
         app.logger.info(e)
-        return render_template('error.html', error="LTExec: Exception while presenting Listening Task")
+        return render_template(
+            'error.html',
+            error="LTExec: Exception while presenting Listening Task")
+
 
 @app.route("/like/<test_name>/<section>", methods=["GET"])
 @login_required
-def like(test_name,section):
+def like(test_name, section):
     try:
         email = get_email_from_session()
-        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-        row = Content.query.filter_by(email=email,test_name=test_name,section=section).first()
+        ip_address = request.headers.get(
+            'X-Forwarded-For', request.remote_addr)
+        row = Content.query.filter_by(
+            email=email, test_name=test_name, section=section).first()
         if row:
             row.liked = True
         else:
-            row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
+            row = Content(email=email, test_name=test_name,
+                          section=section, liked=True, ip=ip_address)
             db.session.add(row)
         db.session.commit()
-        return "Liked "+section+" Content."
+        return "Liked " + section + " Content."
     except Exception as e:
         app.logger.info(e)
-        return "Error in liking the "+section+" Content."
+        return "Error in liking the " + section + " Content."
+
 
 @app.route("/dislike/<test_name>/<section>", methods=["GET"])
 @login_required
-def dislike(test_name,section):
+def dislike(test_name, section):
     try:
         email = get_email_from_session()
-        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
-        row = Content.query.filter_by(email=email,test_name=test_name,section=section).first()
+        ip_address = request.headers.get(
+            'X-Forwarded-For', request.remote_addr)
+        row = Content.query.filter_by(
+            email=email, test_name=test_name, section=section).first()
         if row:
             row.liked = False
         else:
-            row = Content(email=email,test_name=test_name,section=section,liked=True,ip=ip_address)
+            row = Content(email=email, test_name=test_name,
+                          section=section, liked=True, ip=ip_address)
             db.session.add(row)
         db.session.commit()
-        return "Disliked "+section+" Content."
+        return "Disliked " + section + " Content."
     except Exception as e:
         app.logger.info(e)
-        return "Error in disliking the "+section+" Content."
+        return "Error in disliking the " + section + " Content."
 
-#==================================================== ADMIN PAGE =====================================================
-# def valid_admin_login(email, password):
-#     result = AdminDetails.query.filter_by(email=email).first()
-#     if str(result) == str(password):
-#         return True
-#     return False
+# ==================================================== ADMIN PAGE ========
 
-# @app.route('/adminlogin', methods=['GET', 'POST'])
-# def adminlogin():
-#     ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
 
-#     if db.session.query(AdminDetails).first() is None:
-#         row = AdminDetails("admin@quiz.in","admin")
-#         db.session.add(row)
-#         db.session.commit()
+def valid_admin_login(email, password):
+    result = AdminDetails.query.filter_by(email=email).first()
+    if str(result) == str(password):
+        return True
+    return False
 
-#         login_log.debug("Created Default Admin Credentials.")
 
-#     message = None
-#     error = None
+@app.route('/adminlogin', methods=['GET', 'POST'])
+def adminlogin():
+    ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if db.session.query(AdminDetails).first() is None:
+        row = AdminDetails("admin@quiz.in", "admin")
+        db.session.add(row)
+        db.session.commit()
 
-#     if request.method == "POST":
-#         email = request.form['email']
-#         password = request.form['password']
+        login_log.debug("Created Default Admin Credentials.")
 
-#         if valid_admin_login(email,password):
-#             session['adminemail'] = email
-#             message = "You are logged in as %s" % email
+    message = None
+    error = None
 
-#             login_log.debug("Logged in as %s with IP %s" % (email, ip_address))
-#             return redirect(url_for('admin'))
-#         else:
-#             error = "Invalid Credentials"
+    if request.method == "POST":
+        email = request.form['email']
+        password = request.form['password']
 
-#             login_log.debug("Tried to login in as %s from IP %s, but Invalid Credentials." % (email, ip_address))
-#             return render_template('login.html', error=error)
+        if valid_admin_login(email, password):
+            session['adminemail'] = email
+            message = "You are logged in as %s" % email
 
-#     return render_template('login.html')
+            login_log.debug("Logged in as %s with IP %s" % (email, ip_address))
+            return redirect(url_for('admin'))
+        else:
+            error = "Invalid Credentials"
+
+            login_log.debug(
+                "Tried to login in as %s from IP %s, but Invalid Credentials." %
+                (email, ip_address))
+            return render_template('login.html', error=error)
+
+    return render_template('login.html')
 
 # @app.route('/logout')
 # def logout():
@@ -2239,9 +2896,10 @@ def dislike(test_name,section):
 #     session.pop('adminemail', None)
 #     return redirect(url_for('adminlogin'))
 
-def createDefaultTest(TestID, author, start_date,end_date, test_mode):
+
+def createDefaultTest(TestID, author, start_date, end_date, test_mode):
     try:
-        test = Tests(TestID,author, start_date, end_date, test_mode)
+        test = Tests(TestID, author, start_date, end_date, test_mode)
         db.session.add(test)
         db.session.commit()
         return True
@@ -2249,7 +2907,8 @@ def createDefaultTest(TestID, author, start_date,end_date, test_mode):
         app.logger.info(e)
         return False
 
-def settestsession(TestID,start_date,end_date):
+
+def settestsession(TestID, start_date, end_date):
     try:
         session["TestID"] = TestID
         session["start_date"] = start_date
@@ -2257,7 +2916,11 @@ def settestsession(TestID,start_date,end_date):
         return True
     except Exception as e:
         app.logger.error(e)
-        return redirect(url_for("error", error="settestsession: unable to save the tesr session."))
+        return redirect(
+            url_for(
+                "error",
+                error="settestsession: unable to save the tesr session."))
+
 
 @app.route('/admin')
 @admin_login_required
@@ -2274,17 +2937,21 @@ def admin(email=None):
     except Exception as e:
         app.logger.info(e)
 
+
 def getAllTestRecord(emailid):
     results = db.session.query(StudentTests.test_name) \
         .filter(StudentTests.emailid == emailid).all()
 
     return [r for (r, ) in results]
 
+
 def validate_name(name):
     result = Tests.query.filter_by(name=name).first()
-    return result == None
+    return result is None
 
-#Change the the now() to utcnow() and add replace method
+# Change the the now() to utcnow() and add replace method
+
+
 def validate_date(date):
     fmt = '%d-%m-%Y %H:%M'
     today = datetime.now(IST)
@@ -2294,13 +2961,15 @@ def validate_date(date):
 
     return date >= today
 
+
 def get_date_from_string(date):
     if date:
         return IST.localize(datetime.strptime(date, '%d-%m-%Y %H:%M'))
     else:
         return None
 
-def validate_file(file_name,data):
+
+def validate_file(file_name, data):
     file_report = {}
     file_report["name"] = file_name
     if file_name != '' and allowed_file(file_name):
@@ -2318,6 +2987,7 @@ def validate_file(file_name,data):
         file_report["isValid"] = 'Invalid Filename or Extension.'
     return file_report
 
+
 @app.route('/uninvite/<testid>', methods=["POST"], defaults={'email': None})
 @app.route('/uninvite/<email>/<testid>', methods=["GET"])
 @admin_login_required
@@ -2326,23 +2996,25 @@ def uninvite(email, testid):
         result = StudentTests.query.filter_by(emailid=email).delete()
 
         db.session.commit()
-        return redirect("/edit/"+testid)
+        return redirect("/edit/" + testid)
     if request.method == "POST":
         try:
             students_list = eval(request.get_data())['jsonData']
             app.logger.info(students_list)
             # students = updateStudents(testid, students_list)
             for email in students_list:
-                result = StudentTests.query.filter_by(emailid=email, test_name=testid).delete()
+                result = StudentTests.query.filter_by(
+                    emailid=email, test_name=testid).delete()
             db.session.commit()
 
         except Exception as e:
             app.logger.info(e)
         return ""
 
-def save_file(folder_name,file_name,data):
+
+def save_file(folder_name, file_name, data):
     filename = secure_filename(file_name)
-    path = os.path.join(app.config['UPLOAD_FOLDER'], folder_name+"/")
+    path = os.path.join(app.config['UPLOAD_FOLDER'], folder_name + "/")
     if not os.path.exists(path):
         os.makedirs(path)
     with open(os.path.join(path, filename), "w+") as f:
@@ -2350,7 +3022,8 @@ def save_file(folder_name,file_name,data):
     # file.save(os.path.join(path, filename))
     # file.close()
 
-def updatetests(test_name=None,email=None,start_date=None,end_date=None):
+
+def updatetests(test_name=None, email=None, start_date=None, end_date=None):
     if not test_name or not email or not start_date or not end_date:
         return False
     try:
@@ -2364,13 +3037,14 @@ def updatetests(test_name=None,email=None,start_date=None,end_date=None):
         app.logger.info(e)
     return False
 
+
 def create_test(test_name, test_mode, start_date, end_date):
 
     if test_name and test_mode and start_date and end_date:
         # if not test_name:
         # test_name = test["name"]
         # test_mode = test["test_mode"] if "test_mode" in test else "TOEFL"
-        #app.logger.info(test_name)
+        # app.logger.info(test_name)
         nameValid = validate_name(test_name)
 
         # start_date = test["start_date"]
@@ -2379,10 +3053,10 @@ def create_test(test_name, test_mode, start_date, end_date):
         # end_date = test["end_date"]
         enddateValid = validate_date(end_date)
 
-
         if nameValid and startdateValid and enddateValid:
             #app.logger.info('%s created a Test - %s' %(admin,test_name))
-            is_created = createDefaultTest(test_name,"admin@quiz.in", start_date, end_date, test_mode)
+            is_created = createDefaultTest(
+                test_name, "admin@quiz.in", start_date, end_date, test_mode)
             if is_created:
                 return True
             # settestsession(test_name,start_date,end_date)
@@ -2390,42 +3064,77 @@ def create_test(test_name, test_mode, start_date, end_date):
             # nameValid = "Already Exists."
             # startdateValid = "Invalid Date Format or Date is passed."
             # enddateValid = "Invalid Date Format."
-            message = 'Failed to create Test - [%s: %s, start_date: %s, end_date: %s]' %(test_name,nameValid,startdateValid,enddateValid)
-            app.logger.info('Failed to create Test - %s: %s, start_date: %s, end_date: %s' %(test_name,nameValid,startdateValid,enddateValid))
+            message = 'Failed to create Test - [%s: %s, start_date: %s, end_date: %s]' % (
+                test_name, nameValid, startdateValid, enddateValid)
+            app.logger.info(
+                'Failed to create Test - %s: %s, start_date: %s, end_date: %s' %
+                (test_name, nameValid, startdateValid, enddateValid))
     else:
-        message = 'Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date])
-        app.logger.info('Test - %s arguments are missing %s' %(test_name, [test_name, test_mode, start_date, end_date]))
+        message = 'Test - %s arguments are missing %s' % (
+            test_name, [test_name, test_mode, start_date, end_date])
+        app.logger.info('Test - %s arguments are missing %s' %
+                        (test_name, [test_name, test_mode, start_date, end_date]))
 
     return message
 
-@app.route('/create', methods=["GET","POST"])
+
+@app.route('/create', methods=["GET", "POST"])
 @admin_login_required
 def create(admin=None, test_name=None):
     if not admin:
         admin = session["user"]['email']
 
     if request.method == "GET":
-        tests= []
-        tests.append({"name":"Daily English Practice 1","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
-        tests.append({"name":"Daily English Practice 2","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
-        tests.append({"name":"Daily English Practice 3","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
-        tests.append({"name":"Daily English Practice 4","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
-        tests.append({"name":"Daily English Practice 5","start_date":"30-08-2017 12:00","end_date":"30-09-2017 12:00", "test_mode":"DEP"})
+        tests = []
+        tests.append({"name": "Daily English Practice 1",
+                      "start_date": "30-08-2017 12:00",
+                      "end_date": "30-09-2017 12:00",
+                      "test_mode": "DEP"})
+        tests.append({"name": "Daily English Practice 2",
+                      "start_date": "30-08-2017 12:00",
+                      "end_date": "30-09-2017 12:00",
+                      "test_mode": "DEP"})
+        tests.append({"name": "Daily English Practice 3",
+                      "start_date": "30-08-2017 12:00",
+                      "end_date": "30-09-2017 12:00",
+                      "test_mode": "DEP"})
+        tests.append({"name": "Daily English Practice 4",
+                      "start_date": "30-08-2017 12:00",
+                      "end_date": "30-09-2017 12:00",
+                      "test_mode": "DEP"})
+        tests.append({"name": "Daily English Practice 5",
+                      "start_date": "30-08-2017 12:00",
+                      "end_date": "30-09-2017 12:00",
+                      "test_mode": "DEP"})
         for test in tests:
             # definition : create_test(test_name, test_mode, start_date, end_date)
-            testValid = create_test(test["name"], test["test_mode"], test["start_date"], test["end_date"])
-            app.logger.info("%s test is created %s"%(test["name"], testValid))
+            testValid = create_test(
+                test["name"],
+                test["test_mode"],
+                test["start_date"],
+                test["end_date"])
+            app.logger.info("%s test is created %s" %
+                            (test["name"], testValid))
         return redirect(url_for("admin"))
 
+
 def loadTestSet():
+    """
+    load Test Set.
+    """
     student = Users.query.filter_by(user_type="student").first()
     if student is None:
         for num in range(20):
-            row = Users("student"+str(num)+"@quiz.in","student","student",True)
+            row = Users("student" + str(num) + "@quiz.in",
+                        "student", "student", True)
             db.session.add(row)
             db.session.commit()
 
+
 def isRegistered(studentemail):
+    """
+    is registered.
+    """
     registered = Users.query.filter(Users.emailid == studentemail).first()
     if registered:
         verified = registered.verified
@@ -2433,19 +3142,31 @@ def isRegistered(studentemail):
             return True
     return False
 
+
 @app.context_processor
 def invited():
-    def _invited(studentemail,testid):
-        app.logger.info("invited function called for %s for email %s"%(testid, studentemail))
-        studentrow = StudentTests.query.filter(StudentTests.emailid == studentemail,
-                                                StudentTests.test_name == testid
-            ).first()
-        if studentrow != None:
+    """
+    invited.
+    """
+    def _invited(studentemail, testid):
+        """
+        is invited.
+        """
+        app.logger.info("invited function called for %s for email %s" %
+                        (testid, studentemail))
+        studentrow = StudentTests.query.filter(
+            StudentTests.emailid == studentemail,
+            StudentTests.test_name == testid).first()
+        if studentrow is not None:
             return True
         return False
     return dict(invited=_invited)
 
-def updateDate(testid=None, start_date=None,end_date=None):
+
+def updateDate(testid=None, start_date=None, end_date=None):
+    """
+    Update date.
+    """
     if testid is not None or start_date is not None or end_date is not None:
         try:
             test = Tests.query.filter_by(name=testid).first()
@@ -2457,12 +3178,16 @@ def updateDate(testid=None, start_date=None,end_date=None):
             app.logger.info(e)
     return False
 
-def updateStudents(testid, students_list):
 
+def updateStudents(testid, students_list):
+    """
+    Update the student list.
+    """
     slist = []
     students = []
     student_table = {}
-    app.logger.info("In updateStudents funtion Students %s and testid %s"%(students_list, testid))
+    app.logger.info("In updateStudents funtion Students %s and testid %s" % (
+        students_list, testid))
     for student in students_list:
         student = student.lstrip()
         student = student.rstrip()
@@ -2474,17 +3199,18 @@ def updateStudents(testid, students_list):
 
         if isRegistered(student):
             tests = getAllTestRecord(student)
-            app.logger.info("all tests %s"%tests)
+            app.logger.info("all tests %s" % tests)
             # if tests != None:
             if testid in tests:
-                app.logger.info("%s is already Invited to %s."%(student, testid))
+                app.logger.info("%s is already Invited to %s." %
+                                (student, testid))
                 student_table[student] = "is already Invited"
             else:
                 studenttests = StudentTests(student, testid)
                 db.session.add(studenttests)
                 db.session.commit()
                 # students.append(student+" is Invited.")
-                app.logger.info("%s is now Invited to %s."%(student, testid))
+                app.logger.info("%s is now Invited to %s." % (student, testid))
                 student_table[student] = "is Invited"
                 #app.logger.info('%s is Invited' %student)
                 # slist.append(student)
@@ -2495,38 +3221,62 @@ def updateStudents(testid, students_list):
             #app.logger.info('%s is not registered' %student)
     return student_table
 
+
 def get_all_students():
-    return Users.query.filter(Users.user_type!="admin").all()
+    """
+    get all students.
+    """
+    return Users.query.filter(Users.user_type != "admin").all()
+
 
 @app.context_processor
 def invitation_mail_sent():
+    """
+    verify if invite was sent.
+    """
     def _invitation_mail_sent(email, testid):
+        """
+        send the mail to the given mail addess.
+        """
         student = StudentTests.query.filter_by(emailid=email).first()
-        app.logger.info("is invitation sent to %s for test %s -> %s", email, testid, student)
+        app.logger.info(
+            "is invitation sent to %s for test %s -> %s",
+            email,
+            testid,
+            student)
         if student:
             if student.invitation_email_sent:
                 return True
-            app.logger.info("is invitation sent to %s for test %s -> %s", email, testid, student.invitation_email_sent)
+            app.logger.info("is invitation sent to %s for test %s -> %s",
+                            email, testid, student.invitation_email_sent)
         return False
     return dict(invitation_mail_sent=_invitation_mail_sent)
+
 
 @app.route("/edit/<testid>/", defaults={'option': None})
 @app.route("/edit/<testid>/<option>", methods=["GET", "POST"])
 @admin_login_required
 def edit(option, testid):
-
+    """
+    edit.
+    """
     # if not testid:
     #     testid = testid if testid else "English Comprehension Test"
-        # app.logger.info('Edit Test Page (%s) accessed by %s' %(testid))
+    # app.logger.info('Edit Test Page (%s) accessed by %s' %(testid))
 
-    if request.method == "GET" or option == None:
+    if request.method == "GET" or option is None:
         invitedstudents = StudentTests.query.all()
-        app.logger.info("All invited students %s"%invitedstudents)
+        app.logger.info("All invited students %s" % invitedstudents)
         # db.session.add(Users("ss@fju.us", "password", "student", True))
         # db.session.commit()
         all_registered_students = get_all_students()
-        app.logger.info("All registered students %s"% all_registered_students)
-        return render_template("add_students.html", testid=testid, messages=False, invitedstudents=invitedstudents, allstudents=all_registered_students)
+        app.logger.info("All registered students %s" % all_registered_students)
+        return render_template(
+            "add_students.html",
+            testid=testid,
+            messages=False,
+            invitedstudents=invitedstudents,
+            allstudents=all_registered_students)
 
     if request.method == "POST":
         invitedstudents = False
@@ -2546,17 +3296,22 @@ def edit(option, testid):
 
                     if validate_start_date:
                         if validate_end_date:
-                            updatedate = updateDate(testid, start_date,end_date)
+                            updatedate = updateDate(
+                                testid, start_date, end_date)
                             if updatedate:
-                                startdatevalid = "Start Date %s is Valid and Updated." %str(start_date)
-                                enddatevalid = "End Date %s is Valid and Updated." %str(end_date)
+                                startdatevalid = "Start Date %s is Valid and Updated." % str(
+                                    start_date)
+                                enddatevalid = "End Date %s is Valid and Updated." % str(
+                                    end_date)
                             else:
                                 startdatevalid = "Something went wrong. Please log in again to make updates."
                                 enddatevalid = ""
                         else:
-                            enddatevalid = "End Date %s is not Valid." %str(end_date)
+                            enddatevalid = "End Date %s is not Valid." % str(
+                                end_date)
                     else:
-                        startdatevalid = "Start Date %s is not Valid." %str(start_date)
+                        startdatevalid = "Start Date %s is not Valid." % str(
+                            start_date)
                 else:
                     startdatevalid = "Updated Exam."
 
@@ -2565,13 +3320,21 @@ def edit(option, testid):
                 # students.append(e)
                 error = e
 
-            app.logger.info('%s %s %s' %(error, startdatevalid, enddatevalid))
-            return render_template("add_students.html", invitedstudents=invitedstudents, testid=testid, error=error, messages=True, startdatevalid=startdatevalid, enddatevalid=enddatevalid)
+            app.logger.info('%s %s %s' % (error, startdatevalid, enddatevalid))
+            return render_template(
+                "add_students.html",
+                invitedstudents=invitedstudents,
+                testid=testid,
+                error=error,
+                messages=True,
+                startdatevalid=startdatevalid,
+                enddatevalid=enddatevalid)
         elif option == "invite_students":
             # app.logger.info("im in invite students functionality")
             students = {}
             students_list = eval(request.get_data())['jsonData']
-            app.logger.info("List of students for test invitaion %s"%students_list)
+            app.logger.info(
+                "List of students for test invitaion %s" % students_list)
             students = updateStudents(testid, students_list)
 
             # try:
@@ -2588,7 +3351,11 @@ def edit(option, testid):
 
             invitedstudents = StudentTests.query.all()
             #app.logger.info('%s added %s to %s' %(admin,students,testid))
-            return render_template("add_students.html", invitedstudents=invitedstudents,testid=testid, students=students)
+            return render_template(
+                "add_students.html",
+                invitedstudents=invitedstudents,
+                testid=testid,
+                students=students)
         else:
             return "No " + option + " option exist"
 
@@ -2596,57 +3363,84 @@ def edit(option, testid):
 @app.route('/getStudentsList/<test>', methods=["GET"])
 @admin_login_required
 def getStudentsList(test):
+    """
+    get the students list.
+    """
     # test = session["TestID"]
     result = StudentTests.query.all()
     students = []
     for i in result:
         if test in i.test_name:
             students.append(i.emailid)
-    return json.dumps({"students":students})
+    return json.dumps({"students": students})
+
 
 @app.route('/prefiledit/<name>', methods=["GET"])
 @admin_login_required
 def prefiledit(name):
-    #app.logger.info(name)
+    """
+    pre file it.
+    """
+    # app.logger.info(name)
     test = Tests.query.filter_by(name=name).first()
     if test:
         start_date = test.start_date
         end_date = test.end_date
         students = eval(getStudentsList(name))["students"]
-        return json.dumps({"start_date":start_date, "end_date":end_date, "students":students})
+        return json.dumps(
+            {"start_date": start_date, "end_date": end_date, "students": students})
     return False
 
-def sendNotifyMail(body="None", email='rguktemailtest@gmail.com', test_name=None, column=None):
+
+def sendNotifyMail(
+        body="None",
+        email='rguktemailtest@gmail.com',
+        test_name=None,
+        column=None):
+    """
+    send the notify email.
+    """
     try:
         #app.logger.debug("send notify mail function")
         if not column:
-            app.logger.info("To send mail and mark column as mail sent a column name must be provided.")
+            app.logger.info(
+                "To send mail and mark column as mail sent a column name must be provided.")
             return False
         if not test_name:
-            app.logger.info("To send mail and mark column as mail sent a test_name must be provided.")
+            app.logger.info(
+                "To send mail and mark column as mail sent a test_name must be provided.")
             return False
         response = requests.post(
-            "https://api.mailgun.net/v3/"+app.config['MAIL_GUN_DOMAIN']+"/messages",
-            auth=("api", app.config['MAIL_GUN_KEY']),
-            data={"from": "RGUKT QUIZ <news@"+app.config['MAIL_GUN_DOMAIN']+">",
-                  "to": [email],
-                  "subject": 'RGUKT QUIZ LINK' if column == "invitation_email_sent" else "RGUKT QUIZ RESULT LINK",
-                  "text": '',
-                  "html": body})
+            "https://api.mailgun.net/v3/" +
+            app.config['MAIL_GUN_DOMAIN'] +
+            "/messages",
+            auth=(
+                "api",
+                app.config['MAIL_GUN_KEY']),
+            data={
+                "from": "RGUKT QUIZ <news@" +
+                app.config['MAIL_GUN_DOMAIN'] +
+                ">",
+                "to": [email],
+                "subject": 'RGUKT QUIZ LINK' if column == "invitation_email_sent" else "RGUKT QUIZ RESULT LINK",
+                "text": '',
+                "html": body})
         #app.logger.info([email, response.status_code, response.text])
-        student = StudentTests.query.filter_by(emailid=email, test_name=test_name).first()
+        student = StudentTests.query.filter_by(
+            emailid=email, test_name=test_name).first()
         if student:
             setattr(student, column, True)
             db.session.commit()
         else:
-            app.logger.info(["Unknown email address received quiz link", email])
+            app.logger.info(
+                ["Unknown email address received quiz link", email])
         return response
     except Exception as e:
         app.logger.info(["Error in sendnotifymail module ", e])
         return False
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#THIS FUNCITONALITY IMPLEMENTED FOR INDIVIDUAL MAIL ID
+# THIS FUNCITONALITY IMPLEMENTED FOR INDIVIDUAL MAIL ID
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # @app.route('/notify/<testid>', methods=["GET", "POST"])
 # @admin_login_required
@@ -2682,21 +3476,28 @@ def sendNotifyMail(body="None", email='rguktemailtest@gmail.com', test_name=None
 #             "testid":testid, "emailid":emailid, "start_date":start_date, "end_date":end_date
 #         }])
 
-@app.route('/release/<testid>/<emailid>/<start_date>/<end_date>', methods=["GET", "POST"])
-@app.route('/notify/<testid>/<emailid>/<start_date>/<end_date>', methods=["GET", "POST"])
+
+@app.route('/release/<testid>/<emailid>/<start_date>/<end_date>',
+           methods=["GET", "POST"])
+@app.route('/notify/<testid>/<emailid>/<start_date>/<end_date>',
+           methods=["GET", "POST"])
 @admin_login_required
 def notify(testid, emailid, start_date, end_date):
-    if testid == None or testid == "":
+    """
+    notify the details to the arguments sent.
+    """
+    if testid is None or testid == "":
         return json.dumps([{
-                "mail":emailid,
-                "status_code":"Error",
-                "status_message":"TestID not received"
-            }])
+            "mail": emailid,
+            "status_code": "Error",
+            "status_message": "TestID not received"
+        }])
 
-    app.logger.info("In notify/release method for test %s"%testid)
+    app.logger.info("In notify/release method for test %s" % testid)
     rule = request.url_rule
     if 'notify' in rule.rule:
-        email_sent = StudentTests.query.filter(StudentTests.emailid==emailid and StudentTests.test_name==testid and StudentTests.invitation_email_sent.is_(True)).first()
+        email_sent = StudentTests.query.filter(
+            StudentTests.emailid == emailid and StudentTests.test_name == testid and StudentTests.invitation_email_sent.is_(True)).first()
         email_sent = email_sent.invitation_email_sent
         body = """Dear Student,<br> This email message is sent by the online quiz portal.
         The test starts at %s and ends by %s
@@ -2705,40 +3506,48 @@ def notify(testid, emailid, start_date, end_date):
         column = "invitation_email_sent"
         # app.logger.info(body)
     elif 'release' in rule.rule:
-        email_sent = StudentTests.query.filter(StudentTests.emailid==emailid and StudentTests.test_name==testid and StudentTests.result_email_sent.is_(True)).first()
+        email_sent = StudentTests.query.filter(
+            StudentTests.emailid == emailid and StudentTests.test_name == testid and StudentTests.result_email_sent.is_(True)).first()
         email_sent = email_sent.result_email_sent
         body = """Dear Student,<br> This email message is sent by the online quiz portal.
         The results for test held in between %s and %s
         Click on the link below to check your results.
-        <a href=https://%s/quiz/%s>Result Link</a> """ % (start_date, end_date, request.host, testid)
+        <a href=https://%s/quiz/%s>Result Link</a> """ % (start_date,
+                                                          end_date,
+                                                          request.host,
+                                                          testid)
         column = "result_email_sent"
         # app.logger.info(body)
 
     app.logger.info(email_sent)
     if not email_sent:
-        response = sendNotifyMail(email=emailid, test_name=testid, column=column, body=body)
+        response = sendNotifyMail(
+            email=emailid, test_name=testid, column=column, body=body)
         if response:
             return json.dumps([{
-                "mail":emailid,
-                "status_code":response.status_code,
-                "status_message":response.text
+                "mail": emailid,
+                "status_code": response.status_code,
+                "status_message": response.text
             }])
         else:
             return json.dumps([{
-                "mail":emailid,
-                "status_code":"Error",
-                "status_message":{"id":"Error","message":"Mail Not Sent"}
+                "mail": emailid,
+                "status_code": "Error",
+                "status_message": {"id": "Error", "message": "Mail Not Sent"}
             }])
     else:
         return json.dumps([{
-                "mail":emailid,
-                "status_code":"Error",
-                "status_message":{"id":"Error","message":"Mail already sent"}
-            }])
+            "mail": emailid,
+            "status_code": "Error",
+            "status_message": {"id": "Error", "message": "Mail already sent"}
+        }])
     # app.logger.info(mail_responses)
 
 
 def get_all_test_created_by(creator=None):
+    """
+    get all tests created by admin.
+    """
     if not creator:
         return {}
     result = Tests.query.filter_by(creator=creator).all()
@@ -2746,26 +3555,36 @@ def get_all_test_created_by(creator=None):
     final["data"] = []
     count = 0
     for test in result:
-        count+=1
+        count += 1
         test = str(test).split("::")
-        #app.logger.info(test)
+        # app.logger.info(test)
         test.append(eval(getStudentsList(test[0]))["students"])
-        #app.logger.info(test)
-        button = "<a href='/edit/"+test[0]+"' class='btn btn-sm btn-primary'>Edit Test</a>"
+        # app.logger.info(test)
+        button = "<a href='/edit/" + \
+            test[0] + "' class='btn btn-sm btn-primary'>Edit Test</a>"
         test.append(button)
-        button = "<a href='/quiz/"+test[0]+"' class='btn btn-sm btn-success'>Preview Test</a>"
+        button = "<a href='/quiz/" + \
+            test[0] + "' class='btn btn-sm btn-success'>Preview Test</a>"
         test.append(button)
-        button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='notify"+str(count)+"' name='/notify/"+test[0]+"' class='btn btn-sm btn-warning'>Notify</a>"
+        button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='notify" + \
+            str(count) + "' name='/notify/" + \
+            test[0] + "' class='btn btn-sm btn-warning'>Notify</a>"
         test.append(button)
-        button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='release"+str(count)+"' name='/release/"+test[0]+"' class='btn btn-sm btn-warning'>Release Result</a>"
+        button = "<a data-toggle='modal' data-target='#NotifyMailResponses' id='release" + \
+            str(count) + "' name='/release/" + \
+            test[0] + "' class='btn btn-sm btn-warning'>Release Result</a>"
         test.append(button)
         final["data"].append(test)
 
     return final
 
+
 @app.route('/loadtests', methods=["GET"])
 @admin_login_required
 def loadtests(creator=None):
+    """
+    load the tests.
+    """
     if not creator:
         creator = get_email_from_session()
     #app.logger.info("Getting all tests created by " + creator)
@@ -2777,20 +3596,28 @@ def loadtests(creator=None):
 @app.route('/autocomplete', methods=['GET'])
 @admin_login_required
 def autocomplete(search=None):
+    """
+    auto complete the ogin details.
+    """
     if not search:
         search = request.args.get('q')
     testid = request.args.get('testid')
     students = []
     if testid:
         students = eval(getStudentsList(testid))['students']
-    query = db.session.query(Users.emailid).filter(Users.emailid.like('%' + str(search) + '%'))
+    query = db.session.query(Users.emailid).filter(
+        Users.emailid.like('%' + str(search) + '%'))
     results = [mv[0] for mv in query.all()]
-    #The below line will remove students already invited or assigned to test
+    # The below line will remove students already invited or assigned to test
     results = list(set(results) - set(students))
     #app.logger.info(["autocomple result", results])
     return jsonify(matching_results=results)
 
+
 def get_all_student_details(test_name):
+    """
+    get all student details.
+    """
     test_students = StudentTests.query.filter_by(test_name=test_name).all()
     # students = userDetails.query.filter(userDetails.email != "admin@quiz.in").all()
     student_table = {}
@@ -2798,62 +3625,97 @@ def get_all_student_details(test_name):
         student = get_student_details(student.emailid)
         try:
             if student.email not in student_table:
-                student_table[student.email] = {"name": student.name, "rollno":student.rollno}
+                student_table[student.email] = {
+                    "name": student.name, "rollno": student.rollno}
         except Exception as e:
             app.logger.info(e)
     # app.logger.info(json.dumps(student_table))
     return json.dumps(student_table)
 
+
 def format_seconds_mmss(seconds):
+    """
+    format the seconds.
+    """
     minutes, secs = divmod(seconds, 60)
-    view_time='%02d:%02d' %(minutes,secs)
+    view_time = '%02d:%02d' % (minutes, secs)
     return view_time
 
-def get_view_details_of_task(email,test_name,section):
-    content_activity = ContentActivity.query.filter_by(email=email, test_name=test_name, section=section).all()
+
+def get_view_details_of_task(email, test_name, section):
+    """
+    get the task details.
+    """
+    content_activity = ContentActivity.query.filter_by(
+        email=email, test_name=test_name, section=section).all()
     view_count = len(content_activity)
     view_time = 0
     views = []
     for row in content_activity:
         view = {}
-        starttime = datetime.strptime(row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
-        endtime = datetime.strptime(row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
-        responsetime=endtime-starttime
+        starttime = datetime.strptime(
+            row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
+        endtime = datetime.strptime(
+            row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
+        responsetime = endtime - starttime
         view["starttime"] = str(starttime)
         view["endtime"] = str(endtime)
         view["responsetime"] = str(format_seconds_mmss(responsetime.seconds))
         view["ip"] = row.ip
         views.append(view)
-        view_time+=(responsetime.seconds)
+        view_time += (responsetime.seconds)
     view_time = format_seconds_mmss(view_time)
     view_count = str(view_count)
-    view_count += " time" if view_count=="1" else " times"
-    return {"Total View Time": str(view_time)+" seconds","No. of times viewed": view_count, "Views": views}
+    view_count += " time" if view_count == "1" else " times"
+    return {
+        "Total View Time": str(view_time) +
+        " seconds",
+        "No. of times viewed": view_count,
+        "Views": views}
 
-def get_view_details_of_user(email,test_name):
+
+def get_view_details_of_user(email, test_name):
+    """
+    get the details of user.
+    """
     view_details = {}
-    view_details["reading_task_responses"] = get_view_details_of_task(email,test_name,"reading")
-    view_details["listening_task_responses"] = get_view_details_of_task(email,test_name,"listening")
+    view_details["reading_task_responses"] = get_view_details_of_task(
+        email, test_name, "reading")
+    view_details["listening_task_responses"] = get_view_details_of_task(
+        email, test_name, "listening")
     return view_details
 
+
 def get_view_details_summary(test_name):
-    content_activity = ContentActivity.query.filter_by(test_name=test_name).all()
+    """
+    get the summary details.
+    """
+    content_activity = ContentActivity.query.filter_by(
+        test_name=test_name).all()
     view_details = {}
     for row in content_activity:
         if row.email not in list(view_details):
-            view_details[row.email] = get_view_details_of_user(row.email,test_name)
+            view_details[row.email] = get_view_details_of_user(
+                row.email, test_name)
     return render_summary_csv_from_content_views(view_details)
 
+
 def get_view_details_complete(test_name):
-    content_activity = ContentActivity.query.filter_by(test_name=test_name).all()
+    """
+    get the view details.
+    """
+    content_activity = ContentActivity.query.filter_by(
+        test_name=test_name).all()
     view_details = []
     for row in content_activity:
         view = {}
         view["email"] = row.email
         view["section"] = row.section
-        starttime = datetime.strptime(row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
-        endtime = datetime.strptime(row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
-        responsetime=endtime-starttime
+        starttime = datetime.strptime(
+            row.starttime[:row.starttime.find('.')], "%Y-%m-%d %H:%M:%S")
+        endtime = datetime.strptime(
+            row.endtime[:row.endtime.find('.')], "%Y-%m-%d %H:%M:%S")
+        responsetime = endtime - starttime
         view["starttime"] = starttime
         view["endtime"] = endtime
         view["responsetime"] = str(format_seconds_mmss(responsetime.seconds))
@@ -2861,25 +3723,30 @@ def get_view_details_complete(test_name):
         view_details.append(view)
     return render_complete_csv_from_content_views(view_details)
 
+
 def render_summary_csv_from_content_views(data):
+    """
+    remnder the data from content views.
+    """
     csvList = []
     header = [
-                "Email",
-                "Reading Task View Count",
-                "Reading Task View Time",
-                "Listening Task View Count",
-                "Listening Task View Time",
-            ]
+        "Email",
+        "Reading Task View Count",
+        "Reading Task View Time",
+        "Listening Task View Count",
+        "Listening Task View Time",
+    ]
 
     csvList.append(header)
     for csv_line in data:
         csv_line_value = data[csv_line]
-        row = [csv_line,
-        csv_line_value["reading_task_responses"]["No. of times viewed"],
-                csv_line_value["reading_task_responses"]["Total View Time"],
-                csv_line_value["listening_task_responses"]["No. of times viewed"],
-                csv_line_value["listening_task_responses"]["Total View Time"],
-            ]
+        row = [
+            csv_line,
+            csv_line_value["reading_task_responses"]["No. of times viewed"],
+            csv_line_value["reading_task_responses"]["Total View Time"],
+            csv_line_value["listening_task_responses"]["No. of times viewed"],
+            csv_line_value["listening_task_responses"]["Total View Time"],
+        ]
         csvList.append(row)
     si = io.StringIO()
     cw = csv.writer(si)
@@ -2889,26 +3756,30 @@ def render_summary_csv_from_content_views(data):
     output.headers["Content-type"] = "text/csv"
     return output
 
+
 def render_complete_csv_from_content_views(data):
+    """
+    render the complete csv from content views.
+    """
     csvList = []
     header = [
-                "Email",
-                "Section",
-                "Start Time",
-                "End Time",
-                "Viewed Time",
-                "IP Address"
-            ]
+        "Email",
+        "Section",
+        "Start Time",
+        "End Time",
+        "Viewed Time",
+        "IP Address"
+    ]
 
     csvList.append(header)
     for view in data:
         row = [view["email"],
-                view["section"],
-                view["starttime"],
-                view["endtime"],
-                view["responsetime"],
-                view["ip"]
-            ]
+               view["section"],
+               view["starttime"],
+               view["endtime"],
+               view["responsetime"],
+               view["ip"]
+               ]
         csvList.append(row)
     si = io.StringIO()
     cw = csv.writer(si)
@@ -2918,28 +3789,46 @@ def render_complete_csv_from_content_views(data):
     output.headers["Content-type"] = "text/csv"
     return output
 
+
 @app.route('/contentAnalyticsSummary/<test_name>', methods=['GET'])
 @admin_login_required
 def contentAnalyticsSummary(test_name):
+    """
+    conteent analytics summary.
+    """
     return get_view_details_complete(test_name)
+
 
 @app.route('/contentAnalytics/<test_name>', methods=['GET'])
 @admin_login_required
 def contentAnalytics(test_name):
+    """
+    content analytics.
+    """
     return get_view_details_summary(test_name)
 
+
 def get_student_details(student):
+    """
+    get the student details from the data base.
+    """
     return userDetails.query.filter(userDetails.email == student).first()
+
 
 @app.route('/getAllStudentDetails/<test_name>', methods=['GET'])
 @admin_login_required
 def getAllStudentDetails(test_name):
+    """
+    get all student details.
+    """
     return get_all_student_details(test_name)
 
 
 # Plagiarism in Essay Type Questions
 def get_plagiarism_data(test_name=None):
-
+    """
+    get the plagirism data.
+    """
     result = EssayTypeResponse.query.filter_by(test_name=test_name).all()
     students = json.loads(get_all_student_details(test_name))
 
@@ -2947,7 +3836,7 @@ def get_plagiarism_data(test_name=None):
 
     for entry in result:
         # student_temp = {"name":None, "email":None, "rollno":None, "qid":None, "answer":None, "analytics":None}
-        student_temp = {"qid":None, "answer":None, "analytics":None}
+        student_temp = {"qid": None, "answer": None, "analytics": None}
         emailid = entry.useremailid
 
         if emailid not in table:
@@ -2965,54 +3854,68 @@ def get_plagiarism_data(test_name=None):
 
     return table
 
+
 def render_csv_from_plagiarism_data(data):
-        csvList = []
-        header = [
-                    "name",
-                    "rollno",
-                    "email",
-                    "qid",
-                    "answer",
-                    "analytics",
-                ]
+    """
+    render the csv data fromplagirism data.
+    """
+    csvList = []
+    header = [
+        "name",
+        "rollno",
+        "email",
+        "qid",
+        "answer",
+        "analytics",
+    ]
 
-        csvList.append(header)
+    csvList.append(header)
 
-        for student_object in data:
-            student = data[student_object]
-            for student_response in student:
-                row = [student_response["name"],
-                        student_response["rollno"],
-                        student_response["email"],
-                        student_response["qid"],
-                        student_response["answer"],
-                        student_response["analytics"]
-                    ]
+    for student_object in data:
+        student = data[student_object]
+        for student_response in student:
+            row = [student_response["name"],
+                   student_response["rollno"],
+                   student_response["email"],
+                   student_response["qid"],
+                   student_response["answer"],
+                   student_response["analytics"]
+                   ]
 
-                csvList.append(row)
+            csvList.append(row)
 
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerows(csvList)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=Plagiarism_Data.csv"
-        output.headers["Content-type"] = "text/csv"
-        return output
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Plagiarism_Data.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @app.route('/getPlagiarismDataStudent/<test_name>/<qid>')
 @login_required
-def getPlagiarismDataStudent(test_name,qid):
+def getPlagiarismDataStudent(test_name, qid):
+    """
+    get the data of plagirismed student.
+    """
     if request.method == 'GET':
-        result = EssayTypeResponse.query.filter_by(test_name=test_name, useremailid=session['user']['email'], qid=qid).first()
+        result = EssayTypeResponse.query.filter_by(
+            test_name=test_name,
+            useremailid=session['user']['email'],
+            qid=qid).first()
         if result:
             return json.dumps(result.analytics)
         else:
             return json.dumps({})
 
+
 @app.route('/plagiarismData/<test_name>')
 @admin_login_required
 def plagiarismData(test_name):
+    """
+    verify if the data is plagarized.
+    """
     if request.method == 'GET':
         table = get_plagiarism_data(test_name)
         # data = table.values()
@@ -3027,227 +3930,284 @@ def plagiarismData(test_name):
         output.headers["Content-type"] = "application/json"
         return output
 
+
 def get_test_responses_as_dict(testid=None):
+    """
+    get the test responses as dict.
+    """
+    result = Response.query.filter_by(test_name=testid).all()
 
-        result = Response.query.filter_by(test_name=testid).all()
+    students = json.loads(get_all_student_details(testid))
+    questions = ""
+    # app.logger.info(students)
+    table = {}
+    for entry in result:
+        id = entry.id
+        name = entry.name
+        rollno = ""
+        emailid = entry.emailid
+        pin = entry.pin
+        testctime = entry.testctime
+        submittedans = entry.submittedans
+        responsetime = entry.responsetime
+        q_score = entry.q_score
+        q_status = entry.q_status
+        time = entry.time
+        currentQuestion = entry.currentQuestion
+        serialno = entry.serialno
+        if emailid in students:
+            student = students[emailid]
+            name = student['name']
+            rollno = student['rollno']
 
-        students = json.loads(get_all_student_details(testid))
-        questions = ""
-        # app.logger.info(students)
-        table = {}
-        for entry in result:
-            id = entry.id
-            name = entry.name
-            rollno = ""
-            emailid = entry.emailid
-            pin = entry.pin
-            testctime = entry.testctime
-            submittedans = entry.submittedans
-            responsetime = entry.responsetime
-            q_score = entry.q_score
-            q_status = entry.q_status
-            time = entry.time
-            currentQuestion = entry.currentQuestion
-            serialno = entry.serialno
-            if emailid in students:
-                student = students[emailid]
-                name = student['name']
-                rollno = student['rollno']
+        if rollno not in table:
+            table[rollno] = {
+                "rollno": rollno,
+                "name": name,
+                "emailid": emailid,
+                "testctime": testctime,
+                "count": 1
+            }
 
+        if currentQuestion is None:
+            continue
 
-            if rollno not in table:
-                table[rollno] = {
-                    "rollno":rollno,
-                    "name":name,
-                    "emailid":emailid,
-                    "testctime":testctime,
-                    "count": 1
-                }
+        table[rollno].update({"Question_" +
+                              str(table[rollno]['count']) +
+                              "_Submittedans": submittedans, "Question_" +
+                              str(table[rollno]['count']) +
+                              "_Responsetime": convert_to_minutes(responsetime), "Question_" +
+                              str(table[rollno]['count']) +
+                              "_Score": q_score, "Question_" +
+                              str(table[rollno]['count']) +
+                              "_Status": q_status, "Question_" +
+                              str(table[rollno]['count']) +
+                              "_Time": time, "Question_" +
+                              str(table[rollno]['count']) +
+                              "": currentQuestion, })
+        table[rollno]['count'] += 1
+    # app.logger.info(table)
+    return table
 
-            if currentQuestion is None:
-                continue
-
-            table[rollno].update({
-                            "Question_"+str(table[rollno]['count'])+"_Submittedans":submittedans,
-                            "Question_"+str(table[rollno]['count'])+"_Responsetime":convert_to_minutes(responsetime),
-                            "Question_"+str(table[rollno]['count'])+"_Score":q_score,
-                            "Question_"+str(table[rollno]['count'])+"_Status":q_status,
-                            "Question_"+str(table[rollno]['count'])+"_Time":time,
-                            "Question_"+str(table[rollno]['count'])+"":currentQuestion,
-                        })
-            table[rollno]['count'] += 1
-        # app.logger.info(table)
-        return table
 
 def render_csv_from_test_responses(data, test_name):
-        csvList = []
-        header = [
-                    "name",
-                    "rollno",
-                    "emailid",
-                    "testctime",
+    """
+    render the csv from test respinses.
+    """
+    csvList = []
+    header = [
+        "name",
+        "rollno",
+        "emailid",
+        "testctime",
+    ]
+    # app.logger.info(list(data)[0])
+
+    user = Randomize.query.filter_by(test_name=test_name).first()
+    if user:
+        Questions_count = Randomize.query.filter_by(
+            test_name=test_name, user1=user.user1).count()
+        app.logger.info(["number is ", Questions_count])
+        # return ""
+        for i in range(1, Questions_count + 1):
+            # app.logger.info("hi ra --> Question"+ str(i))
+            header.extend(
+                [
+                    "Question_" + str(i) + "",
+                    "Question_" + str(i) + "_Score",
+                    "Question_" + str(i) + "_Submittedans",
+                    "Question_" + str(i) + "_Responsetime",
+                    "Question_" + str(i) + "_Status",
+                    "Question_" + str(i) + "_Time"
                 ]
-        # app.logger.info(list(data)[0])
+            )
+        csvList.append(header)
 
-        user = Randomize.query.filter_by(test_name=test_name).first()
-        if user:
-            Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).count()
-            app.logger.info(["number is ", Questions_count])
-            # return ""
+        for csv_line in data:
+            # app.logger.info(csv_line)
+            row = [csv_line["name"],
+                   csv_line["rollno"],
+                   csv_line["emailid"],
+                   csv_line["testctime"]
+                   ]
             for i in range(1, Questions_count + 1):
-                # app.logger.info("hi ra --> Question"+ str(i))
-                header.extend(
-                        [
-                            "Question_"+str(i)+"",
-                            "Question_"+str(i)+"_Score",
-                            "Question_"+str(i)+"_Submittedans",
-                            "Question_"+str(i)+"_Responsetime",
-                            "Question_"+str(i)+"_Status",
-                            "Question_"+str(i)+"_Time"
-                        ]
-                    )
-            csvList.append(header)
+                row.extend([csv_line["Question_" +
+                                     str(i) +
+                                     ""] if "Question_" +
+                            str(i) +
+                            "" in csv_line else "", csv_line["Question_" +
+                                                             str(i) +
+                                                             "_Score"] if "Question_" +
+                            str(i) +
+                            "_Score" in csv_line else "", csv_line["Question_" +
+                                                                   str(i) +
+                                                                   "_Submittedans"] if "Question_" +
+                            str(i) +
+                            "_Submittedans" in csv_line else "", csv_line["Question_" +
+                                                                          str(i) +
+                                                                          "_Responsetime"] if "Question_" +
+                            str(i) +
+                            "_Responsetime" in csv_line else "", csv_line["Question_" +
+                                                                          str(i) +
+                                                                          "_Status"] if "Question_" +
+                            str(i) +
+                            "_Status" in csv_line else "", csv_line["Question_" +
+                                                                    str(i) +
+                                                                    "_Time"] if "Question_" +
+                            str(i) +
+                            "_Time" in csv_line else "", ])
+            csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
-            for csv_line in data:
-                #app.logger.info(csv_line)
-                row = [csv_line["name"],
-                        csv_line["rollno"],
-                        csv_line["emailid"],
-                        csv_line["testctime"]
-                        ]
-                for i in range(1, Questions_count + 1):
-                    row.extend(
-                            [
-                                csv_line["Question_"+str(i)+""] if "Question_"+str(i)+"" in csv_line else "",
-                                csv_line["Question_"+str(i)+"_Score"] if "Question_"+str(i)+"_Score" in csv_line else "",
-                                csv_line["Question_"+str(i)+"_Submittedans"] if "Question_"+str(i)+"_Submittedans" in csv_line else "",
-                                csv_line["Question_"+str(i)+"_Responsetime"] if "Question_"+str(i)+"_Responsetime" in csv_line else "",
-                                csv_line["Question_"+str(i)+"_Status"] if "Question_"+str(i)+"_Status" in csv_line else "",
-                                csv_line["Question_"+str(i)+"_Time"] if "Question_"+str(i)+"_Time" in csv_line else "",
-                            ]
-                        )
-                csvList.append(row)
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerows(csvList)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
-        output.headers["Content-type"] = "text/csv"
-        return output
 
 def get_sorted_test_responses_as_dict(testid=None):
+    """
+    get the sorted results as dict.
+    """
+    result = Response.query.filter_by(test_name=testid).all()
 
-        result = Response.query.filter_by(test_name=testid).all()
+    students = json.loads(get_all_student_details(testid))
+    questions = ""
+    # app.logger.info(students)
+    table = {}
+    for entry in result:
+        id = entry.id
+        name = entry.name
+        rollno = ""
+        emailid = entry.emailid
+        pin = entry.pin
+        testctime = entry.testctime
+        submittedans = entry.submittedans
+        responsetime = entry.responsetime
+        q_score = entry.q_score
+        q_status = entry.q_status
+        time = entry.time
+        currentQuestion = entry.currentQuestion
+        serialno = entry.serialno
+        if emailid in students:
+            student = students[emailid]
+            name = student['name']
+            rollno = student['rollno']
 
-        students = json.loads(get_all_student_details(testid))
-        questions = ""
-        # app.logger.info(students)
-        table = {}
-        for entry in result:
-            id = entry.id
-            name = entry.name
-            rollno = ""
-            emailid = entry.emailid
-            pin = entry.pin
-            testctime = entry.testctime
-            submittedans = entry.submittedans
-            responsetime = entry.responsetime
-            q_score = entry.q_score
-            q_status = entry.q_status
-            time = entry.time
-            currentQuestion = entry.currentQuestion
-            serialno = entry.serialno
-            if emailid in students:
-                student = students[emailid]
-                name = student['name']
-                rollno = student['rollno']
+        if rollno not in table:
+            table[rollno] = {
+                "rollno": rollno,
+                "name": name,
+                "emailid": emailid,
+                "testctime": testctime,
+                "count": 1
+            }
 
+        if currentQuestion is None:
+            continue
 
-            if rollno not in table:
-                table[rollno] = {
-                    "rollno":rollno,
-                    "name":name,
-                    "emailid":emailid,
-                    "testctime":testctime,
-                    "count": 1
-                }
+        table[rollno].update({
+            "Question_" + str(currentQuestion) + "_Submittedans": submittedans,
+            "Question_" + str(currentQuestion) + "_Responsetime": convert_to_minutes(responsetime),
+            "Question_" + str(currentQuestion) + "_Score": q_score,
+            "Question_" + str(currentQuestion) + "_Status": q_status,
+            "Question_" + str(currentQuestion) + "_Time": time,
+            "Question_" + str(currentQuestion) + "": currentQuestion,
+        })
+        table[rollno]['count'] += 1
+    # app.logger.info(table)
+    return table
 
-            if currentQuestion is None:
-                continue
-
-            table[rollno].update({
-                            "Question_"+str(currentQuestion)+"_Submittedans":submittedans,
-                            "Question_"+str(currentQuestion)+"_Responsetime":convert_to_minutes(responsetime),
-                            "Question_"+str(currentQuestion)+"_Score":q_score,
-                            "Question_"+str(currentQuestion)+"_Status":q_status,
-                            "Question_"+str(currentQuestion)+"_Time":time,
-                            "Question_"+str(currentQuestion)+"":currentQuestion,
-                        })
-            table[rollno]['count'] += 1
-        # app.logger.info(table)
-        return table
 
 def render_sorted_csv_from_test_responses(data, test_name):
-        csvList = []
-        header = [
-                    "name",
-                    "rollno",
-                    "emailid",
-                    "testctime",
+    """
+    render the sorted respons from the test. 
+    """
+    csvList = []
+    header = [
+        "name",
+        "rollno",
+        "emailid",
+        "testctime",
+    ]
+    # app.logger.info(list(data)[0])
+
+    user = Randomize.query.filter_by(test_name=test_name).first()
+    if user:
+        Questions_count = Randomize.query.filter_by(
+            test_name=test_name,
+            user1=user.user1).order_by(
+            cast(
+                Randomize.qno,
+                Integer).asc()).all()
+        # app.logger.info(["number is ", Questions_count])
+        # return ""
+        count = 1
+        for i in Questions_count:
+            # app.logger.info("hi ra --> Question"+ str(i))
+            header.extend(
+                [
+                    "Question_" + str(count) + "",
+                    "Question_" + str(count) + "_Score",
+                    "Question_" + str(count) + "_Submittedans",
+                    "Question_" + str(count) + "_Responsetime",
+                    "Question_" + str(count) + "_Status",
+                    "Question_" + str(count) + "_Time"
                 ]
-        # app.logger.info(list(data)[0])
+            )
+            count += 1
+        csvList.append(header)
 
-        user = Randomize.query.filter_by(test_name=test_name).first()
-        if user:
-            Questions_count = Randomize.query.filter_by(test_name=test_name, user1=user.user1).order_by(cast(Randomize.qno, Integer).asc()).all()
-            # app.logger.info(["number is ", Questions_count])
-            # return ""
-            count = 1
+        for csv_line in data:
+            # app.logger.info(csv_line)
+            row = [csv_line["name"],
+                   csv_line["rollno"],
+                   csv_line["emailid"],
+                   csv_line["testctime"]
+                   ]
             for i in Questions_count:
-                # app.logger.info("hi ra --> Question"+ str(i))
-                header.extend(
-                        [
-                            "Question_"+str(count)+"",
-                            "Question_"+str(count)+"_Score",
-                            "Question_"+str(count)+"_Submittedans",
-                            "Question_"+str(count)+"_Responsetime",
-                            "Question_"+str(count)+"_Status",
-                            "Question_"+str(count)+"_Time"
-                        ]
-                    )
-                count+=1;
-            csvList.append(header)
+                row.extend([csv_line["Question_" +
+                                     str(i.qno) +
+                                     ""] if "Question_" +
+                            str(i.qno) +
+                            "" in csv_line else "N/A", csv_line["Question_" +
+                                                                str(i.qno) +
+                                                                "_Score"] if "Question_" +
+                            str(i.qno) +
+                            "_Score" in csv_line else "N/A", csv_line["Question_" +
+                                                                      str(i.qno) +
+                                                                      "_Submittedans"] if "Question_" +
+                            str(i.qno) +
+                            "_Submittedans" in csv_line else "N/A", csv_line["Question_" +
+                                                                             str(i.qno) +
+                                                                             "_Responsetime"] if "Question_" +
+                            str(i.qno) +
+                            "_Responsetime" in csv_line else "N/A", csv_line["Question_" +
+                                                                             str(i.qno) +
+                                                                             "_Status"] if "Question_" +
+                            str(i.qno) +
+                            "_Status" in csv_line else "N/A", csv_line["Question_" +
+                                                                       str(i.qno) +
+                                                                       "_Time"] if "Question_" +
+                            str(i.qno) +
+                            "_Time" in csv_line else "N/A", ])
+            csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
-            for csv_line in data:
-                #app.logger.info(csv_line)
-                row = [csv_line["name"],
-                        csv_line["rollno"],
-                        csv_line["emailid"],
-                        csv_line["testctime"]
-                        ]
-                for i in Questions_count:
-                    row.extend(
-                            [
-                                csv_line["Question_"+str(i.qno)+""] if "Question_"+str(i.qno)+"" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Score"] if "Question_"+str(i.qno)+"_Score" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Submittedans"] if "Question_"+str(i.qno)+"_Submittedans" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Responsetime"] if "Question_"+str(i.qno)+"_Responsetime" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Status"] if "Question_"+str(i.qno)+"_Status" in csv_line else "N/A",
-                                csv_line["Question_"+str(i.qno)+"_Time"] if "Question_"+str(i.qno)+"_Time" in csv_line else "N/A",
-                            ]
-                        )
-                csvList.append(row)
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerows(csvList)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=Complete_Data.csv"
-        output.headers["Content-type"] = "text/csv"
-        return output
 
 @app.route('/downloadSortedTestResults/<testid>')
 @admin_login_required
 def downloadSortedTestResults(testid):
+    """
+    download the sorted test results.
+    """
     if request.method == 'GET':
 
         #app.logger.info(["Requested result for test with id ",testid])
@@ -3256,93 +4216,105 @@ def downloadSortedTestResults(testid):
         data = table.values()
         return render_sorted_csv_from_test_responses(data, testid)
 
+
 def get_test_responses_summary_as_dict(testid=None):
+    """
+    get the response summary as dict.
+    """
+    result = Response.query.filter_by(test_name=testid).all()
 
-        result = Response.query.filter_by(test_name=testid).all()
+    students = json.loads(get_all_student_details(testid))
+    questions = ""
+    # app.logger.info(students)
+    table = {}
+    table_q_touched = {}
+    student_temp = {"name": None, "rollno": None,
+                    "Speaking": 0, "Writing": 0, "Listening": 0, "Reading": 0}
+    for entry in result:
+        id = entry.id
+        name = entry.name
+        emailid = entry.emailid
+        rollno = ""
+        q_score = entry.q_score
+        q_section = entry.q_section
+        currentQuestion = entry.currentQuestion
 
-        students = json.loads(get_all_student_details(testid))
-        questions = ""
-        # app.logger.info(students)
-        table = {}
-        table_q_touched = {}
-        student_temp = {"name":None, "rollno":None, "Speaking":0, "Writing":0, "Listening":0, "Reading":0}
-        for entry in result:
-            id = entry.id
-            name = entry.name
-            emailid = entry.emailid
-            rollno = ""
-            q_score = entry.q_score
-            q_section = entry.q_section
-            currentQuestion = entry.currentQuestion
+        if emailid in students:
+            student = students[emailid]
+            name = student['name']
+            rollno = student['rollno']
 
-            if emailid in students:
-                student = students[emailid]
-                name = student['name']
-                rollno = student['rollno']
+        if rollno not in table:
+            table[rollno] = student_temp.copy()
+            table[rollno]['name'] = name
+            table[rollno]['rollno'] = rollno
+            table_q_touched[rollno] = []
 
-            if rollno not in table:
-                table[rollno] = student_temp.copy()
-                table[rollno]['name'] = name
-                table[rollno]['rollno'] = rollno
-                table_q_touched[rollno] = []
+        if q_section == "Speaking":
+            if currentQuestion not in table_q_touched[rollno]:
+                table_q_touched[rollno].append(currentQuestion)
+                table[rollno]["Speaking"] += q_score
+        elif q_section == "Listening":
+            if currentQuestion not in table_q_touched[rollno]:
+                table_q_touched[rollno].append(currentQuestion)
+                table[rollno]["Listening"] += q_score
+        elif q_section == "Reading":
+            if currentQuestion not in table_q_touched[rollno]:
+                table_q_touched[rollno].append(currentQuestion)
+                table[rollno]["Reading"] += q_score
+        elif q_section == "Writing":
+            if currentQuestion not in table_q_touched[rollno]:
+                table_q_touched[rollno].append(currentQuestion)
+                table[rollno]["Writing"] += q_score
+    # app.logger.info(table)
+    return table
 
-            if q_section == "Speaking":
-                if currentQuestion not in table_q_touched[rollno]:
-                    table_q_touched[rollno].append(currentQuestion)
-                    table[rollno]["Speaking"] += q_score
-            elif q_section == "Listening":
-                if currentQuestion not in table_q_touched[rollno]:
-                    table_q_touched[rollno].append(currentQuestion)
-                    table[rollno]["Listening"] += q_score
-            elif q_section == "Reading":
-                if currentQuestion not in table_q_touched[rollno]:
-                    table_q_touched[rollno].append(currentQuestion)
-                    table[rollno]["Reading"] += q_score
-            elif q_section == "Writing":
-                if currentQuestion not in table_q_touched[rollno]:
-                    table_q_touched[rollno].append(currentQuestion)
-                    table[rollno]["Writing"] += q_score
-        # app.logger.info(table)
-        return table
 
 def render_csv_from_test_responses_summary(data):
-        csvList = []
-        header = [
-                    "name",
-                    "rollno",
-                    "Speaking",
-                    "Listening",
-                    "Reading",
-                    "Writing",
-                    "Total"
-                ]
+    """
+    render the csv from test response summary.
+    """
+    csvList = []
+    header = [
+        "name",
+        "rollno",
+        "Speaking",
+        "Listening",
+        "Reading",
+        "Writing",
+        "Total"
+    ]
 
-        csvList.append(header)
+    csvList.append(header)
 
-        for csv_line in data:
-            # app.logger.info(csv_line)
-            row = [csv_line["name"],
-                    csv_line["rollno"],
-                    csv_line["Speaking"],
-                    csv_line["Listening"],
-                    csv_line["Reading"],
-                    csv_line["Writing"],
-                    csv_line["Speaking"]+csv_line["Listening"]+csv_line["Reading"]+csv_line["Writing"]
-                ]
+    for csv_line in data:
+        # app.logger.info(csv_line)
+        row = [csv_line["name"],
+               csv_line["rollno"],
+               csv_line["Speaking"],
+               csv_line["Listening"],
+               csv_line["Reading"],
+               csv_line["Writing"],
+               csv_line["Speaking"] + csv_line["Listening"] +
+               csv_line["Reading"] + csv_line["Writing"]
+               ]
 
-            csvList.append(row)
-        si = io.StringIO()
-        cw = csv.writer(si)
-        cw.writerows(csvList)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=Summary_Sheet.csv"
-        output.headers["Content-type"] = "text/csv"
-        return output
+        csvList.append(row)
+    si = io.StringIO()
+    cw = csv.writer(si)
+    cw.writerows(csvList)
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=Summary_Sheet.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 
 @app.route('/downloadTestResults/<testid>')
 @admin_login_required
 def downloadTestResults(testid):
+    """
+    downoad the test results.
+    """
     if request.method == 'GET':
 
         #app.logger.info(["Requested result for test with id ",testid])
@@ -3351,9 +4323,13 @@ def downloadTestResults(testid):
         data = table.values()
         return render_csv_from_test_responses(data, testid)
 
+
 @app.route('/downloadTestResultsSummary/<testid>')
 @admin_login_required
 def downloadTestResultsSummary(testid):
+    """
+    download the test result summary.
+    """
     if request.method == 'GET':
 
         #app.logger.info(["Requested result summary for test with id ",testid])
@@ -3362,17 +4338,21 @@ def downloadTestResultsSummary(testid):
         data = table.values()
         return render_csv_from_test_responses_summary(data)
 
+
 @app.route('/downloadInvitedStudents/<testid>')
 @admin_login_required
 def downloadInvitedStudents(testid):
+    """
+    get the data of all the invited students.
+    """
     if request.method == 'GET':
 
         #app.logger.info(["Requested result for test with id ",testid])
         students = json.loads(getStudentsList(testid))['students']
         csvList = []
         header = [
-                    "EmailID",
-                ]
+            "EmailID",
+        ]
         csvList.append(header)
         for student in students:
             csvList.append([student])
@@ -3384,12 +4364,20 @@ def downloadInvitedStudents(testid):
         output.headers["Content-type"] = "text/csv"
         return output
 
+
 @app.route('/test_audio')
 def testaudio():
+    """
+    test the audio.
+    """
     return """<div><audio controls controlslist='nodownload' src="https://www.w3schools.com/tags/horse.mp3"> Your browser does not support the audio tag. </audio></div>"""
+
 
 @app.route('/test_recorder', methods=['GET'])
 def testrecorder():
+    """
+    test the recorder.
+    """
     if request.method == "GET":
         html = '''
         <!DOCTYPE html>
@@ -3476,33 +4464,49 @@ def testrecorder():
         </body>
         </html>
         '''
-        return html;
+        return html
+
 
 @app.route('/showrecorder/<test_name>/<qid>', methods=['GET'])
 @login_required
-def showrecorder(test_name,qid):
+def showrecorder(test_name, qid):
+    """
+    show the recorder.
+    """
     if request.method == "GET":
         # app.logger.info(request.host)
         if request.is_secure or "localhost" in request.host:
-            return render_template('recorder.html', test_name=test_name, qid=qid)
+            return render_template(
+                'recorder.html', test_name=test_name, qid=qid)
         else:
-            #To show audio recording for students on only HTTPS, flip the commenting below two lines
+            # To show audio recording for students on only HTTPS, flip the commenting below two lines
             # return render_template('recorder.html')
-            return render_template('error.html', error="Audio recording is not supported in insecure origins, Contact Examination Admin")
+            return render_template(
+                'error.html',
+                error="Audio recording is not supported in insecure origins, Contact Examination Admin")
+
 
 @app.route('/getrecorder', methods=['GET'])
 def getrecorder():
+    """
+    get the recoreder.
+    """
     if request.method == "GET":
         return '<div class="container"> <div> <h3>Record: </h3> <hr> <button class="btn btn-primary" id="record">Record</button> <button class="btn btn-primary" id="stop" disabled>Stop</button> </div> <div data-type="wav"> <h3>Recorded Audio: </h3> <div id="recorded"></div> </div> <div data-type="wav"> <h3>Save Audio: </h3> <button class="btn btn-primary" id="save">Save</button> </div> </div>'
 
     # if request.method == "POST":
 
+
 def sublist(child, parent):
     return set(child) <= set(parent)
+
 
 @app.route('/createexam', methods=['GET', 'POST'])
 @admin_login_required
 def createexam():
+    """
+    create the exam
+    """
     if request.method == 'GET':
         app.logger.info('im in createexam get')
         return render_template('create_exam.html')
@@ -3512,52 +4516,54 @@ def createexam():
 
         # check if the post request has the file part
         mode = request.form['mode']
-        flash("Selected mode is %s"%mode)
+        flash("Selected mode is %s" % mode)
 
-        if mode=="TOEFL":
+        if mode == "TOEFL":
             test_name = request.form['toefl_testname']
-            flash("Test Name is %s"%test_name)
+            flash("Test Name is %s" % test_name)
             startdate = request.form['datetimepicker1']
-            flash("Start Date is %s"%startdate)
+            flash("Start Date is %s" % startdate)
             enddate = request.form['datetimepicker2']
-            flash("End Date is %s"%enddate)
+            flash("End Date is %s" % enddate)
             if not test_name or not mode or not startdate or not enddate:
-                flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
+                flash(
+                    'Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]' %
+                    (test_name, startdate, enddate))
                 return redirect(request.url)
         else:
             test_name = request.form['dep_testname']
-            flash("Test Name is %s"%test_name)
+            flash("Test Name is %s" % test_name)
             date = request.form['datepicker']
-            flash("Exam Date is %s"%date)
-            startdate = date+" 09:00"
-            enddate = date+" 23:59"
+            flash("Exam Date is %s" % date)
+            startdate = date + " 09:00"
+            enddate = date + " 23:59"
             if not test_name or not mode or not date:
-                flash('Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]'%(test_name,startdate,enddate))
+                flash(
+                    'Error: One or more fields of form are Invalid. [test_name:"%s",startdate:"%s",enddate:"%s"]' %
+                    (test_name, startdate, enddate))
                 return redirect(request.url)
 
         if 'file' not in request.files:
             flash('Error: No File selected. Please upload a .zip file.')
             return redirect(request.url)
 
-
         folder_structure = {"DEP":
-            ["E1-Reading.json",
-             "E3-Speaking.json",
-             "listening.mp4",
-             "reading.pdf",
-             "E2-Listening.json",
-             "E4-Writing.json",
-             "QP_template.json"
-            ]
-            ,"TOEFL":
-            [
-             "E1-Reading.json",
-             "E3-Speaking.json",
-             "QP_template.json",
-             "E2-Listening.json",
-             "E4-Writing.json"
-             ]
-            }
+                            ["E1-Reading.json",
+                             "E3-Speaking.json",
+                             "listening.mp4",
+                             "reading.pdf",
+                             "E2-Listening.json",
+                             "E4-Writing.json",
+                             "QP_template.json"
+                             ], "TOEFL":
+                            [
+                                "E1-Reading.json",
+                                "E3-Speaking.json",
+                                "QP_template.json",
+                                "E2-Listening.json",
+                                "E4-Writing.json"
+                            ]
+                            }
 
         file = request.files['file']
         # if user does not select file, browser also
@@ -3567,59 +4573,76 @@ def createexam():
             return redirect(request.url)
         if file:
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            flash('Uploading content from %s'%file.filename)
+            flash('Uploading content from %s' % file.filename)
             filename = secure_filename(file.filename)
             file.save(os.path.join(BASE_DIR, 'static/tmp_upload', filename))
-            zip_exist = zipfile.is_zipfile('static/tmp_upload/'+filename)
+            zip_exist = zipfile.is_zipfile('static/tmp_upload/' + filename)
             if zip_exist or True:
-                flash("Success: %s is valid. \nExtracting contents..."%filename)
-                zf = zipfile.ZipFile(os.path.join(BASE_DIR,'static/tmp_upload/',filename), 'r')
+                flash(
+                    "Success: %s is valid. \nExtracting contents..." %
+                    filename)
+                zf = zipfile.ZipFile(os.path.join(
+                    BASE_DIR, 'static/tmp_upload/', filename), 'r')
                 file_list = zf.namelist()
                 if sublist(folder_structure[mode], file_list):
-                    if mode=="DEP":
-                        zf.extractall(os.path.join(BASE_DIR,"static/content/"+mode+"/"+date))
+                    if mode == "DEP":
+                        zf.extractall(os.path.join(
+                            BASE_DIR, "static/content/" + mode + "/" + date))
                     else:
-                        zf.extractall(os.path.join(BASE_DIR,"static/content/"+mode+"/"+filename.split(".")[0]))
+                        zf.extractall(
+                            os.path.join(
+                                BASE_DIR,
+                                "static/content/" +
+                                mode +
+                                "/" +
+                                filename.split(".")[0]))
                     zf.close()
                     flash("Success in extracting: Folder uploaded in test environment")
                     try:
                         test = create_test(test_name, mode, startdate, enddate)
-                        if test != True:
-                            flash("Error: %s"%test)
+                        if not test:
+                            flash("Error: %s" % test)
                             return redirect(request.url)
                         else:
                             flash("Test Created Succesfully")
                     except Exception as e:
                         flash(e)
                         return redirect(request.url)
-                    if mode=="DEP":
+                    if mode == "DEP":
                         try:
                             registered = Users.query.all()
                             registered_emails = []
                             for i in registered:
                                 registered_emails.append(i.emailid)
-                                flash("Inviting %s"%str(registered_emails))
-                                students_list = updateStudents(test_name,registered_emails)
-                                flash("Success: %s"%str(students_list))
+                                flash("Inviting %s" % str(registered_emails))
+                                students_list = updateStudents(
+                                    test_name, registered_emails)
+                                flash("Success: %s" % str(students_list))
                         except Exception as e:
                             flash(e)
                             return redirect(request.url)
                 else:
-                    flash("Error in extracting: Uploaded zip file doesn't contain necessary files/folder structure.")
+                    flash(
+                        "Error in extracting: Uploaded zip file doesn't contain necessary files/folder structure.")
             else:
-                flash("Error: %s file is not a zip file %s"%(filename, zip_exist))
+                flash("Error: %s file is not a zip file %s" %
+                      (filename, zip_exist))
             return redirect(url_for('createexam'))
         else:
             flash("Error: file format is not allowed")
         return redirect("createexam")
 
-            # flash("Test Created: %s"%test)
+        # flash("Test Created: %s"%test)
 # ==================================================
-                    # UNIT Tests
+        # UNIT Tests
 # ==================================================
 
+
 def test_handler(name, expected, actual, function):
-    output = {"testcase_name":name, "result":None, "response":None}
+    """
+    testing the handler.
+    """
+    output = {"testcase_name": name, "result": None, "response": None}
     try:
         if function == "equal":
             if actual == expected:
@@ -3627,21 +4650,21 @@ def test_handler(name, expected, actual, function):
                 response = "OK"
             else:
                 result = "Fail"
-                response = "Expected %s got %s"%(expected, actual)
+                response = "Expected %s got %s" % (expected, actual)
         if function == "contains":
             if expected in actual:
                 result = "Pass"
                 response = "OK"
             else:
                 result = "Fail"
-                response = "Expected %s got %s"%(expected, actual)
+                response = "Expected %s got %s" % (expected, actual)
         if function == "notNone":
             if actual:
                 result = "Pass"
                 response = "OK"
             else:
                 result = "Fail"
-                response = "Expected %s got %s"%(expected, actual)
+                response = "Expected %s got %s" % (expected, actual)
 
     except Exception as e:
         response = e
@@ -3650,176 +4673,317 @@ def test_handler(name, expected, actual, function):
     output['response'] = response
     return output
 
+
 def datetime_handler(x):
+    """
+    handle the date time.
+    """
     if isinstance(x, datetime):
         return x.isoformat()
     if isinstance(x, datetime.datetime):
         return x.isoformat()
     raise TypeError("Unknown type")
 
+
 def test_get_test_responses_as_dict():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    # expected = {'128': {'Question_1_Score': 1, 'Question_5_Score': 0, 'Question_3_Time': datetime(2017, 7, 8, 7, 45, 47, 254924), 'Question_3': '104', 'Question_6': '201', 'Question_6_Score': 0, 'count': 7, 'Question_6_Submittedans': '#', 'Question_6_Time': datetime(2017, 7, 8, 7, 50, 7, 829351), 'Question_4_Status': 'submitted', 'Question_3_Status': 'submitted', 'Question_2_Score': 1, 'Question_3_Submittedans': 'False', 'name': 'Sreenath', 'Question_1_Status': 'submitted', 'Question_4_Time': datetime(2017, 7, 8, 7, 45, 48, 870909), 'Question_5': '106', 'rollno': '128', 'Question_5_Submittedans': 'Partly true', 'Question_2_Submittedans': 'By the Prime Minister of India in an unscheduled, real time, televised address to the nation', 'emailid': 'sirimala.sreenath@gmail.com', 'Question_2_Time': datetime(2017, 7, 8, 7, 45, 44, 958977), 'Question_5_Status': 'submitted', 'Question_1': '102', 'Question_1_Time': datetime(2017, 7, 8, 7, 45, 43, 599523), 'Question_6_Status': 'submitted', 'Question_1_Submittedans': 'All of the above', 'Question_2': '103', 'Question_5_Time': datetime(2017, 7, 8, 7, 45, 50, 917283), 'Question_2_Status': 'submitted', 'Question_1_Responsetime': 4.737, 'Question_5_Responsetime': 2.021, 'Question_3_Responsetime': 2.279, 'testctime': datetime(2017, 7, 8, 7, 45, 24, 463860), 'Question_3_Score': 0, 'Question_2_Responsetime': 1.317, 'Question_6_Responsetime': 257.088, 'Question_4': '105', 'Question_4_Score': 0, 'Question_4_Responsetime': 1.591, 'Question_4_Submittedans': 'None of these'}, '1234': {'Question_5_Score': 0, 'Question_3_Time': datetime(2017, 7, 8, 7, 41, 56, 276504), 'count': 9, 'Question_4_Status': 'submitted', 'Question_6_Time': datetime(2017, 7, 8, 7, 42, 4, 291266), 'Question_3_Submittedans': 'By the Prime Minister of India in an unscheduled, real time, televised address to the nation', 'Question_4_Submittedans': 'Not sure', 'Question_1_Status': 'submitted', 'rollno': '1234', 'Question_2_Submittedans': 'Maoist extremism', 'Question_7': '201', 'emailid': 'vy@fju.us', 'Question_5_Status': 'submitted', 'Question_3_Score': 1, 'Question_2': '102', 'Question_5_Time': datetime(2017, 7, 8, 7, 42, 2, 361560), 'Question_1_Responsetime': 3.99, 'Question_5_Responsetime': 1.768, 'Question_3': '103', 'Question_6_Submittedans': 'True', 'Question_2_Responsetime': 1.472, 'Question_7_Score': 0, 'Question_4_Responsetime': 4.249, 'Question_7_Status': 'submitted', 'Question_8_Score': 0, 'Question_1_Score': 0, 'Question_6_Score': 0, 'Question_8_Responsetime': 6.418, 'Question_6': '106', 'Question_7_Submittedans': '#', 'Question_1_Submittedans': '3.26 million people', 'Question_2_Score': 0, 'name': 'Veda', 'Question_7_Time': datetime(2017, 7, 8, 7, 42, 6, 512938), 'Question_4_Time': datetime(2017, 7, 8, 7, 42, 0, 559407), 'Question_5': '105', 'Question_5_Submittedans': 'Safety fee', 'Question_7_Responsetime': 2.181, 'Question_8': '1', 'Question_8_Submittedans': 'The answer to all the problems', 'Question_2_Time': datetime(2017, 7, 8, 7, 41, 54, 570905), 'Question_1': '101', 'Question_1_Time': datetime(2017, 7, 8, 7, 41, 53, 51284), 'Question_6_Status': 'submitted', 'Question_3_Status': 'submitted', 'Question_2_Status': 'submitted', 'Question_8_Time': datetime(2017, 7, 8, 7, 42, 12, 949458), 'Question_3_Responsetime': 1.668, 'testctime': datetime(2017, 7, 8, 7, 41, 47, 277874), 'Question_8_Status': 'submitted', 'Question_6_Responsetime': 1.89, 'Question_4': '104', 'Question_4_Score': 0}}
+    """
+    testing the get test responses as dict.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    # expected = {'128': {'Question_1_Score': 1, 'Question_5_Score': 0,
+    # 'Question_3_Time': datetime(2017, 7, 8, 7, 45, 47, 254924),
+    # 'Question_3': '104', 'Question_6': '201', 'Question_6_Score': 0,
+    # 'count': 7, 'Question_6_Submittedans': '#', 'Question_6_Time':
+    # datetime(2017, 7, 8, 7, 50, 7, 829351), 'Question_4_Status':
+    # 'submitted', 'Question_3_Status': 'submitted', 'Question_2_Score': 1,
+    # 'Question_3_Submittedans': 'False', 'name': 'Sreenath',
+    # 'Question_1_Status': 'submitted', 'Question_4_Time': datetime(2017, 7,
+    # 8, 7, 45, 48, 870909), 'Question_5': '106', 'rollno': '128',
+    # 'Question_5_Submittedans': 'Partly true', 'Question_2_Submittedans': 'By
+    # the Prime Minister of India in an unscheduled, real time, televised
+    # address to the nation', 'emailid': 'sirimala.sreenath@gmail.com',
+    # 'Question_2_Time': datetime(2017, 7, 8, 7, 45, 44, 958977),
+    # 'Question_5_Status': 'submitted', 'Question_1': '102',
+    # 'Question_1_Time': datetime(2017, 7, 8, 7, 45, 43, 599523),
+    # 'Question_6_Status': 'submitted', 'Question_1_Submittedans': 'All of the
+    # above', 'Question_2': '103', 'Question_5_Time': datetime(2017, 7, 8, 7,
+    # 45, 50, 917283), 'Question_2_Status': 'submitted',
+    # 'Question_1_Responsetime': 4.737, 'Question_5_Responsetime': 2.021,
+    # 'Question_3_Responsetime': 2.279, 'testctime': datetime(2017, 7, 8, 7,
+    # 45, 24, 463860), 'Question_3_Score': 0, 'Question_2_Responsetime':
+    # 1.317, 'Question_6_Responsetime': 257.088, 'Question_4': '105',
+    # 'Question_4_Score': 0, 'Question_4_Responsetime': 1.591,
+    # 'Question_4_Submittedans': 'None of these'}, '1234':
+    # {'Question_5_Score': 0, 'Question_3_Time': datetime(2017, 7, 8, 7, 41,
+    # 56, 276504), 'count': 9, 'Question_4_Status': 'submitted',
+    # 'Question_6_Time': datetime(2017, 7, 8, 7, 42, 4, 291266),
+    # 'Question_3_Submittedans': 'By the Prime Minister of India in an
+    # unscheduled, real time, televised address to the nation',
+    # 'Question_4_Submittedans': 'Not sure', 'Question_1_Status': 'submitted',
+    # 'rollno': '1234', 'Question_2_Submittedans': 'Maoist extremism',
+    # 'Question_7': '201', 'emailid': 'vy@fju.us', 'Question_5_Status':
+    # 'submitted', 'Question_3_Score': 1, 'Question_2': '102',
+    # 'Question_5_Time': datetime(2017, 7, 8, 7, 42, 2, 361560),
+    # 'Question_1_Responsetime': 3.99, 'Question_5_Responsetime': 1.768,
+    # 'Question_3': '103', 'Question_6_Submittedans': 'True',
+    # 'Question_2_Responsetime': 1.472, 'Question_7_Score': 0,
+    # 'Question_4_Responsetime': 4.249, 'Question_7_Status': 'submitted',
+    # 'Question_8_Score': 0, 'Question_1_Score': 0, 'Question_6_Score': 0,
+    # 'Question_8_Responsetime': 6.418, 'Question_6': '106',
+    # 'Question_7_Submittedans': '#', 'Question_1_Submittedans': '3.26 million
+    # people', 'Question_2_Score': 0, 'name': 'Veda', 'Question_7_Time':
+    # datetime(2017, 7, 8, 7, 42, 6, 512938), 'Question_4_Time':
+    # datetime(2017, 7, 8, 7, 42, 0, 559407), 'Question_5': '105',
+    # 'Question_5_Submittedans': 'Safety fee', 'Question_7_Responsetime':
+    # 2.181, 'Question_8': '1', 'Question_8_Submittedans': 'The answer to all
+    # the problems', 'Question_2_Time': datetime(2017, 7, 8, 7, 41, 54,
+    # 570905), 'Question_1': '101', 'Question_1_Time': datetime(2017, 7, 8, 7,
+    # 41, 53, 51284), 'Question_6_Status': 'submitted', 'Question_3_Status':
+    # 'submitted', 'Question_2_Status': 'submitted', 'Question_8_Time':
+    # datetime(2017, 7, 8, 7, 42, 12, 949458), 'Question_3_Responsetime':
+    # 1.668, 'testctime': datetime(2017, 7, 8, 7, 41, 47, 277874),
+    # 'Question_8_Status': 'submitted', 'Question_6_Responsetime': 1.89,
+    # 'Question_4': '104', 'Question_4_Score': 0}}
     expected = {}
     testcases = [
         ("test1", expected, get_test_responses_as_dict(None), "equal"),
-        ("test2",expected,get_test_responses_as_dict(12), "equal"),
-        ("test3",expected,get_test_responses_as_dict("12"), "equal"),
-        ("test4",expected,get_test_responses_as_dict(16), "equal"),
-        ("test5",expected,get_test_responses_as_dict(122), "equal")
+        ("test2", expected, get_test_responses_as_dict(12), "equal"),
+        ("test3", expected, get_test_responses_as_dict("12"), "equal"),
+        ("test4", expected, get_test_responses_as_dict(16), "equal"),
+        ("test5", expected, get_test_responses_as_dict(122), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
     # app.logger.info(output)
     return output
 
-def test_add_user_if_not_exist():
 
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    existed = Users.query.filter_by(emailid="sirimala.sreenath@gmail.com").all()
+def test_add_user_if_not_exist():
+    """
+    testing the add user if not exist.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    existed = Users.query.filter_by(
+        emailid="sirimala.sreenath@gmail.com").all()
     for exist in existed:
         db.session.delete(exist)
     db.session.commit()
     testcases = [
-        ("test1", not None, add_user_if_not_exist(email="sirimala.sreenath@gmail.com", password="generate_unique_code"), "notNone"),
-        ("test2",False, add_user_if_not_exist(email="sirimala.sreenath@gmail.com", password="generate_unique_code"), "equal"),
-        ("test3",True, add_user_if_not_exist(email="vy@fju.us", password="generate_unique_code"), "notNone"),
+        ("test1",
+         not None,
+         add_user_if_not_exist(
+             email="sirimala.sreenath@gmail.com",
+             password="generate_unique_code"),
+            "notNone"),
+        ("test2",
+         False,
+         add_user_if_not_exist(
+             email="sirimala.sreenath@gmail.com",
+             password="generate_unique_code"),
+            "equal"),
+        ("test3",
+         True,
+         add_user_if_not_exist(
+             email="vy@fju.us",
+             password="generate_unique_code"),
+         "notNone"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
-    #app.logger.info(output)
-    existed = Users.query.filter_by(emailid="sirimala.sreenath@gmail.com").all()
+    # app.logger.info(output)
+    existed = Users.query.filter_by(
+        emailid="sirimala.sreenath@gmail.com").all()
     for exist in existed:
         db.session.delete(exist)
     db.session.commit()
     return output
 
+
 def test_allowed_to_take_test():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    student = StudentTests("sirimala.sreenath@gmail.com", ["English Comprehension Test"])
+    """
+    testing the allowed to take test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    student = StudentTests("sirimala.sreenath@gmail.com",
+                           ["English Comprehension Test"])
     db.session.add(student)
     # db.session.commit()
     testcases = [
-        ("test1", False, allowed_to_take_test("", "", ""), "equal"),
-        ("test2",False, allowed_to_take_test("", "sirimala.sreenath@gmail.com", ""), "equal"),
-        ("test3",True, allowed_to_take_test("English Comprehension Test", "sirimala.sreenath@gmail.com","student"), "equal"),
+        ("test1",
+         False,
+         allowed_to_take_test(
+             "",
+             "",
+             ""),
+            "equal"),
+        ("test2",
+         False,
+         allowed_to_take_test(
+             "",
+             "sirimala.sreenath@gmail.com",
+             ""),
+            "equal"),
+        ("test3",
+         True,
+         allowed_to_take_test(
+             "English Comprehension Test",
+             "sirimala.sreenath@gmail.com",
+             "student"),
+         "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
-    #app.logger.info(output)
+    # app.logger.info(output)
     db.session.delete(student)
     return output
 
+
 def test_add_first_response():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    testing the add first response.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
         ("test1", False, add_first_response(""), "equal"),
         ("test1", False, add_first_response(), "equal"),
-        ("test2",True, add_first_response("sirimala.sreenath@gmail.com"), "equal"),
-        ("test3",False, add_first_response("sirimala.sreenath@gmail.com"), "equal"),
+        ("test2", True, add_first_response("sirimala.sreenath@gmail.com"), "equal"),
+        ("test3", False, add_first_response("sirimala.sreenath@gmail.com"), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
-    #app.logger.info(output)
-    existed = Response.query.filter_by(emailid="sirimala.sreenath@gmail.com").all()
+    # app.logger.info(output)
+    existed = Response.query.filter_by(
+        emailid="sirimala.sreenath@gmail.com").all()
     for exist in existed:
         db.session.delete(exist)
     db.session.commit()
     return output
 
+
 def test_add_user_profile():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    testing the add user profile.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     existed = userDetails.query.filter_by(email="vy@fju.us").all()
     for exist in existed:
         db.session.delete(exist)
     db.session.commit()
     testcases = [
-        ("test1", True, add_user_profile("Veda","vy@fju.us",8686093417,1234,"Basara"), "equal"),
+        ("test1", True, add_user_profile(
+            "Veda", "vy@fju.us", 8686093417, 1234, "Basara"), "equal"),
         ("test1", False, add_user_profile(), "equal"),
-        ("test2",False, add_user_profile("","","","",""), "equal"),
+        ("test2", False, add_user_profile("", "", "", "", ""), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
-    #app.logger.info(output)
+    # app.logger.info(output)
 
     return output
 
+
 def test_qidlisttodict():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    testing the qil list to dict.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", type({}), type(qidlisttodict(checkrandomizetable("vy@fju.us"))), "equal"),
-        ("test1", len(checkrandomizetable("vy@fju.us")), len(qidlisttodict(checkrandomizetable("vy@fju.us"))), "equal"),
+        ("test1", type({}), type(qidlisttodict(
+            checkrandomizetable("vy@fju.us"))), "equal"),
+        ("test1", len(checkrandomizetable("vy@fju.us")),
+         len(qidlisttodict(checkrandomizetable("vy@fju.us"))), "equal"),
         ("test2", False, qidlisttodict(None), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_add_to_randomize():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    testing add to randomize.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", True, add_to_randomize("vy@fju.us",1,101), "equal"),
+        ("test1", True, add_to_randomize("vy@fju.us", 1, 101), "equal"),
         ("test1", False, add_to_randomize(), "equal"),
-        ("test2",False, add_to_randomize("","",""), "equal"),
+        ("test2", False, add_to_randomize("", "", ""), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
-    #app.logger.info(output)
+    # app.logger.info(output)
     existed = Randomize.query.filter_by(user1="vy@fju.us").all()
     for exist in existed:
         db.session.delete(exist)
     db.session.commit()
     return output
 
+
 def test_setquizstatus():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    testing the set quiz status.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     existed = TestDetails.query.filter_by(email="vy@fju.us").first()
     if not existed:
-        td = TestDetails(email="vy@fju.us",testend=True)
+        td = TestDetails(email="vy@fju.us", testend=True)
         db.session.add(td)
         db.session.commit()
     testcases = [
         ("test1", "END", setquizstatus("vy@fju.us"), "equal"),
         ("test1", False, setquizstatus(), "equal"),
-        ("test2","START", setquizstatus(""), "equal"),
+        ("test2", "START", setquizstatus(""), "equal"),
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     if existed:
         db.session.delete(existed)
         db.session.commit()
     return output
 
+
 def test_addtestdetails():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    test add the test details
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", True, addtestdetails("vy@fju.us",True,0.5), "equal"),
+        ("test1", True, addtestdetails("vy@fju.us", True, 0.5), "equal"),
         ("test2", False, addtestdetails(), "equal"),
-        ("test3",False, addtestdetails("","",0.0), "equal"),
+        ("test3", False, addtestdetails("", "", 0.0), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     existed = TestDetails.query.filter_by(email="vy@fju.us").all()
     for exist in existed:
@@ -3827,19 +4991,28 @@ def test_addtestdetails():
     db.session.commit()
     return output
 
+
 def test_storeresponse():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    expected = {u"status":"success" , u"q_status":"skip", u"validresponse":"true", u"qid":101}
-    expected2 = {u"status":"success" , u"q_status":"submitted", u"validresponse":"true", u"qid":102}
-    expected3 = {u"status":"error" , u"q_status":None, u"validresponse":"false", u"qid":None}
+    """
+    store the response.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    expected = {u"status": "success", u"q_status": "skip",
+                u"validresponse": "true", u"qid": 101}
+    expected2 = {u"status": "success", u"q_status": "submitted",
+                 u"validresponse": "true", u"qid": 102}
+    expected3 = {u"status": "error", u"q_status": None,
+                 u"validresponse": "false", u"qid": None}
     testcases = [
-        ("test1", expected, storeresponse("vy@fju.us",101,"skip",1.254), "equal"),
-        ("test2", expected2, storeresponse("vy@fju.us",102,"submitted",1.26), "equal"),
+        ("test1", expected, storeresponse("vy@fju.us", 101, "skip", 1.254), "equal"),
+        ("test2", expected2, storeresponse(
+            "vy@fju.us", 102, "submitted", 1.26), "equal"),
         ("test3", expected3, storeresponse(), "equal"),
-        ("test4", expected3, storeresponse("","","",""), "equal")
+        ("test4", expected3, storeresponse("", "", "", ""), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
     existed = Response.query.filter_by(emailid="vy@fju.us").all()
@@ -3848,14 +5021,28 @@ def test_storeresponse():
     db.session.commit()
     return output
 
+
 def test_getResultOfStudent():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    get the results of the student from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     giveninput = getResultOfStudent("vy@fju.us")
     expected = {"totalscore": 0, "question": []}
-    storeresponse("vy@fju.us",101,"submitted",1.26)
-    storeresponse("vy@fju.us",102,"skip",1.80)
+    storeresponse("vy@fju.us", 101, "submitted", 1.26)
+    storeresponse("vy@fju.us", 102, "skip", 1.80)
     giveninput2 = getResultOfStudent("vy@fju.us")
-    expected2 = {"totalscore": 0, "question": [{"user": "vy@fju.us", "submittedans": "submitted", "currentQuestion": "101", "q_score": 0, "responsetime": 1.26}, {"user": "vy@fju.us", "submittedans": "skip", "currentQuestion": "102", "q_score": 0, "responsetime": 1.8}]}
+    expected2 = {"totalscore": 0,
+                 "question": [{"user": "vy@fju.us",
+                               "submittedans": "submitted",
+                               "currentQuestion": "101",
+                               "q_score": 0,
+                               "responsetime": 1.26},
+                              {"user": "vy@fju.us",
+                               "submittedans": "skip",
+                               "currentQuestion": "102",
+                               "q_score": 0,
+                               "responsetime": 1.8}]}
     giveninput3 = getResultOfStudent()
     testcases = [
         ("test1", expected, json.loads(giveninput), "equal"),
@@ -3864,7 +5051,8 @@ def test_getResultOfStudent():
         ("test4", expected, json.loads(getResultOfStudent("")), "equal"),
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         # app.logger.info(testcase_output)
         output['testcases'].append(testcase_output)
     # app.logger.info(output)
@@ -3874,21 +5062,29 @@ def test_getResultOfStudent():
     db.session.commit()
     return output
 
+
 def test_saveessay():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    row = EssayTypeResponse.query.filter_by(useremailid = "vy@fju.us", qid = "201").first()
-    giveninput = saveessay(row,"vy@fju.us","201","This is a test paragraph",3.5789)
-    giveninput2 = saveessay(row,"vy@fju.us","201","This is a test paragraph2",3.5789)
+    """
+    save the essay from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    row = EssayTypeResponse.query.filter_by(
+        useremailid="vy@fju.us", qid="201").first()
+    giveninput = saveessay(row, "vy@fju.us", "201",
+                           "This is a test paragraph", 3.5789)
+    giveninput2 = saveessay(row, "vy@fju.us", "201",
+                            "This is a test paragraph2", 3.5789)
     testcases = [
         ("test1", True, giveninput, "equal"),
         ("test2", True, giveninput, "equal"),
         ("test3", False, saveessay(), "equal"),
-        ("test4", False, saveessay(row,"","","",0.0), "equal")
+        ("test4", False, saveessay(row, "", "", "", 0.0), "equal")
 
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     existed = EssayTypeResponse.query.filter_by(useremailid="vy@fju.us").all()
     for exist in existed:
@@ -3896,17 +5092,22 @@ def test_saveessay():
     db.session.commit()
     return output
 
+
 def test_getlearningcentre():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    add_user_profile("Veda","vy@fju.us",8686093417,1234,"Basara")
+    """
+    get the learning center based on the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    add_user_profile("Veda", "vy@fju.us", 8686093417, 1234, "Basara")
     testcases = [
         ("test1", "Basara", getlearningcentre("vy@fju.us"), "equal"),
         ("test2", False, getlearningcentre(), "equal"),
-        ("test3",False, getlearningcentre(""), "equal"),
+        ("test3", False, getlearningcentre(""), "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     existed = userDetails.query.filter_by(email="vy@fju.us").all()
     for exist in existed:
@@ -3914,27 +5115,36 @@ def test_getlearningcentre():
     db.session.commit()
     return output
 
+
 def test_generate_unique_code():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    testcases = [
-        ("test1", False, generate_unique_code()==generate_unique_code(), "equal")
-    ]
+    """
+    generate the unique code based on the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    testcases = [("test1", False, generate_unique_code()
+                  == generate_unique_code(), "equal")]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_valid_user_login():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    verify if the user has valid login.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     existed = Users.query.filter_by(emailid="vy@fju.us").all()
-    #app.logger.info(existed)
+    # app.logger.info(existed)
     for exist in existed:
         #app.logger.info(['deleting', exist.emailid])
         db.session.delete(exist)
 
-    #app.logger.info(Users.query.filter_by(emailid="vy@fju.us").all())
-    user = Users("vy@fju.us",hashlib.md5("veda1996".encode('utf-8')).hexdigest(),"student",True)
+    # app.logger.info(Users.query.filter_by(emailid="vy@fju.us").all())
+    user = Users("vy@fju.us", hashlib.md5("veda1996".encode('utf-8')
+                                          ).hexdigest(), "student", True)
     db.session.add(user)
     # update_password(user,)
 
@@ -3943,157 +5153,239 @@ def test_valid_user_login():
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
 
     db.session.delete(user)
     return output
 
+
 def test_makestatusbutton():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    input1 = makestatusbutton("vy@fju.us",True)
+    """
+    make the status button.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    input1 = makestatusbutton("vy@fju.us", True)
     existed = TestDetails.query.filter_by(email="vy@fju.us").first()
     if not existed:
-        td = TestDetails(email="vy@fju.us",testend=False)
+        td = TestDetails(email="vy@fju.us", testend=False)
         db.session.add(td)
         db.session.commit()
-    input2 = makestatusbutton("vy@fju.us",True)
+    input2 = makestatusbutton("vy@fju.us", True)
     testcases = [
-        ("test1", "<a href='#' class='btn btn-sm btn-warning' disabled>Locked</a>", makestatusbutton("vy@fju.us",False), "equal"),
-        ("test2", "<a href='/quiz' class='btn btn-sm btn-primary'>Attempt Test</a>", input1, "equal"),
-        ("test3", "<a href='/quiz' class='btn btn-sm btn-warning'>In Progress!</a>", input2, "equal"),
+        ("test1",
+         "<a href='#' class='btn btn-sm btn-warning' disabled>Locked</a>",
+         makestatusbutton(
+             "vy@fju.us",
+             False),
+            "equal"),
+        ("test2",
+         "<a href='/quiz' class='btn btn-sm btn-primary'>Attempt Test</a>",
+         input1,
+         "equal"),
+        ("test3",
+         "<a href='/quiz' class='btn btn-sm btn-warning'>In Progress!</a>",
+         input2,
+         "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     if existed:
         db.session.delete(existed)
         db.session.commit()
     return output
 
+
 def test_gettestdetails():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    get the test details.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     existed = Tests.query.filter_by(name="English Literacy Test").first()
     if existed:
         db.session.delete(existed)
         db.session.commit()
-    input1 = gettestdetails("vy@fju.us","English Literacy Test")
+    input1 = gettestdetails("vy@fju.us", "English Literacy Test")
     expected = []
-    td = Tests("English Literacy Test","vy@fju.us",'06-07-2017 15:30', '02-08-2017 12:00')
+    td = Tests("English Literacy Test", "vy@fju.us",
+               '06-07-2017 15:30', '02-08-2017 12:00')
     db.session.add(td)
     db.session.commit()
-    input2 = gettestdetails("vy@fju.us","English Literacy Test")
+    input2 = gettestdetails("vy@fju.us", "English Literacy Test")
     testcases = [
         ("test1", expected, input1, "equal"),
-        ("test2", ['English Literacy Test', '06-07-2017 15:30', '02-08-2017 12:00', "<a href='/quiz' class='btn btn-sm btn-warning'>In Progress!</a>"], input2, "equal"),
+        ("test2", ['English Literacy Test', '06-07-2017 15:30', '02-08-2017 12:00',
+                   "<a href='/quiz' class='btn btn-sm btn-warning'>In Progress!</a>"], input2, "equal"),
     ]
 
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_add_default_user_admin_if_not_exist():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    add the user if admin does not exist.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
         ("test1", True, add_default_user_admin_if_not_exist(), "equal"),
         ("test2", False, add_default_user_admin_if_not_exist(), "equal"),
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
+
 
 def test_sendMail():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    send the mail from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", True, sendMail("UnitTesting","UnitTesting","vy@fju.us"), "equal"),
-        ("test2", True, sendMail(), "equal")
-    ]
+        ("test1",
+         True,
+         sendMail(
+             "UnitTesting",
+             "UnitTesting",
+             "vy@fju.us"),
+            "equal"),
+        ("test2",
+         True,
+         sendMail(),
+         "equal")]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_sendNotifyMail():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    send the notify mail from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
         ("test1", True, sendNotifyMail("vy@fju.us"), "notNone"),
         ("test2", True, sendNotifyMail("admin@quiz.in"), "notNone")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_update_password():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    update the password in the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     user = Users.query.filter_by(emailid="vy@fju.us").all()
     if not user:
-        user = Users("vy@fju.us","","student",True)
+        user = Users("vy@fju.us", "", "student", True)
         db.session.add(user)
         db.session.commit()
-    input1 = update_password(user,"veda1997")
-    input2 = update_password(user,"veda1996")
+    input1 = update_password(user, "veda1997")
+    input2 = update_password(user, "veda1996")
     testcases = [
         ("test1", True, input1, "equal"),
         ("test2", True, input2, "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
+
 
 def test_getQuestionPaper():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    get the question paper from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", [], getQuestionPaper([0])["section"][0]["subsection"][0]['questions'], "notNone"),
-        ("test2", [], getQuestionPaper([])["section"][0]["subsection"][0]['questions'], "equal")
+        ("test1", [], getQuestionPaper([0])["section"]
+         [0]["subsection"][0]['questions'], "notNone"),
+        ("test2", [], getQuestionPaper([])["section"]
+         [0]["subsection"][0]['questions'], "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
+
 
 def test_generateQuestionPaper():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    generate the question paper of the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
-        ("test1", not None, generateQuestionPaper()["section"][0]["subsection"][0]['questions'], "notNone"),
-        ("test2", not None, generateQuestionPaper()["section"][0]["subsection"][0]['questions'], "notNone")
+        ("test1", not None, generateQuestionPaper()[
+         "section"][0]["subsection"][0]['questions'], "notNone"),
+        ("test2", not None, generateQuestionPaper()[
+         "section"][0]["subsection"][0]['questions'], "notNone")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_render_csv_from_test_responses():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    render the test responses as csv.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     data = get_test_responses_as_dict()
     testcases = [
         ("test1", not None, render_csv_from_test_responses(data), "notNone"),
         ("test2", not None, render_csv_from_test_responses(data), "notNone")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_get_all_test_created_by():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    get all the tests created by admin.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
         ("test1", {}, get_all_test_created_by(None), "equal"),
         ("test2", [], get_all_test_created_by("admin@quiz.in")['data'], "notNone"),
-        ("test3", type([]), type(get_all_test_created_by("admin@quiz.in")['data']), "notNone")
+        ("test3", type([]), type(get_all_test_created_by(
+            "admin@quiz.in")['data']), "notNone")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_isRegistered():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    user = Users(emailid="admin@quiz.in",password="sree", user_type="admin", verified=True)
+    """
+    verify of the test is registered.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    user = Users(emailid="admin@quiz.in", password="sree",
+                 user_type="admin", verified=True)
     db.session.add(user)
     db.session.commit()
     testcases = [
@@ -4101,7 +5393,8 @@ def test_isRegistered():
         ("test2", False, isRegistered("sirimala.sirimala@gmail.com"), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
 
     db.session.delete(user)
@@ -4109,40 +5402,53 @@ def test_isRegistered():
 
     return output
 
+
 def test_getAnswer():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    testcases = [
-        ("test1", "Other measures to restructure the economy", getAnswer(10), "equal"),
-        ("test2", "Forerunner", getAnswer(11), "equal")
-    ]
+    """
+    get the answer from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    testcases = [("test1", "Other measures to restructure the economy", getAnswer(
+        10), "equal"), ("test2", "Forerunner", getAnswer(11), "equal")]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_getendtestdata():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    request_data = {'jsonData':{}}
+    """
+    get the end test data from the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    request_data = {'jsonData': {}}
     val = request_data['jsonData']
     val['testend'] = 'true'
     val['finalScore'] = '12'
     val['spklink'] = 'http://link'
     testcases = [
-        ("test1", (val, 'true', '12', 'http://link'), getendtestdata(request_data), "equal"),
+        ("test1", (val, 'true', '12', 'http://link'),
+         getendtestdata(request_data), "equal"),
         ("test2", False, getendtestdata({}), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_get_all_student_details():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    get all the student details in the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     input1 = get_all_student_details()
     name = "Veda"
     email = "vy@fju.us"
     rollno = 1234
-    add_user_profile("Veda","vy@fju.us",8686093417,1234,"Basara")
+    add_user_profile("Veda", "vy@fju.us", 8686093417, 1234, "Basara")
     expected = json.dumps({email: {"name": name, "rollno": str(rollno)}})
     input2 = get_all_student_details()
     testcases = [
@@ -4150,19 +5456,25 @@ def test_get_all_student_details():
         ("test2", expected, input2, "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_validate_name():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    validate the name in the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     name = "English Comprehension Test"
     test = Tests.query.filter_by(name=name).first()
     if test:
         db.session.delete(test)
         db.session.commit()
     input1 = validate_name(name)
-    td = Tests("English Comprehension Test","vy@fju.us",'06-07-2017 15:30', '02-08-2017 12:00')
+    td = Tests("English Comprehension Test", "vy@fju.us",
+               '06-07-2017 15:30', '02-08-2017 12:00')
     db.session.add(td)
     db.session.commit()
     input2 = validate_name(name)
@@ -4171,30 +5483,42 @@ def test_validate_name():
         ("test2", False, input2, "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_validate_date():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    validate the date in the test
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     testcases = [
         ("test1", False, validate_date("30-06-2017 12:00"), "equal"),
         ("test2", True, validate_date("30-08-2017 12:00"), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_updatetests():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
+    """
+    update the tests in the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
     name = "English Comprehension Test"
     test = Tests.query.filter_by(name=name).first()
     if test:
         db.session.delete(test)
         db.session.commit()
-    input1 = updatetests("English Comprehension Test","vy@fju.us",'16-07-2017 15:30', '02-08-2017 12:00')
-    input2 = updatetests("English Comprehension Test","vy@fju.us",'16-07-2017 15:30', '02-08-2017 12:00')
+    input1 = updatetests("English Comprehension Test",
+                         "vy@fju.us", '16-07-2017 15:30', '02-08-2017 12:00')
+    input2 = updatetests("English Comprehension Test",
+                         "vy@fju.us", '16-07-2017 15:30', '02-08-2017 12:00')
 
     testcases = [
         ("test1", True, input1, "equal"),
@@ -4202,29 +5526,54 @@ def test_updatetests():
         ("test3", False, updatetests(), "equal")
     ]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
 
+
 def test_updateDate():
-    output = {"function_name": inspect.stack()[0][3], "testcases":[]}
-    updatetests("English Comprehension Test","vy@fju.us",'16-07-2017 15:30', '02-08-2017 12:00')
+    """
+    Update the date in the test.
+    """
+    output = {"function_name": inspect.stack()[0][3], "testcases": []}
+    updatetests("English Comprehension Test", "vy@fju.us",
+                '16-07-2017 15:30', '02-08-2017 12:00')
     testcases = [
-        ("test1", True, updateDate("English Comprehension Test",'15-07-2017 15:30', '02-08-2017 12:00'), "equal"),
-        ("test2", False, updateDate("English Literacy",'16-07-2017 15:30', '02-08-2017 12:00'), "equal"),
-        ("test3", False, updateDate(), "equal")
-    ]
+        ("test1",
+         True,
+         updateDate(
+             "English Comprehension Test",
+             '15-07-2017 15:30',
+             '02-08-2017 12:00'),
+            "equal"),
+        ("test2",
+         False,
+         updateDate(
+             "English Literacy",
+             '16-07-2017 15:30',
+             '02-08-2017 12:00'),
+            "equal"),
+        ("test3",
+         False,
+         updateDate(),
+         "equal")]
     for testcase in testcases:
-        testcase_output = test_handler(testcase[0], testcase[1], testcase[2], testcase[3])
+        testcase_output = test_handler(
+            testcase[0], testcase[1], testcase[2], testcase[3])
         output['testcases'].append(testcase_output)
     return output
+
 
 @app.route('/unit_test')
 def unit_test():
+    """
+    unit testing all the methods.
+    """
     if eval(os.environ['DEBUG']):
         db.drop_all()
         db.create_all()
-        return render_template("unit_tests.html", tests = [
+        return render_template("unit_tests.html", tests=[
             test_get_all_student_details(),
             test_validate_name(),
             test_validate_date(),
@@ -4259,7 +5608,8 @@ def unit_test():
     else:
         return redirect("/")
 
+
 if __name__ == "__main__":
-        app.debug = True
-        db.create_all()
-        app.run(host="0.0.0.0")
+    app.debug = True
+    db.create_all()
+    app.run(host="0.0.0.0")
