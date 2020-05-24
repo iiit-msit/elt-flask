@@ -1,0 +1,216 @@
+
+@app.route('/error/<error>'):
+   return render_template('error.html', error=error) 
+
+@app.route('/test', methods=['GET', 'POST'])
+   return render_template('error.html', responses=responses)
+
+@app.route('/audio_upload', methods=["POST"])
+   return str
+
+@app.route('/get_audio/<test_name>', methods=["GET"])
+   return str
+
+@app.route('/get_audio_by_qid/<test_name>/<qid>', methods=["GET"])
+   return str
+
+@app.route('/', methods=['GET'])
+   return redirect(url_for(role))
+
+@app.route('/quiz/<test_name>')
+   return redirect("/checklogin/" + test_name)
+
+@app.route('/javascripts/<path:path>')
+   return send_from_directory(root + "/javascripts", path)
+
+@app.route('/src/<path:path>')
+   return send_from_directory(root + "/javascripts", path)
+
+@app.route('/js/<path:path>')
+   return send_from_directory(root + "/javascripts", path)
+
+@app.route('/video/<path:path>')
+   return send_from_directory(root + "/javascripts", path)
+
+@app.route('/stylesheets/<path:path>')
+   return send_from_directory(root + "/javascripts", path)
+
+@app.route('/checklogin/<test_name>')
+   return redirect("/startquiz/" + test_name)
+
+@app.route('/savepersonaldata', methods=['POST'])
+   return redirect("/")
+
+@app.route('/getquizstatus', methods=['POST'])
+   return json.dumps(quiz_status_object)
+
+@app.route('/testtime', methods=['POST'])
+   return json.dumps(time_obj)
+
+@app.route('/submitanswer', methods=["POST"])
+   return json.dumps(responseobj)
+
+@app.route('/getResult/<test_name>', methods=["GET", "POST"])
+   return json.dumps(questionresponses_dict)
+
+@app.route('/getstudentscore/<test_name>/<email>', methods=["GET"])
+   return render_template('studentscore.html',test_name=test_name,email=email)
+
+@app.route('/testresult/<test_name>', methods=["GET"])
+   return render_template("testresult.html", test_name=test_name)
+
+@app.route('/releaseResults/<test_name>', methods=["GET"])
+   return ""
+
+@app.route('/viewresults', methods=["GET"])
+   return render_template("viewresults.html", tests=result)
+
+@app.route('/getScore', methods=["GET"])
+   return render_template("testresult.html")
+
+@app.route('/autosaveEssay', methods=["POST"])
+   return json.dumps(essay_response)
+
+@app.route('/uploadredirect', methods=["POST"])
+   return redirect(url_for("/upload_audio"))
+
+@app.route('/upload_audio', methods=["POST"])
+   return -
+
+@app.route('/view_audio/<link>', methods=["GET"])
+   return app.response_class(event.blob1, mimetype='application/octet-stream')
+
+@app.route('/endtest', methods=["POST"])
+   return str
+
+@app.route('/startquiz/<test_name>')
+   return render_template('quiz.html',rollno=rollno,test_name=test_name,mode=mode,show_result=show_result)
+
+@app.route('/student', methods=['GET'])
+   return render_template('student.html')
+
+@app.route('/studenttests', methods=['GET'])
+   return json.dumps(final)
+
+@app.route('/verify/<email>/<code>', methods=['GET'])
+   return render_template("set_password.html",success="You are successfully activated your account.\n Please login")
+
+@app.route('/login', methods=['GET', 'POST'])
+   return redirect(url_for(role))
+
+@app.route('/logout')
+   return redirect(url_for('login'))
+
+@app.route('/registration', methods=['GET', 'POST'])
+   return render_template('registration.html',message=message,status=message_staus)
+
+@app.route('/forgot_password', methods=["GET", "POST"])
+   return render_template('forgot_password.html')
+
+@app.route('/setpassword', methods=['GET', 'POST'])
+   return render_template('login.html', success=message)
+
+@app.route('/audio', methods=['GET', 'POST'])
+   return render_template("audio.html")
+
+@app.route('/content/<test_mode>/<datetoday>/<filename>')
+   return send_from_directory(root + '/content/%s/%s/' %(test_mode, datetoday), filename)
+
+@app.route("/addviewrecord", methods=["POST"])
+   return str
+
+@app.route("/readingtask/<test_name>", methods=["GET"])
+   return render_template('readingtask.html',task=reading_task,test_name=test_name,starttime=time)
+
+@app.route('/play/<path:song>')
+   return send_file_partial(root + "/" + song)
+
+@app.route("/listeningtask/<test_name>", methods=["GET"])
+   return render_template('listeningtask.html',task=listening_task,test_name=test_name,starttime=time)
+
+@app.route("/like/<test_name>/<section>", methods=["GET"])
+   return str
+
+@app.route("/dislike/<test_name>/<section>", methods=["GET"])
+   return str
+
+@app.route('/adminlogin', methods=['GET', 'POST'])
+   return redirect(url_for('admin'))
+
+@app.route('/admin')
+   return render_template('admin.html')
+
+
+@app.route('/uninvite/<testid>', methods=["POST"], defaults={'email': None})
+@app.route('/uninvite/<email>/<testid>', methods=["GET"])
+   Get - return redirect("/edit/" + testid)
+   Post - return str
+
+@app.route('/create', methods=["GET", "POST"])
+   return redirect(url_for("admin"))
+
+@app.route("/edit/<testid>/", defaults={'option': None})
+@app.route("/edit/<testid>/<option>", methods=["GET", "POST"])
+   GET- return render_template("add_students.html",testid=testid,messages=False,invitedstudents=invitedstudents,allstudents=all_registered_students)
+   POST - return render_template("add_students.html",invitedstudents=invitedstudents,testid=testid,error=error,messages=True,startdatevalid=startdatevalid,enddatevalid=enddatevalid)
+
+@app.route('/getStudentsList/<test>', methods=["GET"])
+   return json.dumps({"students": students})
+
+@app.route('/prefiledit/<name>', methods=["GET"])
+   return json.dumps({"start_date": start_date, "end_date": end_date, "students": students})
+
+@app.route('/release/<testid>/<emailid>/<start_date>/<end_date>',
+@app.route('/notify/<testid>/<emailid>/<start_date>/<end_date>',
+   return json dumps
+
+@app.route('/loadtests', methods=["GET"])
+   return json dumps
+
+@app.route('/autocomplete', methods=['GET'])
+   return jsonify
+
+@app.route('/contentAnalyticsSummary/<test_name>', methods=['GET'])
+@app.route('/contentAnalytics/<test_name>', methods=['GET'])
+   return response
+
+@app.route('/getAllStudentDetails/<test_name>', methods=['GET'])
+   return json dumps
+
+@app.route('/getPlagiarismDataStudent/<test_name>/<qid>')
+   return json dump
+
+@app.route('/plagiarismData/<test_name>')
+   return json response
+
+@app.route('/downloadSortedTestResults/<testid>')
+   return response
+
+@app.route('/downloadTestResults/<testid>')
+   return response
+
+@app.route('/downloadTestResultsSummary/<testid>')
+   return response
+
+@app.route('/downloadInvitedStudents/<testid>')
+   return response
+
+@app.route('/test_audio')
+   return str
+
+@app.route('/test_recorder', methods=['GET'])
+   return html
+
+@app.route('/showrecorder/<test_name>/<qid>', methods=['GET'])
+   return render_template('recorder.html', test_name=test_name, qid=qid)
+        
+@app.route('/getrecorder', methods=['GET'])
+   return html
+
+@app.route('/createexam', methods=['GET', 'POST'])
+   return render_template('create_exam.html')
+
+@app.route('/unit_test')
+
+
+

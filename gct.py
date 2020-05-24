@@ -55,10 +55,10 @@ app.config['UPLOAD_FOLDER'] = APP_STATIC_JSON
 app.debug_log_format = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 #formatter = "[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s"
 # logHandler = logging.FileHandler('logs/login.log')
-log_Path = os.path.join(os.getcwd(), 'logs.log')
-log_Path = 'logs.log'
-print(log_Path)
-logHandler = RotatingFileHandler(log_Path, maxBytes=10000, backupCount=1)
+log_path = os.path.join(os.getcwd(), 'logs.log')
+log_path = 'logs.log'
+print(log_path)
+logHandler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
 #logHandler = logging.basicConfig(stream=sys.stderr)
 # logHandler.setFormatter(formatter)
 logHandler.setLevel(logging.NOTSET)
